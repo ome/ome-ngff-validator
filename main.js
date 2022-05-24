@@ -26,7 +26,7 @@ const sample_images_url =
   // load JSON to be validated...
   log("Loading JSON... " + source + ".zattrs");
   const data = await getJson(source + ".zattrs");
-  console.log("data", data);
+  logJson(data, ".zattrs JSON");
   if (!data.multiscales) {
     log("No 'multiscales' found")
   }

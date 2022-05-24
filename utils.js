@@ -8,8 +8,20 @@ export function log(text) {
   document.getElementById("app").appendChild(el);
 }
 
-export function logJson(data) {
-  log(JSON.stringify(data, null, 2));
+export function logJson(data, label) {
+  if (!label) {
+    log(JSON.stringify(data, null, 2));
+    return;
+  }
+  // put the JSON in a <details> element
+  const details = document.createElement("details")
+  const summary = document.createElement("summary")
+  summary.innerHTML = label;
+  details.appendChild(summary);
+  const pre = document.createElement("pre");
+  pre.innerHTML = JSON.stringify(data, null, 2);
+  details.appendChild(pre);
+  document.getElementById("app").appendChild(details);
 }
 
 let schemas = {};
