@@ -2,38 +2,12 @@ import "./style.css";
 
 import Ajv from "ajv";
 
+import { getJson, logJson, log, getSchema } from "./utils";
+
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 const sample_images_url =
   "https://raw.githubusercontent.com/ome/blog/master/_data/zarr_data_2020-11-04.json";
-
-async function getJson(url) {
-  return fetch(url).then((rsp) => rsp.json());
-}
-
-function log(text) {
-  const el = document.createElement("pre");
-  el.innerHTML = text;
-  document.getElementById("app").appendChild(el);
-}
-
-function logJson(data) {
-  log(JSON.stringify(data, null, 2));
-}
-
-let schemas = {};
-
-async function getSchema(version) {
-  if (!schemas[version]) {
-    const schema_url = `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/image.schema`;
-    log("Loading schema... " + schema_url);
-    const schema = await getJson(schema_url);
-    // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
-    delete schema["$schema"];
-    schemas[version] = schema;
-  }
-  return schemas[version];
-}
 
 
 (async function () {
