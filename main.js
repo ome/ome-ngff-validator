@@ -50,15 +50,17 @@ async function getSchema(version) {
   }
 
   // load JSON to be validated...
+  log("Loading JSON... " + source + ".zattrs");
   const data = await getJson(source + ".zattrs");
   console.log("data", data);
   if (!data.multiscales) {
-    console.error("No 'multiscales' found")
+    log("No 'multiscales' found")
   }
   const version = data.multiscales[0].version;
   if (!version) {
-    console.error("No 'multiscales[0].version' found")
+    log("No 'multiscales[0].version' found")
   }
+  log("OME-NGFF multiscales version: " + version);
 
   // load Schema - correct version
   const schema = await getSchema(version);
