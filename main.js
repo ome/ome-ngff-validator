@@ -29,10 +29,12 @@ const sample_images_url =
   logJson(rootAttrs, ".zattrs JSON");
   if (!rootAttrs.multiscales) {
     log("No 'multiscales' found")
+    return;
   }
   const version = rootAttrs.multiscales[0].version;
   if (!version) {
     log("No 'multiscales[0].version' found")
+    return;
   }
   log("OME-NGFF multiscales version: " + version);
 
@@ -45,9 +47,9 @@ const sample_images_url =
   log("Validating " + source);
   const valid = validate(rootAttrs);
   if (valid) {
-    log("Valid!")
+    log("<div style='color: green; font-size:24px; border:solid green 1px; padding: 10px; border-radius: 5px; background: #eeffee'>VALID!</span>")
   } else {
-    log("NOT VALID!")
+    log("<div style='color: red; font-size:24px; border:solid red 1px; padding: 10px; border-radius: 5px; background: #ffeeee'>NOT VALID!</span>")
     validate.errors.forEach(error => logJson(error));
   }
 
