@@ -8,9 +8,15 @@ export function log(text) {
   document.getElementById("app").appendChild(el);
 }
 
+function escapeHTML(html) {
+  // https://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery/17546215#17546215
+  return document.createElement('div').appendChild(document.createTextNode(html)).parentNode.innerHTML;
+}
+
 export function logJson(data, label) {
+  let text = escapeHTML(JSON.stringify(data, null, 2));
   if (!label) {
-    log(JSON.stringify(data, null, 2));
+    log(text);
     return;
   }
   // put the JSON in a <details> element
@@ -19,7 +25,7 @@ export function logJson(data, label) {
   summary.innerHTML = label;
   details.appendChild(summary);
   const pre = document.createElement("pre");
-  pre.innerHTML = JSON.stringify(data, null, 2);
+  pre.innerHTML = text;
   details.appendChild(pre);
   document.getElementById("app").appendChild(details);
 }

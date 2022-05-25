@@ -25,12 +25,12 @@ const sample_images_url =
 
   // load JSON to be validated...
   log("Loading JSON... " + source + ".zattrs");
-  const data = await getJson(source + ".zattrs");
-  logJson(data, ".zattrs JSON");
-  if (!data.multiscales) {
+  const rootAttrs = await getJson(source + ".zattrs");
+  logJson(rootAttrs, ".zattrs JSON");
+  if (!rootAttrs.multiscales) {
     log("No 'multiscales' found")
   }
-  const version = data.multiscales[0].version;
+  const version = rootAttrs.multiscales[0].version;
   if (!version) {
     log("No 'multiscales[0].version' found")
   }
@@ -43,13 +43,35 @@ const sample_images_url =
 
   // Validate...
   log("Validating " + source);
-  const valid = validate(data);
-  console.log("valid", valid);
+  const valid = validate(rootAttrs);
   if (valid) {
     log("Valid!")
   } else {
     log("NOT VALID!")
-    validate.errors.forEach(error => logJson(error))
+    validate.errors.forEach(error => logJson(error));
   }
 
+  // Metadata: axes...
+  let axesNames = ["t", "c", "z", "y", "x"];
+  let axes = rootAttrs.multiscales[0].axes;
+  if (axes) {
+      axesNames = axes.map(axis => axis.name ? axis.name : axis);
+  }
+  log("Axes: " + JSON.stringify(axesNames));
+
+  let paths = rootAttrs.multiscales[0].datasets.map(d => d.path);
+  log("Paths: " + JSON.stringify(paths));
+
+  // start with smallest resolution (last path...)
+  for (let i=0; i<paths.length; i++) {
+    let path = paths[i];
+    let zAttrsUrl = source + path + "/.zarray";
+    log("Loading..." + zAttrsUrl)
+    let arrayAttrs = await getJson(zAttrsUrl);
+    const shape = arrayAttrs.shape;
+    log("Shape: " + JSON.stringify(shape));
+    logJson(arrayAttrs, path + "/.zarray");
+  
+    // await renderRegion(path, axesNames, shape, rootAttrs.omero?.channels);
+};
 })();
