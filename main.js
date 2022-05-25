@@ -2,7 +2,7 @@ import "./style.css";
 
 import Ajv from "ajv";
 
-import { getJson, logJson, log, getSchema } from "./utils";
+import { getJson, logJson, log, getSchema, renderRegion } from "./utils";
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
@@ -72,6 +72,6 @@ const sample_images_url =
     log("Shape: " + JSON.stringify(shape));
     logJson(arrayAttrs, path + "/.zarray");
   
-    // await renderRegion(path, axesNames, shape, rootAttrs.omero?.channels);
+    await renderRegion(source + path, axesNames, shape, rootAttrs.omero?.channels);
 };
 })();
