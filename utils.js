@@ -37,16 +37,17 @@ export function logJson(data, label) {
 
 let schemas = {};
 
-export async function getSchema(version) {
-  if (!schemas[version]) {
-    const schema_url = `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/image.schema`;
+export async function getSchema(version, schemaName="image") {
+  let cacheKey = schemaName + version;
+  if (!schemas[cacheKey]) {
+    const schema_url = `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
     log("Loading schema... " + schema_url);
     const schema = await getJson(schema_url);
     // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
     delete schema["$schema"];
-    schemas[version] = schema;
+    schemas[cacheKey] = schema;
   }
-  return schemas[version];
+  return schemas[cacheKey];
 }
 
 function hexToRgb(color) {
