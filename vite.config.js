@@ -1,5 +1,5 @@
 // vite.config.js
 export default {
   // config options
-  base: "https://will-moore.github.io/ome-ngff-validator/"
+  base: `https://${process.env.GITHUB_REPOSITORY_OWNER}.github.io/ome-ngff-validator/`
 };
