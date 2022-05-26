@@ -15,12 +15,12 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm install
-          npm run build && touch out/.nojekyll
+          npm run build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: out
+          FOLDER: dist
           CLEAN: true
           # CLEAN_EXCLUDE: '["v0.1", "v0.2", "v0.3"]' # Manually add endpoints to keep
