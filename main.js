@@ -6,23 +6,26 @@ import { getJson, logJson, log, getSchema, renderRegion } from "./utils";
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
+const CURRENT_VERSION = "0.4";
 const sample_images_url =
   "https://raw.githubusercontent.com/ome/blog/master/_data/zarr_data_2020-11-04.json";
 
-function validateAndLog(schema, jsonData) {
-  console.log(schema);
+function validateAndLog(schema, jsonData, logValid = true) {
   const validate = ajv.compile(schema);
   const valid = validate(jsonData);
   if (valid) {
-    log(
-      "<div style='color: green; font-size:24px; border:solid green 1px; padding: 10px; border-radius: 5px; background: #eeffee'>VALID!</span>"
-    );
+    if (logValid) {
+      log(
+        "<div style='color: green; font-size:24px; border:solid green 1px; padding: 10px; border-radius: 5px; background: #eeffee'>VALID!</span>"
+      );
+    }
   } else {
     log(
       "<div style='color: red; font-size:24px; border:solid red 1px; padding: 10px; border-radius: 5px; background: #ffeeee'>NOT VALID!</span>"
     );
     validate.errors.forEach((error) => logJson(error));
   }
+  return valid;
 }
 
 async function validatePlate(rootAttrs, source) {
@@ -38,6 +41,7 @@ async function validatePlate(rootAttrs, source) {
   log("Validating " + source);
 
   // Validate...
+  console.log(schema);
   validateAndLog(schema, rootAttrs);
 
   // Validate wells...
@@ -63,6 +67,7 @@ function logPlate(plateAttrs) {
 async function validateWells(plateAttrs, source, version) {
   // cache the schema, so it's not loaded lots of times async
   await getSchema(version, "well");
+  await getSchema(version, "image");
   // build the plate html - Wells updated by code below
   logPlate(plateAttrs);
   // process all wells at the same time
@@ -73,40 +78,59 @@ async function validateWells(plateAttrs, source, version) {
     console.log(wellAttrs);
     let wellVersion = wellAttrs.version || version;
     const schema = await getSchema(wellVersion, "well");
-    const validate = ajv.compile(schema);
-    const valid = validate(wellAttrs);
+    const valid = validateAndLog(schema, wellAttrs, false);
     if (valid) {
       document.getElementById(wellPath).classList.add("valid");
-      // document.getElementById(wellPath).innerHTML = "✓";
     } else {
       document.getElementById(wellPath).classList.add("invalid");
-      // document.getElementById(wellPath).innerHTML = "⨯";
-      validate.errors.forEach((error) => logJson(error));
     }
 
     // let's just validate the FIRST image for each Well!
     let imagePath = wellAttrs.well.images[0].path;
     let imageUrl = source + wellPath + "/" + imagePath + "/.zattrs";
     let imageAttrs = await getJson(imageUrl);
+    let imgValid = await validateMultiscales(
+      imageAttrs,
+      null,
+      wellVersion,
+      false
+    );
+    if (imgValid) {
+      document.getElementById(wellPath).innerHTML = "✓";
+    } else {
+      document.getElementById(wellPath).innerHTML = "⨯";
+    }
   });
 }
 
-async function validateMultiscales(rootAttrs, source) {
+async function validateMultiscales(
+  rootAttrs,
+  source,
+  defaultVersion,
+  logValid = true
+) {
   // source is optional - required for loading paths to arrays
 
   const version = rootAttrs.multiscales[0].version;
   if (!version) {
     log("No 'multiscales[0].version' found");
-    return;
+    version = defaultVersion || CURRENT_VERSION;
   }
-  log("OME-NGFF multiscales version: " + version);
+  if (logValid) {
+    log("OME-NGFF multiscales version: " + version);
+  }
 
   // load Schema - correct version
   const schema = await getSchema(version);
-  log("Validating " + source);
 
   // Validate...
-  validateAndLog(schema, rootAttrs);
+  console.log(schema);
+  let imgValid = validateAndLog(schema, rootAttrs, logValid);
+
+  if (!source) {
+    // in case we're just validating local JSON?
+    return imgValid;
+  }
 
   // Metadata: axes...
   let axesNames = ["t", "c", "z", "y", "x"];
@@ -119,10 +143,6 @@ async function validateMultiscales(rootAttrs, source) {
   let paths = rootAttrs.multiscales[0].datasets.map((d) => d.path);
   log("Paths: " + JSON.stringify(paths));
 
-  if (!source) {
-    // in case we're just validating local JSON?
-    return;
-  }
   // start with smallest resolution (last path...)
   for (let i = 0; i < paths.length; i++) {
     let path = paths[i];
@@ -186,6 +206,7 @@ async function validateLabels(source) {
   logJson(rootAttrs, ".zattrs JSON");
   if (rootAttrs.multiscales) {
     // Multiscales validation...
+    log("Validating " + source);
     await validateMultiscales(rootAttrs, source);
     await validateLabels(source);
   } else if (rootAttrs.plate) {
