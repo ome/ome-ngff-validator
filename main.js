@@ -9,7 +9,6 @@ const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allError
 const sample_images_url =
   "https://raw.githubusercontent.com/ome/blog/master/_data/zarr_data_2020-11-04.json";
 
-
 function validateAndLog(schema, jsonData) {
   console.log(schema);
   const validate = ajv.compile(schema);
@@ -34,15 +33,63 @@ async function validatePlate(rootAttrs, source) {
   }
   log("OME-NGFF plate version: " + version);
 
-    // load Schema - correct version
-    const schema = await getSchema(version, 'plate');
-    log("Validating " + source);
-  
-    // Validate...
-    validateAndLog(schema, rootAttrs);
+  // load Schema - correct version
+  const schema = await getSchema(version, "plate");
+  log("Validating " + source);
+
+  // Validate...
+  validateAndLog(schema, rootAttrs);
+
+  // Validate wells...
+  await validateWells(rootAttrs.plate, source, version);
 }
 
+function logPlate(plateAttrs) {
+  let keyHtml = `Key: Well: <span class='valid'>valid</span> / <span class='invalid'>invalid</span>. First Image: valid: ✓ / invalid: ⨯`;
+  log(keyHtml);
+  // add a table, where each Well is a <td id=path>
+  let html = plateAttrs.rows
+    .map((row) => {
+      return `<tr>${plateAttrs.columns
+        .map((col) => `<td id="${row.name}/${col.name}"></td>`)
+        .join("")}</tr>`;
+    })
+    .join("");
+  const table = document.createElement("table");
+  table.innerHTML = html;
+  document.getElementById("app").appendChild(table);
+}
 
+async function validateWells(plateAttrs, source, version) {
+  // cache the schema, so it's not loaded lots of times async
+  await getSchema(version, "well");
+  // build the plate html - Wells updated by code below
+  logPlate(plateAttrs);
+  // process all wells at the same time
+  plateAttrs.wells.forEach(async function (well) {
+    let wellPath = well.path;
+    let wellUrl = source + wellPath + "/.zattrs";
+    let wellAttrs = await getJson(wellUrl);
+    console.log(wellAttrs);
+    let wellVersion = wellAttrs.version || version;
+    const schema = await getSchema(wellVersion, "well");
+    const validate = ajv.compile(schema);
+    const valid = validate(wellAttrs);
+    if (valid) {
+      document.getElementById(wellPath).classList.add("valid");
+      // document.getElementById(wellPath).innerHTML = "✓";
+    } else {
+      document.getElementById(wellPath).classList.add("invalid");
+      // document.getElementById(wellPath).innerHTML = "⨯";
+      validate.errors.forEach((error) => logJson(error));
+    }
+
+    // let's just validate the FIRST image for each Well!
+    let imagePath = wellAttrs.well.images[0].path;
+    let imageUrl = source + wellPath + "/" + imagePath + "/.zattrs";
+    let imageAttrs = await getJson(imageUrl);
+  });
+}
 
 async function validateMultiscales(rootAttrs, source) {
   // source is optional - required for loading paths to arrays

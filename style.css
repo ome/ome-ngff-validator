@@ -23,3 +23,20 @@ details pre {
   background-color: #2c3e50;
   padding: 10px;
 }
+
+table {
+  margin: 15px auto;
+}
+
+td {
+  border: 1px solid #ddd;
+  width: 20px;
+  height: 20px;
+}
+
+.valid {
+  background-color: #eeffee;
+}
+.invalid {
+  background-color: #ffeeee;
+}
