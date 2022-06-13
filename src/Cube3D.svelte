@@ -11,11 +11,23 @@
   const scaledX = Math.max(minL, sizeX * scale);
   const scaledY = Math.max(minL, sizeY * scale);
   const scaledZ = Math.max(minL, sizeZ * scale);
+
+  const chunks = zattrs.chunks;
+  const minCh = 10;
+  const chunkX = Math.max(minCh, chunks[chunks.length - 1] * scale);
+  const chunkY = Math.max(minCh, chunks[chunks.length - 2] * scale);
+  const chunkZ = Math.max(minCh, chunks.length < 3 ? 1 : chunks[chunks.length - 3] * scale);
 </script>
 
 <div
   class="container"
-  style="--size-x: {scaledX}px; --size-y: {scaledY}px; --size-z: {scaledZ}px"
+  style="
+    --size-x: {scaledX}px;
+    --size-y: {scaledY}px;
+    --size-z: {scaledZ}px;
+    --chunkX: {chunkX}px;
+    --chunkY: {chunkY}px;
+    --chunkZ: {chunkZ}px"
 >
   <div class="cube">
     <div class="face front">
@@ -34,9 +46,6 @@
 
 <style>
   .container {
-    --size-x: 300px;
-    --size-y: 200px;
-    --size-z: 100px;
     width: var(--size-x);
     height: var(--size-y);
     perspective: 1000px;
@@ -58,17 +67,17 @@
     height: 100%;
     background-image: repeating-linear-gradient(
         0deg,
-        rgba(70, 70, 70, 0.2) 0px,
-        rgba(70, 70, 70, 0.2) 1px,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent 21px
+        transparent var(--chunkX)
       ),
       repeating-linear-gradient(
         90deg,
-        rgba(70, 70, 70, 0.2) 0px,
-        rgba(70, 70, 70, 0.2) 1px,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent 21px
+        transparent var(--chunkY)
       ),
       linear-gradient(90deg, rgb(255, 255, 255), rgb(255, 255, 255));
   }
