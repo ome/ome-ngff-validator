@@ -199,7 +199,7 @@
 
   .array {
     border-radius: 10px;
-    padding: 15px;
+    padding: 15px 0;
     margin: 15px 0;
     box-shadow: 5px 5px 10px #c3c0c0;
     background: linear-gradient(to right, #ccc, #aaa);
@@ -221,11 +221,16 @@
     border-radius: 10px;
     padding: 10px;
     margin: 15px auto;
+    max-width: 100%;
   }
   td,
   th {
     padding: 5px;
     text-align: right;
+  }
+
+  td {
+    word-break: break-word;
   }
   tr:first-child th {
     border-bottom: 1px solid #ccc;

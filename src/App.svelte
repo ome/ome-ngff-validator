@@ -66,7 +66,7 @@
     overflow: auto;
     width: 100%;
     flex: 1;
-    padding: 15px;
+    padding: 15px 0;
     background: #ff512f; /* fallback for old browsers */
     background: -webkit-linear-gradient(
       to right,
