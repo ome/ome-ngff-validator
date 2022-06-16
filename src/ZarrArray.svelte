@@ -8,7 +8,7 @@
   const promise = getJson(source + path + "/.zarray");
 
   function getBytes(shape, zattrs) {
-    let bytesPerPixel = [2, 4, 8].find((n) => zattrs.dtype.includes(n));
+    let bytesPerPixel = [1, 2, 4, 8].find((n) => zattrs.dtype.includes(n));
     if (!bytesPerPixel) return "";
     let pixels = shape.reduce((i, p) => i * p, 1);
     return formatBytes(bytesPerPixel * pixels);
