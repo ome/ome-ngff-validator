@@ -84,7 +84,6 @@
 
   .face div {
     font-size: 24px;
-    width: 100%;
     position: absolute;
     text-align: center;
     background: transparent;
@@ -93,13 +92,16 @@
   .sizeX {
     left: 0;
     top: 110%;
+    width: 100%;
   }
   .sizeY {
-    left: 0;
+    left: 100%;
     top: 0;
     transform: rotate(-90deg);
-    transform-origin: right top;
+    transform-origin: center;
     padding-top: 10px;
+    width: var(--size-y);
+    height: var(--size-y);
   }
 
   .top {
