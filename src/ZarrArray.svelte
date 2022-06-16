@@ -7,8 +7,16 @@
 
   const promise = getJson(source + path + "/.zarray");
 
-  function getBytes(shape, zattrs) {
-    let bytesPerPixel = [1, 2, 4, 8].find((n) => zattrs.dtype.includes(n));
+  function chunkCount(zarray) {
+    console.log('chunkCount', zarray);
+    const ch = zarray.chunks;
+    const counts = zarray.shape.map((sh, index) => Math.ceil(sh/ch[index]));
+    console.log("counts", counts);
+    return counts.reduce((prev, curr) => prev * curr, 1);
+  }
+
+  function getBytes(shape, zarray) {
+    let bytesPerPixel = [1, 2, 4, 8].find((n) => zarray.dtype.includes(n));
     if (!bytesPerPixel) return "";
     let pixels = shape.reduce((i, p) => i * p, 1);
     return formatBytes(bytesPerPixel * pixels);
@@ -20,33 +28,38 @@
 
   {#await promise}
     <div>loading array .zarray ...</div>
-  {:then zattrs}
+  {:then zarray}
     <table>
       <tr>
         <th /><th>Array</th><th>Chunk</th>
       </tr>
       <tr>
         <th>Bytes</th>
-        <td>{getBytes(zattrs.shape, zattrs)}</td>
-        <td>{getBytes(zattrs.chunks, zattrs)}</td>
+        <td>{getBytes(zarray.shape, zarray)}</td>
+        <td>{getBytes(zarray.chunks, zarray)}</td>
       </tr>
       <tr>
         <th>Shape</th>
-        <td>{JSON.stringify(zattrs.shape)}</td>
-        <td>{JSON.stringify(zattrs.chunks)}</td>
+        <td>{JSON.stringify(zarray.shape)}</td>
+        <td>{JSON.stringify(zarray.chunks)}</td>
+      </tr>
+      <tr>
+        <th>Count</th>
+        <td>{chunkCount(zarray) + 1} Tasks</td>
+        <td>{chunkCount(zarray)} Chunks</td>
       </tr>
       <tr>
         <th>Type</th>
-        <td>{zattrs.dtype}</td>
+        <td>{zarray.dtype}</td>
         <td>numpy.ndarray</td>
       </tr>
     </table>
 
-    <Cube3D zattrs={zattrs} />
+    <Cube3D zarray={zarray} />
 
     <details>
       <summary>{path}/.zarray</summary>
-      <pre><code>{JSON.stringify(zattrs, null, 2)}</code></pre>
+      <pre><code>{JSON.stringify(zarray, null, 2)}</code></pre>
     </details>
   {:catch error}
     <p style="color: red">{error.message}</p>

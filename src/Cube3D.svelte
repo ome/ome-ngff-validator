@@ -1,7 +1,7 @@
 <script>
-  export let zattrs;
+  export let zarray;
 
-  const shape = zattrs.shape;
+  const shape = zarray.shape;
   const sizeX = shape[shape.length - 1];
   const sizeY = shape[shape.length - 2];
   const sizeZ = shape.length < 3 ? 1 : shape[shape.length - 3];
@@ -12,7 +12,7 @@
   const scaledY = Math.max(minL, sizeY * scale);
   const scaledZ = Math.max(minL, sizeZ * scale);
 
-  const chunks = zattrs.chunks;
+  const chunks = zarray.chunks;
   const minCh = 10;
   const chunkX = Math.max(minCh, chunks[chunks.length - 1] * scale);
   const chunkY = Math.max(minCh, chunks[chunks.length - 2] * scale);
