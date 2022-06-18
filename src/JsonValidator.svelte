@@ -45,15 +45,10 @@
   {:catch error}
     <p style="color: red">{error.message}</p>
   {/await}
-</article>
 
-<article>
-  <details>
+  <details open={true}>
     <summary>{zarrName}/.zattrs</summary>
-    <pre><code>
-        {JSON.stringify(rootAttrs, null, 2)}
-    </code>
-    </pre>
+    <pre><code>{JSON.stringify(rootAttrs, null, 2)}</code></pre>
   </details>
 </article>
 
