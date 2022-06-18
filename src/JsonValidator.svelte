@@ -1,6 +1,7 @@
 <script>
   import MultiscaleArrays from "./MultiscaleArrays.svelte";
   import Plate from "./Plate.svelte";
+  import JsonBrowser from "./JsonBrowser.svelte";
   import {
     CURRENT_VERSION,
     getSchemaUrlForJson,
@@ -46,10 +47,9 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  <details open={true}>
-    <summary>{zarrName}/.zattrs</summary>
-    <pre><code>{JSON.stringify(rootAttrs, null, 2)}</code></pre>
-  </details>
+  <div class="json">
+    <JsonBrowser name="" contents={rootAttrs} expanded/>
+  </div>
 </article>
 
 {#if rootAttrs.multiscales}
@@ -75,22 +75,13 @@
     color: #ff512f;
   }
 
-  summary {
-    font-size: 1.2em;
-  }
-
-  pre {
+  .error pre {
     margin-top: 10px;
-    color: #faebd7;
-    background-color: #2c3e50;
+    color: black;
+    background-color: wheat;
     padding: 10px;
     font-size: 14px;
     border-radius: 10px;
-  }
-
-  .error pre {
-    color: black;
-    background-color: wheat;
   }
 
   .invalid,
@@ -122,8 +113,14 @@
     padding: 10px;
     border-radius: 10px;
   }
-
-  details {
+  .json {
     text-align: left;
+    margin-top: 10px;
+    color: #faebd7;
+    background-color: #263749;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+    font-family: monospace;
   }
 </style>

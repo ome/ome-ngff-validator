@@ -1,0 +1,130 @@
+<script>
+  import Icon from "svelte-icons-pack/Icon.svelte";
+  import BsCaretRightFill from "svelte-icons-pack/bs/BsCaretRightFill";
+  import { slide } from "svelte/transition";
+
+  export let name;
+  export let contents;
+  export let expanded = false;
+
+  // If the Object or list only has a single item, expand to show it
+  if (Object.keys(contents).length == 1) {
+    expanded = true;
+  }
+
+  function toggle() {
+    expanded = !expanded;
+  }
+
+</script>
+
+<div class="folder">
+  <div class="{expanded ? "expanded" : ""} caret" on:click={toggle}>
+    <Icon className="caret-toggle" src={BsCaretRightFill} />
+  </div>
+
+  <div class="content">
+    {#if name}
+      <span class="key">"{name}"</span>:
+    {/if}
+
+    <!-- opening bracket for list or object -->
+    {#if contents[0]}
+      {"["} {#if !expanded} {"]"} {/if}
+    {:else}
+      {"{"} {#if !expanded} {"}"} {/if}
+    {/if}
+
+    {#if expanded}
+      <ul transition:slide={{ duration: 300 }}>
+        <!-- If it's a list show each item or contents -->
+        {#if contents[0]}
+          {#each contents as item}
+            <li>
+              {#if typeof item === "object"}
+                <!-- could be list or object, has no key -->
+                <svelte:self name={""} contents={item} expanded={contents.length==1}/>
+              {:else}
+                <!-- string -->
+                {item}
+              {/if}
+            </li>
+          {/each}
+        {:else}
+          <!-- If it's an Object show each item by it's key -->
+          {#each Object.entries(contents) as keyval}
+            <li>
+              {#if typeof keyval[1] === "object"}
+                <!-- could be list or object -->
+                <svelte:self name={keyval[0]} contents={keyval[1]} expanded={Object.values(contents).length==1} />
+              {:else}
+                <!-- string or number or null, boolean -->
+                <span class="key indent">"{keyval[0]}"</span>:
+                {#if typeof keyval[1] === "string"}
+                  <span class="string">"{keyval[1]}"</span>
+                {:else if typeof keyval[1] === "number"}
+                  <span class="number">{keyval[1]}</span>
+                {:else}
+                  <span class="null">{keyval[1]}</span>
+                {/if}
+              {/if}
+            </li>
+          {/each}
+        {/if}
+      </ul>
+    {/if}
+
+    {#if expanded}
+      <!-- closing bracket for list or object -->
+      {#if contents[0]}{"]"} {:else} {"}"} {/if}
+    {/if}
+  </div>
+</div>
+
+<style>
+  .folder {
+    display: flex;
+    flex-direction: row;
+  }
+  .caret {
+    flex: 0 20px;
+  }
+  .content {
+    flex: 1;
+  }
+  span {
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  .key {
+    color: rgb(154, 217, 254);
+  }
+  .string {
+    color: rgb(201, 175, 118);
+  }
+  .null {
+    color: rgb(86, 186, 211);
+  }
+  .number {
+    color: rgb(181, 206, 168);
+  }
+  .indent {
+    margin-left: 20px;
+  }
+
+  ul {
+    padding: 0.2em 0 0 0;
+    margin: 0;
+    list-style: none;
+    border-left: 1px solid rgba(100, 100, 100, 0.4);
+    text-align: left;
+  }
+
+  li {
+    padding: 0.2em 0;
+  }
+  :global(.expanded .caret-toggle) {
+    transform: rotate(90deg);
+  }
+</style>
