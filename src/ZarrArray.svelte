@@ -8,10 +8,8 @@
   const promise = getJson(source + path + "/.zarray");
 
   function chunkCount(zarray) {
-    console.log('chunkCount', zarray);
     const ch = zarray.chunks;
     const counts = zarray.shape.map((sh, index) => Math.ceil(sh/ch[index]));
-    console.log("counts", counts);
     return counts.reduce((prev, curr) => prev * curr, 1);
   }
 

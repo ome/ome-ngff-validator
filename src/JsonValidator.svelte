@@ -59,16 +59,6 @@
 {/if}
 
 <style>
-  article {
-    color: #343a40;
-    border: solid #ddd 1px;
-    border-radius: 10px;
-    padding: 15px;
-    background: white;
-    margin: 20px 0;
-    text-align: center;
-    box-shadow: 10px 10px 20px rgba(125, 22, 2, 0.5);
-  }
 
   a,
   a:visited {

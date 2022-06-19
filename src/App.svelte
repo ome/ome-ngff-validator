@@ -57,7 +57,7 @@
 
   h1 {
     font-weight: 300;
-    font-size: 4em;
+    font-size: clamp(2rem, 6vw, 3.5rem);
     text-align: center;
     color: #343a40;
   }
@@ -84,6 +84,17 @@
 
   section > div {
     margin: auto;
-    width: clamp(300px, 95%, 600px);
+    width: clamp(300px, 95%, 1200px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  @media (min-width: 1000px) {
+    section > div {
+      flex-direction: row;
+    }
   }
 </style>
