@@ -9,7 +9,7 @@
 
   function chunkCount(zarray) {
     const ch = zarray.chunks;
-    const counts = zarray.shape.map((sh, index) => Math.ceil(sh/ch[index]));
+    const counts = zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
     return counts.reduce((prev, curr) => prev * curr, 1);
   }
 
@@ -53,7 +53,7 @@
       </tr>
     </table>
 
-    <Cube3D zarray={zarray} />
+    <Cube3D {zarray} />
 
     <details>
       <summary>{path}/.zarray</summary>

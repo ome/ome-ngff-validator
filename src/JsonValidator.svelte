@@ -48,7 +48,7 @@
   {/await}
 
   <div class="json">
-    <JsonBrowser name="" contents={rootAttrs} expanded/>
+    <JsonBrowser name="" contents={rootAttrs} expanded />
   </div>
 </article>
 
@@ -59,7 +59,6 @@
 {/if}
 
 <style>
-
   a,
   a:visited {
     color: #ff512f;

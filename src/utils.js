@@ -1,4 +1,3 @@
-
 // import { slice, openArray } from "https://cdn.skypack.dev/zarr";
 
 import Ajv from "ajv";
@@ -17,7 +16,7 @@ export async function getJson(url) {
 
 let schemas = {};
 
-export async function getSchema(version, schemaName="image") {
+export async function getSchema(version, schemaName = "image") {
   let cacheKey = schemaName + version;
   if (!schemas[cacheKey]) {
     const schema_url = getSchemaUrl(schemaName, version);
@@ -31,17 +30,25 @@ export async function getSchema(version, schemaName="image") {
 }
 
 export function getVersion(jsonData) {
-  let version = jsonData.multiscales ? jsonData.multiscales[0].version :
-    jsonData.plate ? jsonData.plate.version :
-    jsonData.well ? jsonData.well.version : undefined;
+  let version = jsonData.multiscales
+    ? jsonData.multiscales[0].version
+    : jsonData.plate
+    ? jsonData.plate.version
+    : jsonData.well
+    ? jsonData.well.version
+    : undefined;
   return version;
 }
 
 export function getSchemaName(jsonData) {
   // get version, lookup schema, do validation...
-  const schemaName = jsonData.multiscales ? "image" :
-    jsonData.plate ? "plate" :
-    jsonData.well ? "well" : undefined;
+  const schemaName = jsonData.multiscales
+    ? "image"
+    : jsonData.plate
+    ? "plate"
+    : jsonData.well
+    ? "well"
+    : undefined;
   return schemaName;
 }
 
@@ -57,8 +64,8 @@ export function validateData(schema, jsonData) {
   const valid = validate(jsonData);
   let errors = [];
   if (!valid) {
-      errors = validate.errors;
-      console.log(errors)
+    errors = validate.errors;
+    console.log(errors);
   }
   return errors;
 }
@@ -68,7 +75,7 @@ export async function validate(jsonData) {
   const schemaName = getSchemaName(jsonData);
 
   if (!schemaName) {
-    return ["Unrecognised JSON data"]
+    return ["Unrecognised JSON data"];
   }
 
   let version = getVersion(jsonData);
@@ -78,14 +85,14 @@ export async function validate(jsonData) {
     version = CURRENT_VERSION;
   }
 
-  let schema = await getSchema(version, schemaName)
+  let schema = await getSchema(version, schemaName);
 
   return validateData(schema, jsonData);
 }
 
 export function formatBytes(bytes) {
-  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes == 0) return '0 Byte';
+  var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  if (bytes == 0) return "0 Byte";
   var i = Math.floor(Math.log(bytes) / Math.log(1000));
-  return (bytes / Math.pow(1000, i)).toFixed(2) + ' ' + sizes[i];
+  return (bytes / Math.pow(1000, i)).toFixed(2) + " " + sizes[i];
 }

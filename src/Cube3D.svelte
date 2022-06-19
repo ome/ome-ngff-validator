@@ -16,7 +16,10 @@
   const minCh = 10;
   const chunkX = Math.max(minCh, chunks[chunks.length - 1] * scale);
   const chunkY = Math.max(minCh, chunks[chunks.length - 2] * scale);
-  const chunkZ = Math.max(minCh, chunks.length < 3 ? 1 : chunks[chunks.length - 3] * scale);
+  const chunkZ = Math.max(
+    minCh,
+    chunks.length < 3 ? 1 : chunks[chunks.length - 3] * scale
+  );
 </script>
 
 <div

@@ -15,7 +15,6 @@
 {/each}
 
 <style>
-
   h2 {
     font-weight: 300;
   }

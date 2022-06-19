@@ -15,11 +15,10 @@
   function toggle() {
     expanded = !expanded;
   }
-
 </script>
 
 <div class="folder">
-  <div class="{expanded ? "expanded" : ""} caret" on:click={toggle}>
+  <div class="{expanded ? 'expanded' : ''} caret" on:click={toggle}>
     <Icon className="caret-toggle" src={BsCaretRightFill} />
   </div>
 
@@ -30,9 +29,11 @@
 
     <!-- opening bracket for list or object -->
     {#if contents[0]}
-      {"["} {#if !expanded} {"]"} {/if}
+      {"["}
+      {#if !expanded} {"]"} {/if}
     {:else}
-      {"{"} {#if !expanded} {"}"} {/if}
+      {"{"}
+      {#if !expanded} {"}"} {/if}
     {/if}
 
     {#if expanded}
@@ -43,7 +44,11 @@
             <li>
               {#if typeof item === "object"}
                 <!-- could be list or object, has no key -->
-                <svelte:self name={""} contents={item} expanded={contents.length==1}/>
+                <svelte:self
+                  name={""}
+                  contents={item}
+                  expanded={contents.length == 1}
+                />
               {:else}
                 <!-- string -->
                 {item}
@@ -56,7 +61,11 @@
             <li>
               {#if typeof keyval[1] === "object"}
                 <!-- could be list or object -->
-                <svelte:self name={keyval[0]} contents={keyval[1]} expanded={Object.values(contents).length==1} />
+                <svelte:self
+                  name={keyval[0]}
+                  contents={keyval[1]}
+                  expanded={Object.values(contents).length == 1}
+                />
               {:else}
                 <!-- string or number or null, boolean -->
                 <span class="key indent">"{keyval[0]}"</span>:
