@@ -6,6 +6,7 @@
   export let name;
   export let contents;
   export let expanded = false;
+  export let last = true;
 
   // If the Object or list only has a single item, expand to show it
   if (Object.keys(contents).length == 1) {
@@ -35,12 +36,13 @@
       {"{"}
       {#if !expanded} {"}"} {/if}
     {/if}
+    {#if (!last) && (!expanded) }<span class="trailing-comma">,</span>{/if}
 
     {#if expanded}
       <ul transition:slide={{ duration: 300 }}>
         <!-- If it's a list show each item or contents -->
         {#if contents[0]}
-          {#each contents as item}
+          {#each contents as item, count}
             <li>
               {#if typeof item === "object"}
                 <!-- could be list or object, has no key -->
@@ -48,16 +50,26 @@
                   name={""}
                   contents={item}
                   expanded={contents.length == 1}
+                  last={contents.length === (count + 1)}
                 />
               {:else}
-                <!-- string -->
-                {item}
+                <!-- Value, string or number or null, boolean -->
+                {#if typeof item === "string"}
+                  <span class="string">"{item}"</span>
+                {:else if typeof item === "number"}
+                  <span class="number">{item}</span>
+                {:else}
+                  <span class="null">{item}</span>
+                {/if}
+                {#if contents.length != (count + 1)}
+                  <span class="trailing-comma">,</span>
+                {/if}
               {/if}
             </li>
           {/each}
         {:else}
           <!-- If it's an Object show each item by it's key -->
-          {#each Object.entries(contents) as keyval}
+          {#each Object.entries(contents) as keyval, count}
             <li>
               {#if typeof keyval[1] === "object"}
                 <!-- could be list or object -->
@@ -65,16 +77,22 @@
                   name={keyval[0]}
                   contents={keyval[1]}
                   expanded={Object.values(contents).length == 1}
+                  last={Object.keys(contents).length === (count + 1)}
                 />
               {:else}
-                <!-- string or number or null, boolean -->
+                <!-- Key; -->
                 <span class="key indent">"{keyval[0]}"</span>:
+
+                <!-- Value, string or number or null, boolean -->
                 {#if typeof keyval[1] === "string"}
                   <span class="string">"{keyval[1]}"</span>
                 {:else if typeof keyval[1] === "number"}
                   <span class="number">{keyval[1]}</span>
                 {:else}
                   <span class="null">{keyval[1]}</span>
+                {/if}
+                {#if Object.keys(contents).length != (count + 1)}
+                  <span class="trailing-comma">,</span>
                 {/if}
               {/if}
             </li>
@@ -86,17 +104,23 @@
     {#if expanded}
       <!-- closing bracket for list or object -->
       {#if contents[0]}{"]"} {:else} {"}"} {/if}
+      {#if !last}<span class="trailing-comma">,</span>{/if}
     {/if}
   </div>
 </div>
 
 <style>
+  .trailing-comma {
+    margin-left: -0.5em;
+    opacity: 0.5;
+  }
   .folder {
     display: flex;
     flex-direction: row;
   }
   .caret {
     flex: 0 20px;
+    opacity: 0.5;
   }
   .content {
     flex: 1;
