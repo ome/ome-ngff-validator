@@ -29,14 +29,14 @@
     {/if}
 
     <!-- opening bracket for list or object -->
-    {#if contents[0]}
-      {"["}
-      {#if !expanded} {"]"} {/if}
-    {:else}
-      {"{"}
-      {#if !expanded} {"}"} {/if}
+    {#if contents[0]}{"["}{:else}{"{"}{/if}
+
+    <!-- if NOT expanded, show ...] // n items -->
+    {#if !expanded}
+      <span class="comment dots">...</span> {#if contents[0]}{"]"}{:else}{"}"}{/if}
+      {#if (!last) }<span class="trailing-comma">,</span>{/if}
+      <span class="comment">// {#if contents[0]}{contents.length}{:else}{Object.keys(contents).length}{/if} items</span>
     {/if}
-    {#if (!last) && (!expanded) }<span class="trailing-comma">,</span>{/if}
 
     {#if expanded}
       <ul transition:slide={{ duration: 300 }}>
@@ -110,9 +110,17 @@
 </div>
 
 <style>
+  .comment {
+    opacity: 0.4;
+    color: #aaa;
+  }
+  .dots {
+    margin-left: -7px;
+    margin-right: -7px;
+  }
   .trailing-comma {
     margin-left: -0.5em;
-    opacity: 0.5;
+    opacity: 0.4;
   }
   .folder {
     display: flex;
