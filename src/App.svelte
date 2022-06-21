@@ -10,12 +10,19 @@
     source = source + "/";
   }
 
-  // load JSON to be validated...
-  console.log("Loading JSON... " + source + ".zattrs");
-  const promise = getJson(source + ".zattrs");
+  let location = window.location.href;
 
-  const dirs = source.split("/").filter(Boolean);
-  const zarrName = dirs[dirs.length - 1];
+  let promise;
+  let zarrName;
+
+  if (source) {
+    // load JSON to be validated...
+    console.log("Loading JSON... " + source + ".zattrs");
+    promise = getJson(source + ".zattrs");
+
+    const dirs = source.split("/").filter(Boolean);
+    zarrName = dirs[dirs.length - 1];
+  }
 </script>
 
 <main>
@@ -23,9 +30,9 @@
     <Nav />
   </nav>
   <section>
-    <h1>{zarrName}</h1>
-    <div>
-      {#if source}
+    {#if source}
+      <h1>{zarrName}</h1>
+      <div>
         {#await promise}
           <p>loading...</p>
         {:then data}
@@ -33,11 +40,15 @@
         {:catch error}
           <p style="color: red">{error.message}</p>
         {/await}
-      {:else}
-        Use e.g.
-        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
-      {/if}
-    </div>
+      </div>
+    {:else}
+      <article>
+        To validate an OME-ZARR file, use e.g.
+        <a href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr">
+          ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
+        </a>
+      </article>
+    {/if}
   </section>
 </main>
 
@@ -82,6 +93,11 @@
     /* OME green->blue rgb(61,132,107), rgb(68,139,200) */
   }
 
+  article {
+    width: 90%;
+    margin: auto;
+  }
+
   section > div {
     margin: auto;
     width: clamp(300px, 95%, 1200px);
@@ -96,5 +112,14 @@
     section > div {
       flex-direction: row;
     }
+
+    article {
+      width: 60%;
+      margin: auto;
+    }
+    a {
+      white-space: nowrap;
+    }
+
   }
 </style>
