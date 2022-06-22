@@ -1,6 +1,14 @@
 <script>
   export let zarray;
 
+  // reference to parent element
+  let parent;
+  let scrollX = 50;
+  function handleMousemove(event) {
+    // scrollX goes from 20 -> 50. parent is 300px wide
+    scrollX = (event.clientX - parent.offsetLeft) / 10 + 20;
+  }
+
   const shape = zarray.shape;
   const sizeX = shape[shape.length - 1];
   const sizeY = shape[shape.length - 2];
@@ -19,32 +27,39 @@
   const chunkZ = Math.max(minC, chunks[chunks.length - 3] * scale);
 </script>
 
-<div
-  class="container"
-  style="
+<div class="parent" bind:this={parent} on:mousemove={handleMousemove}>
+  <div
+    class="container"
+    style="
     --size-x: {scaledX}px;
     --size-y: {scaledY}px;
     --size-z: {scaledZ}px;
     --chunkX: {chunkX}px;
     --chunkY: {chunkY}px;
-    --chunkZ: {chunkZ}px"
->
-  <div class="cube">
-    <div class="face front">
-      <div class="sizeX">{sizeX}</div>
-      <div class="sizeY">{sizeY}</div>
+    --chunkZ: {chunkZ}px;
+    --scrollX: {scrollX}deg"
+  >
+    <div class="cube">
+      <div class="face front">
+        <div class="sizeX">{sizeX}</div>
+        <div class="sizeY">{sizeY}</div>
+      </div>
+      <div class="face back" />
+      <div class="face right" />
+      <div class="face left">
+        <div class="sizeX">{sizeZ}</div>
+      </div>
+      <div class="face top" />
+      <div class="face bottom" />
     </div>
-    <div class="face back" />
-    <div class="face right" />
-    <div class="face left">
-      <div class="sizeX">{sizeZ}</div>
-    </div>
-    <div class="face top" />
-    <div class="face bottom" />
   </div>
 </div>
 
 <style>
+  .parent {
+    width: 300px;
+    margin: auto;
+  }
   .container {
     width: var(--size-x);
     height: var(--size-y);
@@ -59,7 +74,7 @@
     width: 100%;
     height: 100%;
     position: relative;
-    transform: rotateX(-26deg) rotateY(50deg);
+    transform: rotateX(-26deg) rotateY(var(--scrollX));
     animation: spin 3s 1 ease-in-out;
   }
   .face {
