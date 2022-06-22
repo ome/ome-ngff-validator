@@ -6,20 +6,17 @@
   const sizeY = shape[shape.length - 2];
   const sizeZ = shape.length < 3 ? 1 : shape[shape.length - 3];
 
+  // Scale 3D so the longest dimension is 200px...
   const scale = 200 / Math.max(sizeX, sizeY, sizeZ);
-  const minL = 40;
-  const scaledX = Math.max(minL, sizeX * scale);
-  const scaledY = Math.max(minL, sizeY * scale);
-  const scaledZ = Math.max(minL, sizeZ * scale);
+  const scaledX = sizeX * scale;
+  const scaledY = sizeY * scale;
+  const scaledZ = sizeZ * scale;
 
+  const minC = 3;
   const chunks = zarray.chunks;
-  const minCh = 10;
-  const chunkX = Math.max(minCh, chunks[chunks.length - 1] * scale);
-  const chunkY = Math.max(minCh, chunks[chunks.length - 2] * scale);
-  const chunkZ = Math.max(
-    minCh,
-    chunks.length < 3 ? 1 : chunks[chunks.length - 3] * scale
-  );
+  const chunkX = Math.max(minC, chunks[chunks.length - 1] * scale);
+  const chunkY = Math.max(minC, chunks[chunks.length - 2] * scale);
+  const chunkZ = Math.max(minC, chunks[chunks.length - 3] * scale);
 </script>
 
 <div
@@ -62,7 +59,8 @@
     width: 100%;
     height: 100%;
     position: relative;
-    animation: spin 5s infinite ease-in-out;
+    transform: rotateX(-26deg) rotateY(50deg);
+    animation: spin 3s 1 ease-in-out;
   }
   .face {
     position: absolute;
@@ -111,6 +109,21 @@
     top: calc((var(--size-y) - var(--size-z)) / 2);
     height: var(--size-z);
     transform: rotateX(90deg) translateZ(calc(var(--size-y) / 2));
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
+        transparent 1px,
+        transparent var(--chunkZ)
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
+        transparent 1px,
+        transparent var(--chunkX)
+      ),
+      linear-gradient(90deg, rgb(255, 255, 255), rgb(255, 255, 255));
   }
   .bottom {
     top: calc((var(--size-y) - var(--size-z)) / 2);
@@ -127,6 +140,21 @@
     width: var(--size-z);
     left: calc((var(--size-x) - var(--size-z)) / 2);
     transform: rotateY(-90deg) translateZ(calc(var(--size-x) / 2));
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
+        transparent 1px,
+        transparent var(--chunkX)
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(70, 70, 70, 0.7) 0px,
+        rgba(70, 70, 70, 0.7) 1px,
+        transparent 1px,
+        transparent var(--chunkZ)
+      ),
+      linear-gradient(90deg, rgb(255, 255, 255), rgb(255, 255, 255));
   }
 
   .front {
