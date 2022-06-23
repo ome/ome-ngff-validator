@@ -5,8 +5,8 @@
   let parent;
   let scrollX = 50;
   function handleMousemove(event) {
-    // scrollX goes from 20 -> 50. parent is 300px wide
-    scrollX = (event.clientX - parent.offsetLeft) / 10 + 20;
+    // scrollX goes from 20 -> 50. parent is 200px wide
+    scrollX = ((event.clientX - parent.offsetLeft) / 6) + 20;
   }
 
   const shape = zarray.shape;
@@ -20,7 +20,7 @@
   const scaledY = sizeY * scale;
   const scaledZ = sizeZ * scale;
 
-  const minC = 3;
+  const minC = 5;
   const chunks = zarray.chunks;
   const chunkX = Math.max(minC, chunks[chunks.length - 1] * scale);
   const chunkY = Math.max(minC, chunks[chunks.length - 2] * scale);
@@ -57,7 +57,7 @@
 
 <style>
   .parent {
-    width: 300px;
+    width: 200px;
     margin: auto;
   }
   .container {
