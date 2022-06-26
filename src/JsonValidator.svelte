@@ -48,7 +48,7 @@
   {/await}
 
   <div class="json">
-    <JsonBrowser name="" contents={rootAttrs} expanded />
+    <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
 </article>
 
