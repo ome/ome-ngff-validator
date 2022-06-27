@@ -1,6 +1,7 @@
 <script>
   import Nav from "./Nav.svelte";
   import JsonValidator from "./JsonValidator.svelte";
+  import Modal from 'svelte-simple-modal';
 
   import { getJson } from "./utils";
 
@@ -25,6 +26,7 @@
   }
 </script>
 
+<Modal>
 <main>
   <nav>
     <Nav />
@@ -51,6 +53,7 @@
     {/if}
   </section>
 </main>
+</Modal>
 
 <style>
   main {
