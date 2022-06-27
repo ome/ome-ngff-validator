@@ -28,7 +28,7 @@
 
   <div class="content">
     {#if name}
-      <JsonKeyLink name={name} version={version}></JsonKeyLink>:
+      <JsonKeyLink on:toggle={toggle} name={name} version={version}></JsonKeyLink>:
     {/if}
 
     <!-- opening bracket for list or object -->

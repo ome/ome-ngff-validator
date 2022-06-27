@@ -1,4 +1,14 @@
 <script>
+  import Icon from "svelte-icons-pack/Icon.svelte";
+  import BsInfoCircleFill from "svelte-icons-pack/bs/BsInfoCircleFill";
+  import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
+	function toggle() {
+		dispatch('toggle');
+	}
+
   export let name;
   export let version;
 
@@ -32,22 +42,25 @@
   }
 </script>
 
-{#if url}
-  <a target="_blank" class="key" href={url} title="Open ngff spec for {name}.">
-    {name}
-  </a>
-{:else}
-  <span class="key" href={url}>{name}</span>
-{/if}
+<span on:click={toggle} class="key" href={url}>{name}{#if url}<a
+  on:click|stopPropagation target="_blank" href={url} title="Open ngff spec for {name}.">
+    <Icon className="info" src={BsInfoCircleFill} />
+  </a>{/if}</span>
 
 <style>
-  .key {
-    color: rgb(154, 217, 254);
-  }
   a {
-    text-decoration-color: rgba(154, 217, 254, 0.5);
+    color: white;
+    position: absolute;
+    padding: 2px;
+    visibility: hidden;
   }
-  a:hover {
-    text-decoration-color: rgb(154, 217, 254);
+
+  .key:hover a {
+    visibility: visible;
+  }
+  .key {
+    position: relative;
+    color: rgb(154, 217, 254);
+    cursor: pointer;
   }
 </style>
