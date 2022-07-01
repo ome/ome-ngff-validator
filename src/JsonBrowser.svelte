@@ -3,10 +3,13 @@
   import BsCaretRightFill from "svelte-icons-pack/bs/BsCaretRightFill";
   import { slide } from "svelte/transition";
 
+  import JsonKeyLink from "./JsonKeyLink.svelte";
+
   export let name;
   export let contents;
   export let expanded = false;
   export let last = true;
+  export let version;
 
   // If the Object or list only has a single item, expand to show it
   if (Object.keys(contents).length == 1) {
@@ -25,7 +28,7 @@
 
   <div class="content">
     {#if name}
-      <span class="key">"{name}"</span>:
+      <JsonKeyLink on:toggle={toggle} name={name} version={version}></JsonKeyLink>:
     {/if}
 
     <!-- opening bracket for list or object -->
@@ -48,6 +51,7 @@
                 <!-- could be list or object, has no key -->
                 <svelte:self
                   name={""}
+                  version={version}
                   contents={item}
                   expanded={contents.length == 1}
                   last={contents.length === (count + 1)}
@@ -75,6 +79,7 @@
                 <!-- could be list or object -->
                 <svelte:self
                   name={keyval[0]}
+                  version={version}
                   contents={keyval[1]}
                   expanded={Object.values(contents).length == 1}
                   last={Object.keys(contents).length === (count + 1)}
@@ -135,11 +140,7 @@
   }
   span {
     padding: 0;
-    cursor: pointer;
     text-align: left;
-  }
-  .key {
-    color: rgb(154, 217, 254);
   }
   .string {
     color: rgb(201, 175, 118);
@@ -165,6 +166,10 @@
   li {
     padding: 0.2em 0;
   }
+  :global(.caret-toggle) {
+    cursor: pointer;
+  }
+  
   :global(.expanded .caret-toggle) {
     transform: rotate(90deg);
   }
