@@ -1,7 +1,8 @@
 <script>
   import Nav from "./Nav.svelte";
   import JsonValidator from "./JsonValidator.svelte";
-  import Modal from 'svelte-simple-modal';
+  import Title from "./Title.svelte"
+  import Modal from "svelte-simple-modal";
 
   import { getJson } from "./utils";
 
@@ -14,45 +15,43 @@
   let location = window.location.href;
 
   let promise;
-  let zarrName;
 
   if (source) {
     // load JSON to be validated...
     console.log("Loading JSON... " + source + ".zattrs");
     promise = getJson(source + ".zattrs");
-
-    const dirs = source.split("/").filter(Boolean);
-    zarrName = dirs[dirs.length - 1];
   }
 </script>
 
 <Modal>
-<main>
-  <nav>
-    <Nav />
-  </nav>
-  <section>
-    {#if source}
-      <h1>{zarrName}</h1>
-      <div>
+  <main>
+    <nav>
+      <Nav />
+    </nav>
+    <section>
+      {#if source}
         {#await promise}
-          <p>loading...</p>
+          <div>loading...</div>
         {:then data}
-          <JsonValidator rootAttrs={data} {source} />
+          <Title {source} zattrs={data} />
+          <div>
+            <JsonValidator rootAttrs={data} {source} />
+          </div>
         {:catch error}
           <p style="color: red">{error.message}</p>
         {/await}
-      </div>
-    {:else}
-      <article>
-        To validate an OME-ZARR file, use e.g.
-        <a href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr">
-          ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
-        </a>
-      </article>
-    {/if}
-  </section>
-</main>
+      {:else}
+        <article>
+          To validate an OME-ZARR file, use e.g.
+          <a
+            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr"
+          >
+            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
+          </a>
+        </article>
+      {/if}
+    </section>
+  </main>
 </Modal>
 
 <style>
@@ -67,13 +66,6 @@
     padding: 0;
     flex: 0 0 48px;
     background-color: #343a40;
-  }
-
-  h1 {
-    font-weight: 300;
-    font-size: clamp(2rem, 6vw, 3.5rem);
-    text-align: center;
-    color: #343a40;
   }
 
   section {
@@ -123,6 +115,5 @@
     a {
       white-space: nowrap;
     }
-
   }
 </style>

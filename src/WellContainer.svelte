@@ -1,7 +1,6 @@
 <script>
   import { getJson } from "./utils";
-  import Well from "./Well.svelte";
-
+  import PlateWell from "./PlateWell.svelte";
   export let source;
   export let path;
 
@@ -11,7 +10,7 @@
 {#await promise}
   <td>.</td>
 {:then data}
-  <Well wellAttrs={data} {source} {path} />
+  <PlateWell wellAttrs={data} {source} {path} />
 {:catch error}
   <td style="color: red">{error.message}</td>
 {/await}

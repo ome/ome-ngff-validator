@@ -22,6 +22,7 @@
   {#await schemasPromise}
     <div>loading schemas...</div>
   {:then ok}
+    <p>Validating {wellPaths.length} Wells and first Image in each:</p>
     <table>
       {#each plateJson.rows as row}
         <tr>
