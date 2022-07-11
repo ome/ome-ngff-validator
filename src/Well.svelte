@@ -1,46 +1,40 @@
 <script>
-  import { getJson, validate } from "./utils";
+  import { CURRENT_VERSION, getVersion, getSchema } from "./utils";
 
-  export let wellAttrs;
+  import ImageContainer from "./ImageContainer.svelte";
+
   export let source;
-  export let path;
+  export let rootAttrs;
 
-  async function loadAndValidate() {
-    console.log("wellAttrs", wellAttrs, wellAttrs.well);
-    let imgPath = wellAttrs.well.images[0].path;
-    let imgAttrs = await getJson(source + path + "/" + imgPath + "/.zattrs");
-    let errs = await validate(imgAttrs);
-    return errs;
-  }
+  let wellJson = rootAttrs.well;
+  let imagePaths = wellJson.images.map((img) => img.path);
+  // const column_count = Math.ceil(Math.sqrt(imagePaths.length))
+  // const row_count = Math.ceil(imagePaths.length / column_count)
+  const version = getVersion(rootAttrs) || CURRENT_VERSION;
 
-  let validatePromise = validate(wellAttrs);
-
-  let imagePromise = loadAndValidate();
+  // wait for schema to be cached, so we don't load them multiple times
+  let schemasPromise = getSchema(version, "image")
 </script>
 
-{#await validatePromise}
-  <td>...</td>
-{:then errors}
-  <td class={errors.length === 0 ? "valid" : "invalid"}>
-    {#await imagePromise}
-      &nbsp
-    {:then imgErrors}
-      {imgErrors.length === 0 ? "✓" : "⨯"}
-    {/await}
-  </td>
-{:catch error}
-  <td style="color: red">{error.message}</td>
-{/await}
+<article>
+  Images:
+  {#await schemasPromise}
+    <div>loading schema...</div>
+  {:then ok}
+    <ul>
+      {#each imagePaths as path}
+        <ImageContainer {source} {path} />
+      {/each}
+    </ul>
+  {:catch error}
+    <p style="color: red">{error.message}</p>
+  {/await}
+</article>
 
 <style>
-  td {
-    width: 20px;
-    height: 20px;
+
+  li {
+    list-style: none;
   }
-  td.valid {
-    background-color: #eeffee;
-  }
-  td.invalid {
-    background-color: #ffeeee;
-  }
+
 </style>

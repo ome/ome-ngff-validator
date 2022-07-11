@@ -1,6 +1,7 @@
 <script>
   import MultiscaleArrays from "./MultiscaleArrays.svelte";
   import Plate from "./Plate.svelte";
+  import Well from "./Well.svelte"
   import JsonBrowser from "./JsonBrowser.svelte";
   import {
     CURRENT_VERSION,
@@ -56,6 +57,8 @@
   <MultiscaleArrays {source} {rootAttrs} />
 {:else if rootAttrs.plate}
   <Plate {source} {rootAttrs} />
+{:else if rootAttrs.well}
+  <Well {source} {rootAttrs} />
 {/if}
 
 <style>
