@@ -1,4 +1,7 @@
 
+# 0.2.1 (July 2022)
+
+- Fix links for browsing of Plate -> Well -> Image
 # 0.2.0 (July 2022)
 
 - Support browsing of Plate -> Well -> Image
