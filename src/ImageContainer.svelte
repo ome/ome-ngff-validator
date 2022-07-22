@@ -14,9 +14,11 @@
   }
 
   const promise = loadAndValidate();
+
+  const url = window.location.origin + window.location.pathname;
 </script>
 
-<a title="{path}: Open Image" href="{window.origin}?source={source + path}/">
+<a title="{path}: Open Image" href="{url}?source={source + path}/">
 {#await promise}
   <li>{path}.</li>
 {:then errs}
