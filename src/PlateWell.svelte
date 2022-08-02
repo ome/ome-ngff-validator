@@ -16,13 +16,15 @@
   let validatePromise = validate(wellAttrs);
 
   let imagePromise = loadAndValidate();
+
+  const url = window.location.origin + window.location.pathname;
 </script>
 
 {#await validatePromise}
   <td>...</td>
 {:then errors}
   <td class={errors.length === 0 ? "valid" : "invalid"}>
-    <a title="{path}: Open Well" href="{window.origin}?source={source + path}/">
+    <a title="{path}: Open Well" href="{url}?source={source + path}/">
       {#await imagePromise}
         &nbsp
       {:then imgErrors}
