@@ -1,14 +1,14 @@
 <script>
-  import MultiscaleArrays from "./MultiscaleArrays.svelte";
-  import Plate from "./Plate.svelte";
-  import Well from "./Well.svelte"
-  import JsonBrowser from "./JsonBrowser.svelte";
+  import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
+  import Plate from "./Plate/index.svelte";
+  import Well from "./Well/index.svelte"
+  import JsonBrowser from "../JsonBrowser/index.svelte";
   import {
     CURRENT_VERSION,
     getSchemaUrlForJson,
     validate,
     getVersion,
-  } from "./utils";
+  } from "../utils";
 
   export let source;
   export let rootAttrs;

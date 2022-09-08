@@ -1,5 +1,5 @@
 <script>
-  import { CURRENT_VERSION, getVersion, getSchema } from "./utils";
+  import { CURRENT_VERSION, getVersion, getSchema } from "../../utils";
 
   import ImageContainer from "./ImageContainer.svelte";
 

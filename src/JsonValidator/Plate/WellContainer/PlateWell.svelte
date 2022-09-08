@@ -1,5 +1,5 @@
 <script>
-  import { getJson, validate } from "./utils";
+  import { getJson, validate } from "../../../utils";
 
   export let wellAttrs;
   export let source;

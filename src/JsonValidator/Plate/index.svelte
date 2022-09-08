@@ -1,7 +1,7 @@
 <script>
-  import { CURRENT_VERSION, getVersion, getSchema } from "./utils";
+  import { CURRENT_VERSION, getVersion, getSchema } from "../../utils";
 
-  import WellContainer from "./WellContainer.svelte";
+  import WellContainer from "./WellContainer/index.svelte";
 
   export let source;
   export let rootAttrs;

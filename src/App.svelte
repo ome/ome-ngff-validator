@@ -1,6 +1,6 @@
 <script>
   import Nav from "./Nav.svelte";
-  import JsonValidator from "./JsonValidator.svelte";
+  import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
 
