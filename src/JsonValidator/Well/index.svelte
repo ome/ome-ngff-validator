@@ -23,7 +23,7 @@
   {:then ok}
     <ul>
       {#each imagePaths as path}
-        <ImageContainer {source} {path} />
+        <li><ImageContainer {source} {path} /></li>
       {/each}
     </ul>
   {:catch error}
@@ -33,8 +33,13 @@
 
 <style>
 
+  ul {
+    margin-top: 20px;
+  }
+
   li {
     list-style: none;
+    display: inline-block;
   }
 
 </style>

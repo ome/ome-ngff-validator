@@ -1,6 +1,7 @@
 <script>
-  import { getXmlDom } from "../utils";
+  import { getXmlDom, getSchema, getJson, validate } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
+  import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
 
   export let source;
   export let rootAttrs;
@@ -37,20 +38,29 @@
   }
   const promise = loadXml(metadataUrl);
 
+  // wait for schema to be cached, so we don't load them multiple times
+  // let schemasPromise = getSchema("0.2", "image");
+  async function preloadSchema(imagePath) {
+    let imgAttrs = await getJson(imagePath + "/.zattrs");
+    console.log("preloadSchema", imgAttrs);
+    let errs = await validate(imgAttrs);
+    return errs;
+  }
+
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
 
   const url = window.location.origin + window.location.pathname;
 </script>
 
-
 <article>
   Reading: <a href={source}>{zarrName}/.zattrs</a>
-  <JsonBrowser name="" version="" contents={rootAttrs} expanded />
 
-  &nbsp<br />
+  <div class="json">
+    <JsonBrowser name="" version="" contents={rootAttrs} expanded />
+  </div>
 
-  Loading metadata: <a href={metadataUrl}>{metadataName}</a><br />
+  Loading metadata:<a href={metadataUrl}>{metadataName}</a><br />
 
   {#await promise}
     <div>loading {metadataUrl}...</div>
@@ -58,9 +68,24 @@
     <!-- Show list of Images -->
     <h1>Images</h1>
     <ol>
-      {#each metadataJson.images as image, i}
-        <li><a title="Open Image" href="{url}?source={source}{i}/">{image.name}</a></li>
-      {/each}
+      {#await preloadSchema(source + "0")}
+        <div>loading schema...</div>
+      {:then ok}
+        <ul>
+          {#each metadataJson.images as image, i}
+            <li class="image">
+              /{i}
+              <a title="Open Image" href="{url}?source={source}{i}/"
+                >{image.name}</a
+              >
+
+              <ImageContainer {source} path={i} />
+            </li>
+          {/each}
+        </ul>
+      {:catch error}
+        <p style="color: red">{error.message}</p>
+      {/await}
     </ol>
 
     <!-- Error handling... -->
@@ -78,8 +103,37 @@
 </article>
 
 <style>
+
+  h1 {
+    margin-top: 20px;
+  }
   a,
   a:visited {
     color: #ff512f;
+  }
+
+  .json {
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #faebd7;
+    background-color: #263749;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+    font-family: monospace;
+  }
+
+  .image {
+    list-style: none;
+    text-align: left;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: #faebd7;
+    background-color: #263749;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+    font-family: monospace;
   }
 </style>
