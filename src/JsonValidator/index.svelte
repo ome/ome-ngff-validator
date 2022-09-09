@@ -48,7 +48,7 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  <div class="json">
+  <div>
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
 </article>
@@ -104,15 +104,5 @@
     background-color: wheat;
     padding: 10px;
     border-radius: 10px;
-  }
-  .json {
-    text-align: left;
-    margin-top: 10px;
-    color: #faebd7;
-    background-color: #263749;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 10px;
-    font-family: monospace;
   }
 </style>

@@ -10,8 +10,34 @@ export function getSchemaUrl(schemaName, version) {
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
 }
 
+// fetch() doesn't error for 404 etc.
+async function fetchHandleError(url) {
+  return await fetch(url).then(function (response) {
+    if (!response.ok) {
+      console.log("Fetch error:", response);
+      // make the promise be rejected if we didn't get a 2xx response
+      throw new Error(`Error loading ${url}: ${response.statusText}`);
+    } else {
+      return response;
+    }
+  });
+}
+
 export async function getJson(url) {
-  return fetch(url).then((rsp) => rsp.json());
+  return fetchHandleError(url).then((rsp) => rsp.json());
+}
+
+export async function getXmlDom(url) {
+  let xmlString = await getText(url);
+  console.log("xmlString", xmlString);
+  var domParser = new DOMParser();
+  let dom = domParser.parseFromString(xmlString, "text/xml");
+  console.log("dom", dom);
+  return dom;
+}
+
+export async function getText(url) {
+  return fetchHandleError(url).then((rsp) => rsp.text());
 }
 
 let schemas = {};
