@@ -36,7 +36,7 @@
         {:then data}
           <Title {source} zattrs={data} />
           <div>
-            {#if data["bioformats2raw.layout"] === 3}
+            {#if data["bioformats2raw.layout"] === 3 && !data.plate}
               <Bioformats2rawLayout rootAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />
