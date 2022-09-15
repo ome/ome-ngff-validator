@@ -120,8 +120,8 @@
     float: right;
   }
   .vizarr_link img {
-    height: 20px;
-    margin: -2px 0;
+    height: 24px;
+    margin: 0;
   }
 
   .json {

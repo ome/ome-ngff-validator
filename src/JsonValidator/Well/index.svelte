@@ -40,6 +40,7 @@
   li {
     list-style: none;
     display: inline-block;
+    margin: 3px;
   }
 
 </style>

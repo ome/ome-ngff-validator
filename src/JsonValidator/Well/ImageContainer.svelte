@@ -37,11 +37,10 @@
     text-decoration: none;
   }
   span {
-    list-style: none;
     border: solid #ddd 1px;
-    margin: 3px;
     padding: 3px;
     border-radius: 3px;
+    display: inline-block;
   }
   .valid {
     color: green;

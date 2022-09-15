@@ -9,6 +9,7 @@
     validate,
     getVersion,
   } from "../utils";
+  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -24,6 +25,10 @@
 </script>
 
 <article>
+  <a title="View image in vizarr" class="vizarr_link" target="_blank"
+                href="https://hms-dbmi.github.io/vizarr/?source={source}"
+                ><img src={vizarrLogoUrl}/></a>
+
   Validating: <a href={source}>{zarrName}/.zattrs</a><br />
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
@@ -75,6 +80,16 @@
     font-size: 14px;
     border-radius: 10px;
     font-family: monospace;
+  }
+
+  .vizarr_link {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .vizarr_link img {
+    height: 24px;
+    margin: 15px;
   }
 
   .error pre {
