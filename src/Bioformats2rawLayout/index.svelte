@@ -6,7 +6,7 @@
   export let source;
   export let rootAttrs;
 
-  const metadataName = "/OME/METADATA.ome.xml";
+  const metadataName = "OME/METADATA.ome.xml";
 
   // source/OME/METADATA.ome.xml
   const metadataUrl = `${source}${metadataName}`;
