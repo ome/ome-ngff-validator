@@ -2,6 +2,7 @@
   import { getXmlDom, getSchema, getJson, validate } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
+  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -33,7 +34,6 @@
         }
       }
     }
-    console.log(rsp);
     return rsp;
   }
   const promise = loadXml(metadataUrl);
@@ -80,6 +80,10 @@
               >
 
               <ImageContainer {source} path={i} />
+
+              <a title="View image in vizarr" class="vizarr_link" target="_blank"
+                href="https://hms-dbmi.github.io/vizarr/?source={source}{i}/"
+                ><img src={vizarrLogoUrl}/></a>
             </li>
           {/each}
         </ul>
@@ -110,6 +114,14 @@
   a,
   a:visited {
     color: #ff512f;
+  }
+
+  .vizarr_link {
+    float: right;
+  }
+  .vizarr_link img {
+    height: 20px;
+    margin: -2px 0;
   }
 
   .json {
