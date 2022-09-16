@@ -31,7 +31,10 @@
                 href="https://hms-dbmi.github.io/vizarr/?source={source}"
                 ><img src={vizarrLogoUrl}/></a>
 
-  Validating: <a href={source}>{zarrName}/.zattrs</a><br />
+  <!-- leave space on the right for vizarr link -->
+  <p class="margin_right">
+    Validating: <a href={source}>{zarrName}/.zattrs</a>
+  </p>
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
 
@@ -92,6 +95,10 @@
   .vizarr_link img {
     height: 24px;
     margin: 15px;
+  }
+
+  .margin_right {
+    margin-right: 30px;
   }
 
   .error pre {
