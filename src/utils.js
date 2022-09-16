@@ -66,6 +66,16 @@ export function getVersion(jsonData) {
   return version;
 }
 
+export function toTitleCase(text) {
+  return text[0].toUpperCase() + text.slice(1);
+}
+
+export function getDataType(jsonData) {
+  // E.g. 'Image', 'Plate' or 'Well'
+  let name = getSchemaName(jsonData);
+  return toTitleCase(name);
+}
+
 export function getSchemaName(jsonData) {
   // get version, lookup schema, do validation...
   const schemaName = jsonData.multiscales

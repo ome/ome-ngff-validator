@@ -8,6 +8,7 @@
     getSchemaUrlForJson,
     validate,
     getVersion,
+    getDataType,
   } from "../utils";
   import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
@@ -16,6 +17,7 @@
 
   const msVersion = getVersion(rootAttrs);
 
+  const dtype = getDataType(rootAttrs);
   const schemaUrl = getSchemaUrlForJson(rootAttrs);
   const shortenedUrl = schemaUrl.split("main")[1];
   const promise = validate(rootAttrs);
@@ -25,7 +27,7 @@
 </script>
 
 <article>
-  <a title="View image in vizarr" class="vizarr_link" target="_blank"
+  <a title="View {dtype} in vizarr" class="vizarr_link" target="_blank"
                 href="https://hms-dbmi.github.io/vizarr/?source={source}"
                 ><img src={vizarrLogoUrl}/></a>
 
