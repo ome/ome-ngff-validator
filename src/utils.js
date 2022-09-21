@@ -72,8 +72,11 @@ export function toTitleCase(text) {
 
 export function getDataType(jsonData) {
   // E.g. 'Image', 'Plate' or 'Well'
+  if (jsonData["bioformats2raw.layout"]){
+    return "bioformats2raw.layout";
+  }
   let name = getSchemaName(jsonData);
-  return toTitleCase(name);
+  return name ? toTitleCase(name) : "";
 }
 
 export function getSchemaName(jsonData) {
