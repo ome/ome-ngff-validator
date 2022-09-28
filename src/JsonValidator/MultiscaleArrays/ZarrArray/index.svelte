@@ -1,5 +1,5 @@
 <script>
-  import { getJson, formatBytes } from "./utils";
+  import { getJson, formatBytes } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
 
   export let source;

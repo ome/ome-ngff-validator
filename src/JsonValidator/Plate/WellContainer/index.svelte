@@ -1,5 +1,5 @@
 <script>
-  import { getJson } from "./utils";
+  import { getJson } from "../../../utils";
   import PlateWell from "./PlateWell.svelte";
   export let source;
   export let path;

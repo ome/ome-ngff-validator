@@ -1,6 +1,7 @@
 <script>
   import Nav from "./Nav.svelte";
-  import JsonValidator from "./JsonValidator.svelte";
+  import Bioformats2rawLayout from "./Bioformats2rawLayout/index.svelte";
+  import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
 
@@ -35,7 +36,11 @@
         {:then data}
           <Title {source} zattrs={data} />
           <div>
-            <JsonValidator rootAttrs={data} {source} />
+            {#if data["bioformats2raw.layout"] === 3 && !data.plate}
+              <Bioformats2rawLayout rootAttrs={data} {source} />
+            {:else}
+              <JsonValidator rootAttrs={data} {source} />
+            {/if}
           </div>
         {:catch error}
           <p style="color: red">{error.message}</p>

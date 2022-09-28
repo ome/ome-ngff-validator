@@ -1,18 +1,17 @@
 
 <script>
 
+  import {getDataType} from "./utils";
+
   export let zattrs;
   export let source;
 
   const dirs = source.split("/").filter(Boolean);
   let title = dirs[dirs.length - 1];
-  let obj = "Image"
+  let obj = getDataType(zattrs);
 
   if ("well" in zattrs) {
-    obj = "Well"
     title = dirs[dirs.length - 2] + "/" + dirs[dirs.length - 1];
-  } else if ("plate" in zattrs) {
-    obj = "Plate"
   }
 </script>
 

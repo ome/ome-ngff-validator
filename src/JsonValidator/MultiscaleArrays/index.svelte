@@ -1,5 +1,5 @@
 <script>
-  import ZarrArray from "./ZarrArray.svelte";
+  import ZarrArray from "./ZarrArray/index.svelte";
 
   export let source;
   export let rootAttrs;

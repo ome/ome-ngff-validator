@@ -1,5 +1,5 @@
 <script>
-  import { getJson, validate } from "./utils";
+  import { getJson, validate } from "../../utils";
 
   export let source;
   export let path;
@@ -20,27 +20,27 @@
 
 <a title="{path}: Open Image" href="{url}?source={source + path}/">
 {#await promise}
-  <li>{path}.</li>
+  <span>{path}.</span>
 {:then errs}
   {#if errs.length > 0}
-    <li class="error"> ⨯ Error! </li>
+    <span class="error"> ⨯ Error! </span>
   {:else}
-    <li class="valid">{path}: ✓ </li>
+    <span class="valid">{path}: ✓ </span>
   {/if}
 {:catch error}
-  <li class="error">{error.message}</li>
+  <span class="error">{error.message}</span>
 {/await}
 </a>
 
 <style>
-  li {
-    display: block;
-    list-style: none;
-    float: left;
+  a {
+    text-decoration: none;
+  }
+  span {
     border: solid #ddd 1px;
-    margin: 3px;
     padding: 3px;
     border-radius: 3px;
+    display: inline-block;
   }
   .valid {
     color: green;

@@ -6,7 +6,7 @@
   let scrollX = 50;
   function handleMousemove(event) {
     // scrollX goes from 20 -> 50. parent is 200px wide
-    scrollX = ((event.clientX - parent.offsetLeft) / 6) + 20;
+    scrollX = (event.offsetX / 6) + 20;
   }
 
   const shape = zarray.shape;
@@ -66,6 +66,8 @@
     perspective: 1000px;
     margin: 25px auto 20px;
     transform: scale(0.75);
+    /* ignore mouse-move events */
+    pointer-events: none;
   }
 
   .cube {
