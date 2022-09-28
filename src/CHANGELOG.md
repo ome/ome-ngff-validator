@@ -1,4 +1,8 @@
 
+
+# 0.3.0 (September 2022)
+
+- Support bioformats2raw.layout [#13](https://github.com/ome/ome-ngff-validator/pull/13)
 # 0.2.1 (July 2022)
 
 - Fix links for browsing of Plate -> Well -> Image
