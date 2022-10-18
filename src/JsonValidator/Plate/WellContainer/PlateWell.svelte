@@ -19,7 +19,6 @@
   let loadingIndex = 0;
 
   async function loadAndValidate() {
-    console.log("wellAttrs", wellAttrs, wellAttrs.well);
     let errs = [];
     const imgs = wellAttrs.well.images;
     for (let i=0; i < wellIndices.length; i++) {
@@ -55,10 +54,10 @@
         {#if imgErrors.length === 0}
           ✓
         {:else}
-          <span title={imgErrors.join(", ")} style="color:red">⨯</span>
+          <span title={imgErrors.join(", ")} style="color:red">X</span>
         {/if}
       {:catch error}
-        <span style="color:red">⨯</span>
+        <span style="color:red">X</span>
       {/await}
     </a>
   </td>

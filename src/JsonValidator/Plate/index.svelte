@@ -1,5 +1,5 @@
 <script>
-  import { CURRENT_VERSION, getVersion, getSchema, getSearchParam } from "../../utils";
+  import { CURRENT_VERSION, getVersion, getSchema, getSearchParam, range } from "../../utils";
 
   import WellContainer from "./WellContainer/index.svelte";
 
@@ -22,14 +22,22 @@
 
   let plateJson = rootAttrs.plate;
   let wellPaths = plateJson.wells.map((well) => well.path);
-  console.log("wellPaths", wellPaths);
   const version = getVersion(rootAttrs) || CURRENT_VERSION;
+
+  // NB: 'field_count' is optional field
+  const maxFieldIndex = plateJson.field_count || wellIndex + 1;
+  const wellIndecies = range(maxFieldIndex);
 
   // wait for schemas to be cached, so we don't load them multiple times
   let schemasPromise = Promise.all([
     getSchema(version, "well"),
     getSchema(version, "image"),
   ]);
+
+  function handleSelect(event) {
+    // Update URL to show ?well=index
+    window.location.href = wellUrl(event.target.value);
+  }
 </script>
 
 <article>
@@ -38,17 +46,15 @@
   {:then ok}
     <p>
       Validating {wellPaths.length} Wells and
-      {#if wellToValidate == "all"}
-        ALL Images in each
-        <a href={wellUrl(0)} title="Validate Image at index {wellIndex}">index:0 only</a>
-      {:else}
-        one Image in each (index: {wellIndex})
-        <a href={wellUrl('all')} title="Validate ALL Images in each Well">all</a>
-        {#if wellIndex > 0}
-          <a href={wellUrl(wellIndex - 1)} title="Validate Image at index {wellIndex - 1}"> &lt; </a>
-        {/if}
-        <a href={wellUrl(wellIndex + 1)} title="Validate Image at index {wellIndex + 1}"> &gt; </a>
-      {/if}
+      <select on:change={handleSelect}>
+        {#each wellIndecies as wellIdx}
+          <option value={wellIdx} selected={wellIndex == wellIdx}>
+            Image at index: {wellIdx}
+          </option>
+        {/each}
+        <option value="all" selected={wellToValidate == "all"}>ALL Images</option>
+      </select>
+      in each Well.
     </p>
     <table>
       {#each plateJson.rows as row}
@@ -82,5 +88,10 @@
 
   a {
     text-decoration: none;
+  }
+
+  select {
+    border: solid rgb(100,100,100) 1px;
+    border-radius: 5px;
   }
 </style>
