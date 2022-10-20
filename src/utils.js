@@ -135,3 +135,13 @@ export function formatBytes(bytes) {
   var i = Math.floor(Math.log(bytes) / Math.log(1000));
   return (bytes / Math.pow(1000, i)).toFixed(2) + " " + sizes[i];
 }
+
+export function getSearchParam(key) {
+  const searchParams = new URLSearchParams(window.location.search);
+  let value = searchParams.get(key);
+  return value;
+}
+
+export function range(length) {
+  return Array.from({ length }, (_, i) => i);
+}
