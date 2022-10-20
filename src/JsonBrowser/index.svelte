@@ -32,19 +32,19 @@
     {/if}
 
     <!-- opening bracket for list or object -->
-    {#if contents[0]}{"["}{:else}{"{"}{/if}
+    {#if Array.isArray(contents)}{"["}{:else}{"{"}{/if}
 
     <!-- if NOT expanded, show ...] // n items -->
     {#if !expanded}
-      <span class="comment dots">...</span> {#if contents[0]}{"]"}{:else}{"}"}{/if}
+      <span class="comment dots">...</span> {#if Array.isArray(contents)}{"]"}{:else}{"}"}{/if}
       {#if (!last) }<span class="trailing-comma">,</span>{/if}
-      <span class="comment">// {#if contents[0]}{contents.length}{:else}{Object.keys(contents).length}{/if} items</span>
+      <span class="comment">// {#if Array.isArray(contents)}{contents.length}{:else}{Object.keys(contents).length}{/if} items</span>
     {/if}
 
     {#if expanded}
       <ul transition:slide={{ duration: 300 }}>
         <!-- If it's a list show each item or contents -->
-        {#if contents[0]}
+        {#if Array.isArray(contents)}
           {#each contents as item, count}
             <li>
               {#if typeof item === "object"}
@@ -59,11 +59,11 @@
               {:else}
                 <!-- Value, string or number or null, boolean -->
                 {#if typeof item === "string"}
-                  <span class="string">"{item}"</span>
+                  <span class="string indent">"{item}"</span>
                 {:else if typeof item === "number"}
-                  <span class="number">{item}</span>
+                  <span class="number indent">{item}</span>
                 {:else}
-                  <span class="null">{item}</span>
+                  <span class="null indent">{item}</span>
                 {/if}
                 {#if contents.length != (count + 1)}
                   <span class="trailing-comma">,</span>
@@ -108,7 +108,7 @@
 
     {#if expanded}
       <!-- closing bracket for list or object -->
-      {#if contents[0]}{"]"} {:else} {"}"} {/if}
+      {#if Array.isArray(contents)}{"]"} {:else} {"}"} {/if}
       {#if !last}<span class="trailing-comma">,</span>{/if}
     {/if}
   </div>
