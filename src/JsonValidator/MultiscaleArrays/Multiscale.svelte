@@ -13,6 +13,7 @@
 
   // TODO: add "0.4" to this list once tested!
   const checkDtypes = !["0.1", "0.2", "0.3"].includes(version);
+  const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
 
   function allEqual(items) {
     return items.every((value) => value == items[0]);
@@ -22,6 +23,7 @@
     let dtypes = [];
     let dimCounts = [];
     let shapes = [];
+    let dimSeparators = [];
 
     for (let i = 0; i < datasets.length; i++) {
       let dataset = datasets[i];
@@ -29,6 +31,7 @@
       dimCounts.push(zarray.shape.length);
       dtypes.push(zarray.dtype);
       shapes.push(zarray.shape);
+      dimSeparators.push(zarray.dimension_separator);
     }
 
     let errors = [];
@@ -46,6 +49,13 @@
       shapes.forEach((shape) => {
         if (shape.length != axes.length) {
           errors.push(`Shape (${shape.join(", ")}) doesn't match axes length: ${axes.length}`)
+        }
+      });
+    }
+    if (checkDimSeparator) {
+      dimSeparators.forEach((sep) => {
+        if (sep != "/") {
+          errors.push(`Dimension separator must be / for version ${version}`)
         }
       });
     }
