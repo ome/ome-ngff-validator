@@ -9,9 +9,10 @@
   // shape.length (number of dimensions)
 
   // If multiscale.axes (version > 0.3) check it matches shape
+  const {axes, datasets, version} = multiscale;
 
-  const datasets = multiscale.datasets;
-  const axes = multiscale.axes;
+  // TODO: add "0.4" to this list once tested!
+  const checkDtypes = !["0.1", "0.2", "0.3"].includes(version);
 
   function allEqual(items) {
     return items.every((value) => value == items[0]);
@@ -35,7 +36,7 @@
       errors.push("No multiscale datasets")
     }
 
-    if (!allEqual(dtypes)) {
+    if (checkDtypes && !allEqual(dtypes)) {
       errors.push(`dtypes mismatch: ${dtypes.join(", ")}`)
     }
     if (!allEqual(dimCounts)) {
