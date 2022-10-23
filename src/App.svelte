@@ -6,6 +6,7 @@
   import Modal from "svelte-simple-modal";
 
   import { getJson } from "./utils";
+  import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
   let source = searchParams.get("source");
@@ -43,7 +44,8 @@
             {/if}
           </div>
         {:catch error}
-          <p style="color: red">{error.message}</p>
+          <CheckMark valid={false}/>
+          <p style="color: red; margin: 20px 0">{error.message}</p>
         {/await}
       {:else}
         <article>

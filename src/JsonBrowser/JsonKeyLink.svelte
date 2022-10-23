@@ -33,9 +33,9 @@
     }
   }
 
-  const version_urls = all_urls[version];
+  const version_urls = all_urls[version] || {};
 
-  let url;
+  let url = "";
 
   if (version_urls[name]) {
     url = `https://ngff.openmicroscopy.org/${version}/index.html#${version_urls[name]}`;

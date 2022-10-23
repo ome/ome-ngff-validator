@@ -54,6 +54,7 @@
       </div>
     {/if}
   {:catch error}
+    <CheckMark valid={false}/>
     <p style="color: red">{error.message}</p>
   {/await}
 
