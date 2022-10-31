@@ -3,6 +3,7 @@
   import Plate from "./Plate/index.svelte";
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
+  import CheckMark from "../CheckMark.svelte";
   import {
     CURRENT_VERSION,
     getSchemaUrlForJson,
@@ -43,18 +44,17 @@
   {#await promise}
     <div>loading schema...</div>
   {:then errors}
+    <CheckMark valid={errors.length == 0} />
     {#if errors.length > 0}
-      <div class="invalid">×</div>
       <div class="error">
         Errors:
         {#each errors as error}
           <pre><code>{JSON.stringify(error, null, 2)}</code></pre>
         {/each}
       </div>
-    {:else}
-      <div class="valid">✓</div>
     {/if}
   {:catch error}
+    <CheckMark valid={false}/>
     <p style="color: red">{error.message}</p>
   {/await}
 
@@ -109,29 +109,6 @@
     font-size: 14px;
     border-radius: 10px;
   }
-
-  .invalid,
-  .valid {
-    border-radius: 50%;
-    padding: 10px;
-    margin: 10px auto;
-    color: white;
-    width: 100px;
-    height: 100px;
-    font-size: 50px;
-    text-align: center;
-    padding: 15px;
-  }
-  .invalid {
-    background-color: red;
-    border: solid red 1px;
-  }
-
-  .valid {
-    background-color: green;
-    border: solid green 1px;
-  }
-
   .error {
     text-align: left;
     overflow: auto;

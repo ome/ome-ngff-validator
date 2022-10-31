@@ -47,10 +47,14 @@ export async function getSchema(version, schemaName = "image") {
   if (!schemas[cacheKey]) {
     const schema_url = getSchemaUrl(schemaName, version);
     console.log("Loading schema... " + schema_url);
-    const schema = await getJson(schema_url);
-    // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
-    delete schema["$schema"];
-    schemas[cacheKey] = schema;
+    try {
+      const schema = await getJson(schema_url);
+      // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
+      delete schema["$schema"];
+      schemas[cacheKey] = schema;
+    } catch (error) {
+      throw new Error(`No schema at ${schema_url}. Version ${version} may be invalid.`);
+    }
   }
   return schemas[cacheKey];
 }
