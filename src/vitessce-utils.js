@@ -139,20 +139,23 @@ export class AnnDataSource extends ZarrDataSource {
   async _loadColumn(path) {
     const { store } = this;
     const prefix = dirname(path);
-    const { categories } = await this.getJson(`${this.store.url}/${path}/.zattrs`);
+    const colAttrs = await this.getJson(`${this.store.url}/${path}/.zattrs`);
     let categoriesValues;
-    console.log("_loadColumn", path, categories);
+    console.log("_loadColumn", path, colAttrs);
     // ? I don't see "categories" in any sample .zattrs files?
+    let categories = colAttrs["encoding-type"] == "categorical";
     if (categories) {
-      const { dtype } = await this.getJson(`/${prefix}/${categories}/.zarray`);
+      const { dtype } = await this.getJson(`${this.store.url}${path}/categories/.zarray`);
       if (dtype === '|O') {
         categoriesValues = await this.getFlatArrDecompressed(
-          `/${prefix}/${categories}`,
+          `${path}/categories/`,
         );
       }
+      console.log("categoriesValues", categoriesValues);
+      path = `${path}/codes/`;
     } else {
       // added this.store.url here, e.g. "obs/category/categories"
-      const { dtype } = await this.getJson(`${this.store.url}/${path}/.zarray`);
+      const { dtype } = await this.getJson(`${this.store.url}${path}/.zarray`);
       if (dtype === '|O') {
         return this.getFlatArrDecompressed(path);
       }

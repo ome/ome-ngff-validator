@@ -7,7 +7,43 @@
   export let source;
   export let tableAttrs;
 
+  let showObsInfo = false;
+  let obsColNames;
+  let obsData;
+
+  function toggleObsInfo() {
+    showObsInfo = !showObsInfo;
+    if (!obsData) {
+      loadObsData();
+    }
+  }
+
   const annDataStore = new AnnDataSource({ url: source });
+
+  async function loadObsData() {
+    let obsAttrs = await loadTable(source, "obs");
+
+    // manually validate without a schema...
+    // `.zattrs` MUST contain `"_index"`, which is the name of the column in obs to be used as the index.
+    // `.zattrs` MUST contain `"column-order"`, which is a list of the order of the non-_index columns.
+    // `.zattrs` MUST contain `"encoding-type"`, which is set to `"dataframe"` by AnnData.
+    // `.zattrs` MUST contain `"encoding-version"`, which is set to `"0.2.0"` by AnnData.
+    ["_index", "column-order", "encoding-type", "encoding-version"].forEach(
+      (attr) => {
+        if (!obsAttrs[attr]) {
+          throw Error(`No ${attr} in obs/.zattrs`);
+        }
+      }
+    );
+
+    obsColNames = obsAttrs["column-order"];
+    // FIXME: hard-code this to avoid 'categories' and dtype '<i8' (not supported by zarr.js)
+    obsColNames = ["_index", "batch", "category", "cell_size", "center_colcoord", "Cluster", "donor", "library_id", "X1",];
+    let toLoad = obsColNames.map((colName) => `obs/${colName}`);
+    obsData = await annDataStore.loadObsColumns(toLoad);
+
+    console.log("obsData", obsData);
+  }
 
   async function loadTableData() {
     // E.g. "obs/cell_id" fails with: Error: Dtype not recognized or not supported in zarr.js, got <i8.
@@ -20,12 +56,13 @@
 
     let varAttrs = await loadTable(source, "var");
     let varColNames = varAttrs["column-order"];
-    let toLoad = varColNames.map(colName => `var/${colName}`);
+    let toLoad = varColNames.map((colName) => `var/${colName}`);
     let varData = await annDataStore.loadObsColumns(toLoad);
 
     let columns = ["var/_index", "X"];
     let data = await annDataStore.loadObsColumns(columns);
 
+    console.log("varData", varData);
     return {
       colNames: data[0],
       rowData: data[1],
@@ -37,8 +74,6 @@
   const tableDataPromise = loadTableData();
 
   const tablePromise = loadTable(source);
-
-  console.log("TABLE", tableAttrs);
 </script>
 
 <article>
@@ -59,6 +94,8 @@
     {:catch error}
       <p style="color: red">Failed to load /obs/.zattrs {error}</p>
     {/await}
+
+    <button class="obs" on:click={toggleObsInfo}>Load obs</button>
   </div>
 
   <!-- Show the main X data table -->
@@ -75,24 +112,36 @@
               <ul class="tooltip">
                 <li>var:</li>
                 {#each data.varColNames as varAttr, i}
-                <li>
-                  <span class="key">{varAttr}</span>:
-                  {data.varData[i][colIndex]}
-                </li>
+                  <li>
+                    <span class="key">{varAttr}</span>:
+                    {data.varData[i][colIndex]}
+                  </li>
                 {/each}
               </ul>
             </th>
           {/each}
+          <!-- If we've loaded obsData, add extra columns -->
+          {#if obsData && showObsInfo}
+            {#each obsColNames as colName}
+              <th class="obs">{colName}</th>
+            {/each}
+          {/if}
         </thead>
         <tbody>
-        {#each data.rowData as rowData, i}
-          <tr>
-            <td>{i}</td>
-            {#each rowData as cellData}
-              <td>{cellData}</td>
-            {/each}
-          </tr>
-        {/each}
+          {#each data.rowData as rowData, rowIndex}
+            <tr>
+              <td>{rowIndex}</td>
+              {#each rowData as cellData}
+                <td>{cellData}</td>
+              {/each}
+              <!-- If we've loaded obsData, add extra columns -->
+              {#if obsData && showObsInfo}
+                {#each obsColNames as colName, obsIndex}
+                  <td class="obs">{obsData[obsIndex][rowIndex]}</td>
+                {/each}
+              {/if}
+            </tr>
+          {/each}
         </tbody>
       </table>
     {:catch error}
@@ -107,7 +156,17 @@
     flex-direction: column;
   }
 
-  article>div {
+  button {
+    padding: 5px;
+    border-radius: 5px;
+    border: solid 1px #666;
+  }
+
+  .obs {
+    background-color: rgb(238, 195, 54);
+  }
+
+  article > div {
     flex: 0;
   }
 
