@@ -2,9 +2,32 @@
   import { each } from "svelte/internal";
 
   import { loadTable } from "../utils";
+  import { AnnDataSource } from "../vitessce-utils";
 
   export let source;
   export let tableAttrs;
+
+  const annDataStore = new AnnDataSource({ url: source });
+
+  async function loadTableData() {
+    // E.g. "obs/cell_id" fails with: Error: Dtype not recognized or not supported in zarr.js, got <i8.
+    // "obs/category/categories" loads a list of categories, e.g. ["carcinoma"]
+    // and "obs/category/codes" loads a list of indecies for those, e.g. [0, 0, ]
+    // let columns = ["obs/category/codes", "obs/X1", "obs/center_rowcoord", "obs/center_colcoord"];
+
+    // column names for the main table data, and other stats:
+    // let columns = ["var/_index", "var/mean-0"];
+
+    let columns = ["var/_index", "X"];
+    let data = await annDataStore.loadObsColumns(columns);
+
+    return {
+      colNames: data[0],
+      rowData: data[1],
+    };
+  }
+
+  const tableDataPromise = loadTableData();
 
   const tablePromise = loadTable(source);
 
@@ -12,43 +35,76 @@
 </script>
 
 <article>
-  obs:
-
-  <details>
-    <summary>table/.zattrs</summary>
-
-    <pre><code>{JSON.stringify(tableAttrs, null, 2)}</code></pre>
-  </details>
-
-  {#await tablePromise}
-    <p>checking for obs...</p>
-  {:then obsAttrs}
+  <!-- code blocks for JSON for the table itself and the required 'obs' group -->
+  <div>
     <details>
-      <summary>table/obs/.zattrs</summary>
-
-      <pre><code>{JSON.stringify(obsAttrs, null, 2)}</code></pre>
+      <summary>table/.zattrs</summary>
+      <pre><code>{JSON.stringify(tableAttrs, null, 2)}</code></pre>
     </details>
 
-    <table>
-      <tr>
-        {#each obsAttrs["column-order"] as colName}
-          <td>{colName}</td>
+    {#await tablePromise}
+      <p>checking for obs...</p>
+    {:then obsAttrs}
+      <details>
+        <summary>table/obs/.zattrs</summary>
+        <pre><code>{JSON.stringify(obsAttrs, null, 2)}</code></pre>
+      </details>
+    {:catch error}
+      <p style="color: red">Failed to load /obs/.zattrs {error}</p>
+    {/await}
+  </div>
+
+  <!-- Show the main X data table -->
+  <div class="tableScroller">
+    {#await tableDataPromise}
+      <p>Loading data...</p>
+    {:then data}
+      <table>
+        <thead>
+          <th>Row</th>
+          {#each data.colNames as colName}
+            <th>{colName}</th>
+          {/each}
+        </thead>
+        {#each data.rowData as rowData, i}
+          <tr>
+            <td>{i}</td>
+            {#each rowData as cellData}
+              <td>{cellData}</td>
+            {/each}
+          </tr>
         {/each}
-      </tr>
-    </table>
-  {:catch error}
-    <p style="color: red">Failed to load /obs/.zattrs</p>
-  {/await}
+      </table>
+    {:catch error}
+      <p style="color: red">{error}</p>
+    {/await}
+  </div>
 </article>
 
 <style>
   article {
+    display: flex;
+    flex-direction: column;
+  }
+
+  article>div {
+    flex: 0;
+  }
+
+  .tableScroller {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    overflow: auto;
+  }
+  article {
     text-align: left;
   }
 
-  @media (min-width: 1000px) {
+  @media (min-width: 0) {
     article {
       width: 100%;
+      height: calc(100% - 100px);
     }
   }
 
@@ -57,9 +113,25 @@
     border-spacing: 0;
   }
 
-  td {
+  td,
+  th {
     border: solid #ddd 1px;
     padding: 5px;
+    width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  th {
+    vertical-align: middle;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    left: 0;
+    background: white;
+    z-index: 1;
+    border-width: 0;
   }
 
   p {

@@ -37,15 +37,13 @@
           <div>loading...</div>
         {:then data}
           <Title {source} zattrs={data} />
-          <div>
             {#if data["bioformats2raw.layout"] === 3 && !data.plate}
-              <Bioformats2rawLayout rootAttrs={data} {source} />
+              <div><Bioformats2rawLayout rootAttrs={data} {source} /></div>
             {:else if data["encoding-type"] == "anndata"}
               <Table tableAttrs={data} {source} />
             {:else}
-              <JsonValidator rootAttrs={data} {source} />
+              <div><JsonValidator rootAttrs={data} {source} /></div>
             {/if}
-          </div>
         {:catch error}
           <CheckMark valid={false}/>
           <p style="color: red; margin: 20px 0">{error.message}</p>
