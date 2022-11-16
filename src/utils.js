@@ -152,11 +152,6 @@ export async function loadTable(source, groupName="obs") {
   return obsJson;
 }
 
-export function getOptionalTableGroupNames() {
-  // you 'MAY' have these containers under table
-  return ["X", "layers", "obs", "var", "obsm", "varm", "obsp", "varp", "uns"]
-}
-
 export function formatBytes(bytes) {
   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   if (bytes == 0) return "0 Byte";

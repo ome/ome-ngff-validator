@@ -1,7 +1,7 @@
 <script>
   import { each } from "svelte/internal";
 
-  import { loadTable } from "../utils";
+  import { loadTable, range } from "../utils";
   import { AnnDataSource } from "../vitessce-utils";
 
   export let source;
@@ -18,12 +18,19 @@
     // column names for the main table data, and other stats:
     // let columns = ["var/_index", "var/mean-0"];
 
+    let varAttrs = await loadTable(source, "var");
+    let varColNames = varAttrs["column-order"];
+    let toLoad = varColNames.map(colName => `var/${colName}`);
+    let varData = await annDataStore.loadObsColumns(toLoad);
+
     let columns = ["var/_index", "X"];
     let data = await annDataStore.loadObsColumns(columns);
 
     return {
       colNames: data[0],
       rowData: data[1],
+      varColNames,
+      varData,
     };
   }
 
@@ -62,10 +69,22 @@
       <table>
         <thead>
           <th>Row</th>
-          {#each data.colNames as colName}
-            <th>{colName}</th>
+          {#each data.colNames as colName, colIndex}
+            <th>
+              {colName}
+              <ul class="tooltip">
+                <li>var:</li>
+                {#each data.varColNames as varAttr, i}
+                <li>
+                  <span class="key">{varAttr}</span>:
+                  {data.varData[i][colIndex]}
+                </li>
+                {/each}
+              </ul>
+            </th>
           {/each}
         </thead>
+        <tbody>
         {#each data.rowData as rowData, i}
           <tr>
             <td>{i}</td>
@@ -74,6 +93,7 @@
             {/each}
           </tr>
         {/each}
+        </tbody>
       </table>
     {:catch error}
       <p style="color: red">{error}</p>
@@ -132,6 +152,29 @@
     background: white;
     z-index: 1;
     border-width: 0;
+    overflow: visible;
+  }
+
+  .tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 5px;
+    font-weight: normal;
+    top: 110%;
+    z-index: 2;
+    background: rgb(51, 151, 190);
+    visibility: hidden;
+    border: 1px solid #666;
+    border-radius: 5px;
+    color: white;
+  }
+  th:hover .tooltip {
+    visibility: visible;
+  }
+
+  li {
+    list-style: none;
+    white-space: nowrap;
   }
 
   p {
