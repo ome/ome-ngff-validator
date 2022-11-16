@@ -2,6 +2,7 @@
   import Nav from "./Nav.svelte";
   import Bioformats2rawLayout from "./Bioformats2rawLayout/index.svelte";
   import JsonValidator from "./JsonValidator/index.svelte";
+  import Table from "./Table/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
 
@@ -39,6 +40,8 @@
           <div>
             {#if data["bioformats2raw.layout"] === 3 && !data.plate}
               <Bioformats2rawLayout rootAttrs={data} {source} />
+            {:else if data["encoding-type"] == "anndata"}
+              <Table tableAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />
             {/if}

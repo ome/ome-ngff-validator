@@ -1,6 +1,7 @@
 <script>
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
+  import TableInfoLink from "../Table/TableInfoLink.svelte";
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -8,6 +9,7 @@
     CURRENT_VERSION,
     getSchemaUrlForJson,
     validate,
+    loadTable,
     getVersion,
     getDataType,
   } from "../utils";
@@ -25,6 +27,9 @@
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
+
+  // check for tables...
+  const tablePromise = loadTable(source + 'table/');
 </script>
 
 <article>
@@ -61,6 +66,14 @@
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
+
+  {#await tablePromise}
+    <p>checking for table...</p>
+  {:then obsAttrs}
+    <TableInfoLink obsAttrs={obsAttrs} source={source}></TableInfoLink>
+  {:catch error}
+    <!-- <p>No table data</p> -->
+  {/await}
 </article>
 
 {#if rootAttrs.multiscales}

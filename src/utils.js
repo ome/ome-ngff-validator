@@ -133,6 +133,30 @@ export async function validate(jsonData) {
   return validateData(schema, jsonData);
 }
 
+export async function loadTable(source, groupName="obs") {
+  // We check for the presence of a anndata table
+  // By default we check for 'obs' since spec says...
+  // # You MUST add an obs group container. The obs group holds a table of annotations on the rows in X.
+
+  // This doesn't seem to contain anything very useful, except 'region' path to label image?
+  // const tableJson = await getJson(source + "table/.zattrs");
+  // console.log('tableJson', tableJson);
+
+  let url = source + `.zattrs`
+  if (groupName) {
+    url = source + `${groupName}/.zattrs`
+  }
+
+  const obsJson = await getJson(url);
+  console.log('obsJson', obsJson);
+  return obsJson;
+}
+
+export function getOptionalTableGroupNames() {
+  // you 'MAY' have these containers under table
+  return ["X", "layers", "obs", "var", "obsm", "varm", "obsp", "varp", "uns"]
+}
+
 export function formatBytes(bytes) {
   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   if (bytes == 0) return "0 Byte";
