@@ -79,6 +79,9 @@ export function getDataType(jsonData) {
   if (jsonData["bioformats2raw.layout"]){
     return "bioformats2raw.layout";
   }
+  if (jsonData["encoding-type"] == "anndata") {
+    return "Table";
+  }
   let name = getSchemaName(jsonData);
   return name ? toTitleCase(name) : "";
 }

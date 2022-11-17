@@ -12,7 +12,11 @@
 
   if ("well" in zattrs) {
     title = dirs[dirs.length - 2] + "/" + dirs[dirs.length - 1];
+  } else if (obj == "Table") {
+    // table
+    title = dirs[dirs.length - 2] + "/" + dirs[dirs.length - 1];
   }
+
 </script>
 
 <h1>{obj}: {title}</h1>
