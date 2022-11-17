@@ -148,7 +148,6 @@ export async function loadTable(source, groupName="obs") {
   }
 
   const obsJson = await getJson(url);
-  console.log('obsJson', obsJson);
   return obsJson;
 }
 

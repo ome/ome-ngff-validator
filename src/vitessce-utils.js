@@ -118,8 +118,9 @@ export class AnnDataSource extends ZarrDataSource {
           const obsPromise = this._loadColumn(col).catch((err) => {
             // clear from cache if promise rejects
             this.promises.delete(col);
-            // propagate error
-            throw err;
+            // don't propagate error - e.g. if single column is dtype '<i8', we don't
+            // want to fail on other columns
+            // throw err;
           });
           this.promises.set(col, obsPromise);
         }
@@ -141,7 +142,6 @@ export class AnnDataSource extends ZarrDataSource {
     const prefix = dirname(path);
     const colAttrs = await this.getJson(`${this.store.url}/${path}/.zattrs`);
     let categoriesValues;
-    console.log("_loadColumn", path, colAttrs);
     // ? I don't see "categories" in any sample .zattrs files?
     let categories = colAttrs["encoding-type"] == "categorical";
     if (categories) {
@@ -151,7 +151,6 @@ export class AnnDataSource extends ZarrDataSource {
           `${path}/categories/`,
         );
       }
-      console.log("categoriesValues", categoriesValues);
       path = `${path}/codes/`;
     } else {
       // added this.store.url here, e.g. "obs/category/categories"
@@ -160,10 +159,8 @@ export class AnnDataSource extends ZarrDataSource {
         return this.getFlatArrDecompressed(path);
       }
     }
-    console.log("openArray... ", store, path)
     const arr = await openArray({ store, path, mode: 'r' });
     const values = await arr.get();
-    console.log('values', values);
     const { data } = values;
     const mappedValues = Array.from(data).map(
       // NB: originally this casted to string:

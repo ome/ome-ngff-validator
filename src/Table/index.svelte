@@ -35,22 +35,10 @@
     );
 
     obsColNames = obsAttrs["column-order"];
-    // FIXME: hard-code this to avoid 'categories' and dtype '<i8' (not supported by zarr.js)
-    obsColNames = [
-      "_index",
-      "batch",
-      "category",
-      "cell_size",
-      "center_colcoord",
-      "Cluster",
-      "donor",
-      "library_id",
-      "X1",
-    ];
-    let toLoad = obsColNames.map((colName) => `obs/${colName}`);
-    obsData = await annDataStore.loadObsColumns(toLoad);
 
-    console.log("obsData", obsData);
+    let toLoad = obsColNames.map((colName) => `obs/${colName}`);
+    // NB: some unsupported '<i8' dtype columns may have failed (undefined)
+    obsData = await annDataStore.loadObsColumns(toLoad);
   }
 
   async function loadTableData() {
@@ -70,7 +58,6 @@
     let columns = ["var/_index", "X"];
     let data = await annDataStore.loadObsColumns(columns);
 
-    console.log("varData", varData);
     return {
       colNames: data[0],
       rowData: data[1],
@@ -89,8 +76,10 @@
   let table1;
   let table2;
   function handleScroll(event) {
-    if (event.target.id == "scroll1" && table2) {
-      table2.scrollTop = event.target.scrollTop;
+    if (event.target.id == "scroll1") {
+      if (table2) {
+        table2.scrollTop = event.target.scrollTop;
+      }
     } else {
       table1.scrollTop = event.target.scrollTop;
     }
@@ -182,7 +171,12 @@
                 <tr>
                   <th class="obs">{rowIndex}</th>
                   {#each obsColNames as colName, obsIndex}
-                    <td class="obs">{obsData[obsIndex][rowIndex]}</td>
+                    <td class="obs">
+                      <!-- check if column has loaded -->
+                      {#if obsData[obsIndex]}
+                        {obsData[obsIndex][rowIndex]}
+                      {/if}
+                    </td>
                   {/each}
                 </tr>
               {/each}
