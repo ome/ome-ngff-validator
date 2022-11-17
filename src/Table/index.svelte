@@ -1,7 +1,5 @@
 <script>
-  import { each } from "svelte/internal";
-
-  import { loadTable, range } from "../utils";
+  import { loadTable } from "../utils";
   import { AnnDataSource } from "../vitessce-utils";
 
   export let source;
@@ -38,7 +36,17 @@
 
     obsColNames = obsAttrs["column-order"];
     // FIXME: hard-code this to avoid 'categories' and dtype '<i8' (not supported by zarr.js)
-    obsColNames = ["_index", "batch", "category", "cell_size", "center_colcoord", "Cluster", "donor", "library_id", "X1",];
+    obsColNames = [
+      "_index",
+      "batch",
+      "category",
+      "cell_size",
+      "center_colcoord",
+      "Cluster",
+      "donor",
+      "library_id",
+      "X1",
+    ];
     let toLoad = obsColNames.map((colName) => `obs/${colName}`);
     obsData = await annDataStore.loadObsColumns(toLoad);
 
@@ -74,6 +82,19 @@
   const tableDataPromise = loadTableData();
 
   const tablePromise = loadTable(source);
+
+  // we have separate tables for X and obs so that each
+  // can scroll in x-dimension independently, BUT we want
+  // to syncronise the scrolling in y -> need JS solution
+  let table1;
+  let table2;
+  function handleScroll(event) {
+    if (event.target.id == "scroll1" && table2) {
+      table2.scrollTop = event.target.scrollTop;
+    } else {
+      table1.scrollTop = event.target.scrollTop;
+    }
+  }
 </script>
 
 <article>
@@ -99,51 +120,76 @@
   </div>
 
   <!-- Show the main X data table -->
-  <div class="tableScroller">
+  <div class="tablesContainer">
     {#await tableDataPromise}
       <p>Loading data...</p>
     {:then data}
-      <table>
-        <thead>
-          <th>Row</th>
-          {#each data.colNames as colName, colIndex}
-            <th>
-              {colName}
-              <ul class="tooltip">
-                <li>var:</li>
-                {#each data.varColNames as varAttr, i}
-                  <li>
-                    <span class="key">{varAttr}</span>:
-                    {data.varData[i][colIndex]}
-                  </li>
-                {/each}
-              </ul>
-            </th>
-          {/each}
-          <!-- If we've loaded obsData, add extra columns -->
-          {#if obsData && showObsInfo}
-            {#each obsColNames as colName}
-              <th class="obs">{colName}</th>
+      <!-- two tables side by side -->
+      <div
+        id="scroll1"
+        class="tableScroller"
+        on:scroll={handleScroll}
+        bind:this={table1}
+      >
+        <table>
+          <thead>
+            <th class="row">Row</th>
+            {#each data.colNames as colName, colIndex}
+              <th>
+                {colName}
+                <ul class="tooltip">
+                  <li>var:</li>
+                  {#each data.varColNames as varAttr, i}
+                    <li>
+                      <span class="key">{varAttr}</span>:
+                      {data.varData[i][colIndex]}
+                    </li>
+                  {/each}
+                </ul>
+              </th>
             {/each}
-          {/if}
-        </thead>
-        <tbody>
-          {#each data.rowData as rowData, rowIndex}
-            <tr>
-              <td>{rowIndex}</td>
-              {#each rowData as cellData}
-                <td>{cellData}</td>
-              {/each}
-              <!-- If we've loaded obsData, add extra columns -->
-              {#if obsData && showObsInfo}
-                {#each obsColNames as colName, obsIndex}
-                  <td class="obs">{obsData[obsIndex][rowIndex]}</td>
+          </thead>
+          <tbody>
+            {#each data.rowData as rowData, rowIndex}
+              <tr>
+                <th>{rowIndex}</th>
+                {#each rowData as cellData}
+                  <td>{cellData}</td>
                 {/each}
-              {/if}
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- If we've loaded obsData, add extra table -->
+      {#if obsData && showObsInfo}
+        <div
+          id="scroll2"
+          class="tableScroller"
+          on:scroll={handleScroll}
+          bind:this={table2}
+        >
+          <table>
+            <thead>
+              <th class="obs row">Row</th>
+              {#each obsColNames as colName}
+                <th class="obs">{colName}</th>
+              {/each}
+            </thead>
+            <tbody>
+              {#each data.rowData as rowData, rowIndex}
+                <tr>
+                  <th class="obs">{rowIndex}</th>
+                  {#each obsColNames as colName, obsIndex}
+                    <td class="obs">{obsData[obsIndex][rowIndex]}</td>
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
     {:catch error}
       <p style="color: red">{error}</p>
     {/await}
@@ -170,12 +216,23 @@
     flex: 0;
   }
 
-  .tableScroller {
+  .tablesContainer {
     flex: 1;
     position: relative;
     width: 100%;
-    overflow: auto;
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
   }
+
+  .tableScroller {
+    overflow: auto;
+    flex: 1;
+  }
+  #scroll2 {
+    flex: 0.5;
+  }
+
   article {
     text-align: left;
   }
@@ -207,11 +264,16 @@
     text-align: center;
     position: sticky;
     top: 0;
-    left: 0;
+    left: 50px;
     background: white;
     z-index: 1;
     border-width: 0;
     overflow: visible;
+  }
+
+  tbody th,
+  th.row {
+    left: 0;
   }
 
   .tooltip {
