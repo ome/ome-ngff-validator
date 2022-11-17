@@ -1,34 +1,41 @@
 <script>
-  export let source;
-  export let obsAttrs;
+  import { each } from "svelte/internal";
+import { parseConsolidatedMetadata } from "../utils";
 
-  console.log("TABLE", obsAttrs)
+  export let source;
+  export let consolidatedMetadata;
+
+  console.log("TABLE", consolidatedMetadata);
 
   const url = window.location.origin + window.location.pathname;
+
+  const tableMetadata = parseConsolidatedMetadata(consolidatedMetadata);
+
+  const tableNames = Object.keys(tableMetadata).filter(key => key[0] != ".");
 </script>
 
+<div>
+  Tables:
 
-<p>
-
-  Table:
-
-  <a title="Open Table" href="{url}?source={source}table/">
-    Open Table...
-  </a>
+  <ul>
+  {#each tableNames as tableName}
+    <li><a title="Open Table" href="{url}?source={source}tables/{tableName}/">{tableName}</a></li>
+  {/each}
+  </ul>
 
   <details>
-    <summary>table/.zattrs</summary>
-  
-    <pre><code>{JSON.stringify(obsAttrs, null, 2)}</code></pre>
+    <summary>tables/.zmetadata</summary>
+    <pre><code>{JSON.stringify(consolidatedMetadata, null, 2)}</code></pre>
   </details>
-
-</p>
+</div>
 
 <style>
-
-  p {
+  div {
     margin-top: 20px;
     text-align: left;
+  }
+  li {
+    list-style: none;
   }
 
   pre {
@@ -42,5 +49,4 @@
   a:visited {
     color: #ff512f;
   }
-
 </style>

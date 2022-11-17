@@ -154,6 +154,30 @@ export async function loadTable(source, groupName="obs") {
   return obsJson;
 }
 
+export function parseConsolidatedMetadata(consolidatedMetadata) {
+  // create hierarchies from consolidated metadata
+  // e.g. "regions_table/X/.zarray": {obj}
+  // => {"regions_table": {"X": {".zarray": {obj}}}}
+
+  let paths = {};
+
+  Object.keys(consolidatedMetadata.metadata).forEach(key => {
+    let dirs = key.split("/");
+    let dirObj = paths;
+    for (let d=0; d<dirs.length; d++) {
+      let dirName = dirs[d];
+      if (d == (dirs.length - 1)) {
+        // if we're on the last dir (e.g. .zarray) add the obj
+        dirObj[dirName] = consolidatedMetadata.metadata[key];
+      } else if (!dirObj[dirName]) {
+        dirObj[dirName] = {}
+      }
+      dirObj = dirObj[dirName];
+    }
+  });
+  return paths;
+}
+
 export function formatBytes(bytes) {
   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   if (bytes == 0) return "0 Byte";

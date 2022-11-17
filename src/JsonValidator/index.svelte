@@ -9,7 +9,7 @@
     CURRENT_VERSION,
     getSchemaUrlForJson,
     validate,
-    loadTable,
+    getJson,
     getVersion,
     getDataType,
   } from "../utils";
@@ -28,8 +28,8 @@
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
 
-  // check for tables...
-  const tablePromise = loadTable(source + 'table/');
+  // check for tables... MUST have consolidated metadata
+  const tablePromise = getJson(source + 'tables/.zmetadata');
 </script>
 
 <article>
@@ -69,8 +69,8 @@
 
   {#await tablePromise}
     <p>checking for table...</p>
-  {:then obsAttrs}
-    <TableInfoLink obsAttrs={obsAttrs} source={source}></TableInfoLink>
+  {:then consolidatedMetadata}
+    <TableInfoLink {consolidatedMetadata} source={source}></TableInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
