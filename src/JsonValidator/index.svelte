@@ -28,8 +28,8 @@
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
 
-  // check for tables... MUST have consolidated metadata
-  const tablePromise = getJson(source + 'tables/.zmetadata');
+  // check for tables/.zattrs
+  const tablePromise = getJson(source + 'tables/.zattrs');
 </script>
 
 <article>
@@ -69,8 +69,8 @@
 
   {#await tablePromise}
     <p>checking for table...</p>
-  {:then consolidatedMetadata}
-    <TableInfoLink {consolidatedMetadata} source={source}></TableInfoLink>
+  {:then tablesAttrs}
+    <TableInfoLink {tablesAttrs} source={source}></TableInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}

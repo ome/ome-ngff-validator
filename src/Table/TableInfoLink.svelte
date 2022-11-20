@@ -3,29 +3,34 @@
 import { parseConsolidatedMetadata } from "../utils";
 
   export let source;
-  export let consolidatedMetadata;
+  export let tablesAttrs;
 
-  console.log("TABLE", consolidatedMetadata);
+  console.log("TABLE tablesAttrs:", tablesAttrs);
 
   const url = window.location.origin + window.location.pathname;
 
-  const tableMetadata = parseConsolidatedMetadata(consolidatedMetadata);
-
-  const tableNames = Object.keys(tableMetadata).filter(key => key[0] != ".");
+  let tableNames;
+  if (tablesAttrs.tables) {
+    tableNames = tablesAttrs.tables;
+  }
 </script>
 
 <div>
   Tables:
 
-  <ul>
-  {#each tableNames as tableName}
-    <li><a title="Open Table" href="{url}?source={source}tables/{tableName}/">{tableName}</a></li>
-  {/each}
-  </ul>
+  {#if tableNames}
+    <ul>
+    {#each tableNames as tableName}
+      <li><a title="Open Table" href="{url}?source={source}tables/{tableName}/">{tableName}</a></li>
+    {/each}
+    </ul>
+  {:else}
+    <div style="color:red">tables/.zattrs has no 'tables' list</div>
+  {/if}
 
   <details>
-    <summary>tables/.zmetadata</summary>
-    <pre><code>{JSON.stringify(consolidatedMetadata, null, 2)}</code></pre>
+    <summary>tables/.zattrs</summary>
+    <pre><code>{JSON.stringify(tablesAttrs, null, 2)}</code></pre>
   </details>
 </div>
 
