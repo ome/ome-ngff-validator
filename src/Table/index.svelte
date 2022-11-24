@@ -246,9 +246,9 @@
   td,
   th {
     border: solid #ddd 1px;
-    padding: 5px;
-    width: 100px;
-    max-width: 100px;
+    padding: 3px;
+    width: 90px;
+    max-width: 90px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
