@@ -77,11 +77,9 @@
     margin: 15px 0;
     box-shadow: 5px 5px 10px #c3c0c0;
     background: linear-gradient(to right, #ccc, #aaa);
-  }
-
-  p {
     text-align: center;
   }
+
   pre {
     color: #faebd7;
     background-color: #2c3e50;
@@ -118,6 +116,7 @@
   details {
     font-size: 1.1em;
     margin: 0 15px;
+    text-align: left;
   }
   pre {
     margin-top: 10px;

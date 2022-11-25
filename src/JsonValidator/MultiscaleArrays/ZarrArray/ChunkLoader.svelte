@@ -1,51 +1,65 @@
 <script>
-    import { range } from "../../../utils";
-    import { get, writable } from 'svelte/store';
+  import { openArray } from "zarr";
+  import { range } from "../../../utils";
+  import { get, writable } from "svelte/store";
+  import ChunkViewer from "./ChunkViewer.svelte";
 
-    export let source;
-    export let path;
-    export let zarray;
-  
+  export let source;
+  export let path;
+  export let zarray;
 
-    const ch = zarray.chunks;
-    const chunkCounts = zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
+  let showChunks = false;
+  let chunk;
 
-    console.log('chunkCounts', chunkCounts);
+  const ch = zarray.chunks;
+  const chunkCounts = zarray.shape.map((sh, index) =>
+    Math.ceil(sh / ch[index])
+  );
 
-    // let chunkIndices = chunkCounts.map(c => 0);
+  const chunkIndices = writable(chunkCounts.map((c) => 0));
 
-    const chunkStore = writable(chunkCounts.map(c => 0));
-  
-    function handleLoadChunks() {
-      console.log("handle chunks", get(chunkStore));
-    }
+  async function handleLoadChunks() {
+    if (!showChunks) return;
 
-    chunkStore.subscribe(function(chunkIndices){
-      console.log("subscribe chunkIndices", chunkIndices)
-    })
-  </script>
-  
-      <div class="chunkLoader">
-        Load chunk:
-        <input type="checkbox" on:change={handleLoadChunks}/>
-        {#each chunkCounts as cc, dim}
-          <select name="dim_{dim}" bind:value={$chunkStore[dim]}>
-            {#each range(cc) as opt}
-              <option value={opt}>{opt}</option>
-            {/each}
-          </select>
-        {/each}
-      </div>
-  
-  <style>
-  
-    .chunkLoader {
-      width: max-content;
-      margin: 10px auto;
-      background: white;
-      border-radius: 10px;
-      padding: 10px;
-    }
+    const store = await openArray({store: source + path, mode: 'r'});
+    chunk = await store.getRawChunk(get(chunkIndices));
+  }
 
-  </style>
-  
+  chunkIndices.subscribe(function () {
+    // whenever the chunk indices change, we load a new chunk...
+    handleLoadChunks();
+  });
+
+</script>
+
+<div class="chunkLoader">
+  Load chunk:
+  <input type="checkbox" bind:checked={showChunks} on:change={handleLoadChunks} />
+  {#each chunkCounts as cc, dim}
+    <select disabled={(cc == 1)} name="dim_{dim}" bind:value={$chunkIndices[dim]}>
+      {#each range(cc) as opt}
+        <option value={opt}>{opt}</option>
+      {/each}
+    </select>
+  {/each}
+</div>
+
+{#if showChunks && chunk}
+  <ChunkViewer {chunk}/>
+{/if}
+
+<style>
+  .chunkLoader {
+    width: max-content;
+    margin: 10px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  select {
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    margin: 1px;
+  }
+</style>
