@@ -1,5 +1,5 @@
 <script>
-  import { openArray } from "zarr";
+  import { openArray, slice } from "zarr";
   import { range } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
@@ -17,18 +17,36 @@
   );
 
   const chunkIndices = writable(chunkCounts.map((c) => 0));
-  const chunkSlice = writable(chunks.map((c) => 0));
 
   // Only need to slice the chunk if it is 3D or greater
   const showSliceControls = chunks.slice(0, -2).some((c) => c > 1);
-  let slices = chunks.map((c) => 0);
+  // slice dimensions that are > 1. (NB we won't slice x and y)
+  // E,g, if chunks is [1, 125, 125, 125] chunk shape will be (125, 125, 125)
+  let chunkShape = chunks.filter((c) => c > 1);
+  let chunkSlice = chunkShape.map((c) => 0);
+
+  const writeableChunkSlice = writable(
+    chunks.filter((c) => c > 1).map((c) => 0)
+  );
 
   async function handleLoadChunks() {
     if (!showChunks) return;
     // clear previous chunk
     chunk = undefined;
     const store = await openArray({ store: source + path, mode: "r" });
-    chunk = await store.getRawChunk(get(chunkIndices));
+
+    // we want to get exactly 1 chunk
+    // e.g. chunkIndices is (0, 1, 0, 0) and chunk is (1, 125, 125, 125)
+    // we want to get [0, 125:250, 0:125, 0:125]
+    let ch = store.meta.chunks;
+    const indecies = get(chunkIndices).map((index, dim) => {
+      if (ch[dim] > 1) {
+        return slice(index * ch[dim], (index + 1) * ch[dim]);
+      } else {
+        return index * ch[dim];
+      }
+    });
+    chunk = await store.get(indecies);
   }
 
   chunkIndices.subscribe(function () {
@@ -36,9 +54,9 @@
     handleLoadChunks();
   });
 
-  chunkSlice.subscribe(function () {
+  writeableChunkSlice.subscribe(function (e) {
     // whenever the slices change... this will update <ChunkViewer/>
-    slices = get(chunkSlice);
+    chunkSlice = get(writeableChunkSlice);
   });
 </script>
 
@@ -59,27 +77,25 @@
 
   {#if showChunks}
     <div class="sliceControls">
-    Slice chunk to 2D:
-    {#each chunks.slice(0, -2) as cc, dim}
-      {#if cc > 1}
-        <input
-          title={"Dimension:" + dim}
-          type="range"
-          min="0"
-          max={chunks[dim] - 1}
-          bind:value={$chunkSlice[dim]}
-        />
-      {/if}
-    {/each}
-    <br />
-    Slice: [{slices.slice(0, -2)},:,:]
+      Slice chunk to 2D:
+      {#each chunkSlice.slice(0, -2) as cc, dim}
+          <input
+            title={"Dimension:" + dim}
+            type="range"
+            min="0"
+            max={chunkShape[dim] - 1}
+            bind:value={$writeableChunkSlice[dim]}
+          />
+      {/each}
+      <br />
+      Slice: [{chunkSlice.slice(0, -2)},:,:]
     </div>
   {/if}
 </div>
 
 {#if showChunks}
   {#if chunk}
-    <ChunkViewer {chunk} chunkSlice={slices} />
+    <ChunkViewer {chunk} {chunkSlice} />
   {:else}
     <p>Loading chunk...</p>
   {/if}
