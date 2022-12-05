@@ -30,7 +30,7 @@
 <article>
   <a title="View {dtype} in vizarr" class="vizarr_link" target="_blank"
                 href="https://hms-dbmi.github.io/vizarr/?source={source}"
-                ><img src={vizarrLogoUrl}/></a>
+                ><img alt="Vizarr logo" src={vizarrLogoUrl}/></a>
 
   <!-- leave space on the right for vizarr link -->
   <p class="margin_right">

@@ -1,16 +1,20 @@
 <script>
-  import { getJson, formatBytes } from "../../../utils";
+  import { getJson, formatBytes, range } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
+  import ChunkLoader from "./ChunkLoader.svelte";
 
   export let source;
   export let path;
 
   const promise = getJson(source + path + "/.zarray");
 
-  function chunkCount(zarray) {
+  function totalChunkCount(zarray) {
+    return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
+  }
+
+  function chunkCounts(zarray) {
     const ch = zarray.chunks;
-    const counts = zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
-    return counts.reduce((prev, curr) => prev * curr, 1);
+    return zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
   }
 
   function getBytes(shape, zarray) {
@@ -42,9 +46,9 @@
         <td>{JSON.stringify(zarray.chunks)}</td>
       </tr>
       <tr>
-        <th>Count</th>
-        <td>{chunkCount(zarray) + 1} Tasks</td>
-        <td>{chunkCount(zarray)} Chunks</td>
+        <th>Counts</th>
+        <td>{chunkCounts(zarray)}</td>
+        <td>{totalChunkCount(zarray)} Chunks</td>
       </tr>
       <tr>
         <th>Type</th>
@@ -52,6 +56,8 @@
         <td>numpy.ndarray</td>
       </tr>
     </table>
+
+    <ChunkLoader {zarray} {source} {path} />
 
     <Cube3D {zarray} />
 
@@ -71,11 +77,9 @@
     margin: 15px 0;
     box-shadow: 5px 5px 10px #c3c0c0;
     background: linear-gradient(to right, #ccc, #aaa);
-  }
-
-  p {
     text-align: center;
   }
+
   pre {
     color: #faebd7;
     background-color: #2c3e50;
@@ -112,6 +116,7 @@
   details {
     font-size: 1.1em;
     margin: 0 15px;
+    text-align: left;
   }
   pre {
     margin-top: 10px;
