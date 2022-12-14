@@ -12,7 +12,7 @@
   export let version;
 
   // If the Object or list only has a single item, expand to show it
-  if (Object.keys(contents).length == 1) {
+  if (contents && Object.keys(contents).length == 1) {
     expanded = true;
   }
 
@@ -47,7 +47,7 @@
         {#if Array.isArray(contents)}
           {#each contents as item, count}
             <li>
-              {#if typeof item === "object"}
+              {#if item && typeof item === "object" }
                 <!-- could be list or object, has no key -->
                 <svelte:self
                   name={""}
@@ -75,7 +75,7 @@
           <!-- If it's an Object show each item by it's key -->
           {#each Object.entries(contents) as keyval, count}
             <li>
-              {#if typeof keyval[1] === "object"}
+              {#if keyval[1] && typeof keyval[1] === "object"}
                 <!-- could be list or object -->
                 <svelte:self
                   name={keyval[0]}
