@@ -84,22 +84,32 @@ export function getDataType(jsonData) {
 }
 
 export function getSchemaName(jsonData) {
-  // get version, lookup schema, do validation...
-  const schemaName = jsonData.multiscales
-    ? "image"
-    : jsonData.plate
-    ? "plate"
-    : jsonData.well
-    ? "well"
-    : undefined;
-  return schemaName;
+  const names = getSchemaNames(jsonData);
+  return names[0];
 }
 
-export function getSchemaUrlForJson(rootAttrs) {
+export function getSchemaNames(jsonData) {
+  let names = [];
+  if (jsonData.multiscales) {
+    names.push("image");
+  }
+  if (jsonData.plate) {
+    names.push("plate");
+  }
+  if (jsonData.well) {
+    names.push("well");
+  }
+  if (jsonData["image-label"]) {
+    names.push("label");
+  }
+  return names;
+}
+
+export function getSchemaUrlsForJson(rootAttrs) {
   const msVersion = getVersion(rootAttrs);
   const version = msVersion || CURRENT_VERSION;
-  const schemaName = getSchemaName(rootAttrs);
-  return getSchemaUrl(schemaName, version);
+  const schemaNames = getSchemaNames(rootAttrs);
+  return schemaNames.map(name => getSchemaUrl(name, version));
 }
 
 export function validateData(schema, jsonData) {
@@ -115,9 +125,9 @@ export function validateData(schema, jsonData) {
 
 export async function validate(jsonData) {
   // get version, lookup schema, do validation...
-  const schemaName = getSchemaName(jsonData);
+  const schemaNames = getSchemaNames(jsonData);
 
-  if (!schemaName) {
+  if (schemaNames.length == 0) {
     return ["Unrecognised JSON data"];
   }
 
@@ -128,9 +138,13 @@ export async function validate(jsonData) {
     version = CURRENT_VERSION;
   }
 
-  let schema = await getSchema(version, schemaName);
-
-  return validateData(schema, jsonData);
+  let errors = [];
+  for (let s=0; s<schemaNames.length; s++) {
+    let schema = await getSchema(version, schemaNames[s]);
+    let errs = validateData(schema, jsonData);
+    errors = errors.concat(errs);
+  }
+  return errors;
 }
 
 export function formatBytes(bytes) {

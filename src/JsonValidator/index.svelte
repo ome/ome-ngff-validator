@@ -7,7 +7,7 @@
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import {
     CURRENT_VERSION,
-    getSchemaUrlForJson,
+    getSchemaUrlsForJson,
     validate,
     getJson,
     getVersion,
@@ -21,8 +21,7 @@
   const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(rootAttrs);
-  const schemaUrl = getSchemaUrlForJson(rootAttrs);
-  const shortenedUrl = schemaUrl.split("main")[1];
+  const schemaUrls = getSchemaUrlsForJson(rootAttrs);
   const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
@@ -44,7 +43,11 @@
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
 
-  Using schema: <a href={schemaUrl} target="_blank">{shortenedUrl}</a>
+  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  {#each schemaUrls as url, i}
+    {i > 0 ? " and " : ""}
+    <a href={url} target="_blank">{url.split("main")[1]}</a>
+  {/each}
 
   {#await promise}
     <div>loading schema...</div>
