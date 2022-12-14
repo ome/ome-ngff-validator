@@ -4,10 +4,12 @@
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
+  import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import {
     CURRENT_VERSION,
     getSchemaUrlForJson,
     validate,
+    getJson,
     getVersion,
     getDataType,
   } from "../utils";
@@ -25,6 +27,9 @@
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
+
+  // check for labels/.zattrs
+  const labelsPromise = getJson(source + 'labels/.zattrs');
 </script>
 
 <article>
@@ -61,6 +66,14 @@
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
+
+  {#await labelsPromise}
+    <p>checking for labels...</p>
+  {:then labelsAttrs}
+    <LabelsInfoLink {labelsAttrs} source={source}></LabelsInfoLink>
+  {:catch error}
+    <!-- <p>No table data</p> -->
+  {/await}
 </article>
 
 {#if rootAttrs.multiscales}
