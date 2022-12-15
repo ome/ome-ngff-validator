@@ -140,7 +140,7 @@ export class AnnDataSource extends ZarrDataSource {
   async _loadColumn(path) {
     const { store } = this;
     const prefix = dirname(path);
-    const colAttrs = await this.getJson(`${this.store.url}/${path}/.zattrs`);
+    const colAttrs = await this.getJson(`${this.store.url}${path}/.zattrs`);
     let categoriesValues;
     // ? I don't see "categories" in any sample .zattrs files?
     let categories = colAttrs["encoding-type"] == "categorical";
