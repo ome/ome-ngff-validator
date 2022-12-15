@@ -50,8 +50,9 @@
     // of a dimentionality reduction algorithm.""
     let obsmAttrs = await getJson(source + "obsm/.zattrs");
 
-    // NB: we rely on custom listing of obsm in the obsm/.zattrs
-    obsmDataNames = obsmAttrs["obsm"];
+    // NB: we rely on custom listing of "keys" in the obsm/.zattrs
+    // See https://github.com/kevinyamauchi/ome-ngff-tables-prototype/pull/12/commits/284406d1a309203bef9d58aca76817c66ebb5912
+    obsmDataNames = obsmAttrs["keys"];
     console.log("obsmDataNames", obsmDataNames);
 
     let toLoad = obsmDataNames.map((colName) => `obsm/${colName}`);
