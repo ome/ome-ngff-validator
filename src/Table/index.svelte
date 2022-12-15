@@ -1,5 +1,5 @@
 <script>
-  import { loadTable } from "../utils";
+  import { getJson } from "../utils";
   import { AnnDataSource } from "../vitessce-utils";
 
   export let source;
@@ -7,7 +7,9 @@
 
   let showObsInfo = true;
   let obsColNames;
-  let obsData;
+  let obsData; // 2D list
+  let obsmDataNames;
+  let obsmData; // Dict: name: nD data
 
   function toggleObsInfo() {
     showObsInfo = !showObsInfo;
@@ -19,7 +21,7 @@
   const annDataStore = new AnnDataSource({ url: source });
 
   async function loadObsData() {
-    let obsAttrs = await loadTable(source, "obs");
+    let obsAttrs = await getJson(source + `obs/.zattrs`);
 
     // manually validate without a schema...
     // `.zattrs` MUST contain `"_index"`, which is the name of the column in obs to be used as the index.
@@ -38,7 +40,32 @@
 
     let toLoad = obsColNames.map((colName) => `obs/${colName}`);
     // NB: some unsupported '<i8' dtype columns may have failed (undefined)
+    // each obs column is a 1D array of data. obsData is 2D list (table)
     obsData = await annDataStore.loadObsColumns(toLoad);
+  }
+
+  async function loadObsmData() {
+    // obsm is "dense matrices annotating each row. For example, the coordinates of the
+    // centroid of each labeled object (Nx3 array for N cells in 3D) or output dimensions
+    // of a dimentionality reduction algorithm.""
+    let obsmAttrs = await getJson(source + "obsm/.zattrs");
+
+    // NB: we rely on custom listing of obsm in the obsm/.zattrs
+    obsmDataNames = obsmAttrs["obsm"];
+    console.log("obsmDataNames", obsmDataNames);
+
+    let toLoad = obsmDataNames.map((colName) => `obsm/${colName}`);
+    // NB: some unsupported '<i8' dtype columns may have failed (undefined)
+    // each obsm is a ND array of data.
+    const data = await annDataStore.loadObsColumns(toLoad);
+    const temp = {};
+    obsmDataNames.forEach((colName, i) => {
+      temp[colName] = data[i];
+    });
+    // setting this will re-render...
+    obsmData = temp;
+
+    console.log("obsmData", obsmData);
   }
 
   async function loadTableData() {
@@ -50,7 +77,7 @@
     // column names for the main table data, and other stats:
     // let columns = ["var/_index", "var/mean-0"];
 
-    let varAttrs = await loadTable(source, "var");
+    let varAttrs = await getJson(source + "var/.zattrs");
     let varColNames = varAttrs["column-order"];
     let toLoad = varColNames.map((colName) => `var/${colName}`);
     let varData = await annDataStore.loadObsColumns(toLoad);
@@ -68,25 +95,29 @@
 
   const tableDataPromise = loadTableData();
 
-  const tablePromise = loadTable(source);
+  const tablePromise = getJson(source + "obs/.zattrs");
 
   // we have separate tables for X and obs so that each
   // can scroll in x-dimension independently, BUT we want
   // to syncronise the scrolling in y -> need JS solution
   let table1;
   let table2;
+  let table3;
   function handleScroll(event) {
-    if (event.target.id == "scroll1") {
-      if (table2) {
-        table2.scrollTop = event.target.scrollTop;
-      }
-    } else {
+    if (event.target.id != "scroll1") {
       table1.scrollTop = event.target.scrollTop;
+    }
+    if (event.target.id != "scroll2") {
+      table2.scrollTop = event.target.scrollTop;
+    }
+    if (event.target.id != "scroll3") {
+      table3.scrollTop = event.target.scrollTop;
     }
   }
 
   // Load obs directly by default
   loadObsData();
+  loadObsmData();
 </script>
 
 <article>
@@ -117,7 +148,44 @@
     {#await tableDataPromise}
       <p>Loading data...</p>
     {:then data}
-      <!-- two tables side by side -->
+      <!-- 3 tables side by side -->
+      <!-- If we've loaded obsData, add extra table -->
+      {#if obsmData}
+        <div
+          class="tableScroller sideTable"
+          id="scroll3"
+          on:scroll={handleScroll}
+          bind:this={table3}
+        >
+          <table>
+            <thead>
+              <th class="row obsm">Row</th>
+              {#each obsmDataNames as matrixName}
+                {#each obsmData[matrixName][0] as x}
+                  <!-- duplicate obsm name for each column of matrix -->
+                  <th class="obsm">{matrixName}</th>
+                {/each}
+              {/each}
+            </thead>
+            <tbody>
+              {#each obsmData[obsmDataNames[0]] as firstM, rowIndex}
+                <tr>
+                  <th class="obsm">{rowIndex}</th>
+                  {#each obsmDataNames as matrixName}
+                    {#each obsmData[matrixName][rowIndex] as value}
+                      <td class="obsm">
+                        <!-- If matrix is more than 2D, this value will be a list -->
+                        {value}
+                      </td>
+                    {/each}
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+
       <div
         id="scroll1"
         class="tableScroller"
@@ -126,11 +194,11 @@
       >
         <table>
           <thead>
-            <th class="row">Row</th>
+            <th class="var row">Row</th>
             {#each data.colNames as colName, colIndex}
-              <th>
+              <th class="var">
                 {colName}
-                <ul class="tooltip">
+                <ul class="tooltip var">
                   <li>var:</li>
                   {#each data.varColNames as varAttr, i}
                     <li>
@@ -142,10 +210,10 @@
               </th>
             {/each}
           </thead>
-          <tbody>
+          <tbody class="X">
             {#each data.rowData as rowData, rowIndex}
               <tr>
-                <th>{rowIndex}</th>
+                <th class="X">{rowIndex}</th>
                 {#each rowData as cellData}
                   <td>{cellData}</td>
                 {/each}
@@ -158,8 +226,8 @@
       <!-- If we've loaded obsData, add extra table -->
       {#if obsData && showObsInfo}
         <div
+          class="tableScroller sideTable"
           id="scroll2"
-          class="tableScroller"
           on:scroll={handleScroll}
           bind:this={table2}
         >
@@ -210,6 +278,18 @@
     background-color: rgb(238, 195, 54);
   }
 
+  .obsm {
+    background-color: rgb(237, 144, 50);
+  }
+
+  .X {
+    background-color: rgb(84, 185, 114);
+  }
+
+  .var {
+    background-color: rgb(51, 151, 190);
+  }
+
   article > div {
     flex: 0;
   }
@@ -227,7 +307,7 @@
     overflow: auto;
     flex: 1;
   }
-  #scroll2 {
+  .sideTable {
     flex: 0.5;
   }
 
@@ -262,7 +342,7 @@
     text-align: center;
     position: sticky;
     top: 0;
-    left: 50px;
+    left: 0px;
     background: white;
     z-index: 1;
     border-width: 0;
@@ -281,7 +361,6 @@
     font-weight: normal;
     top: 110%;
     z-index: 2;
-    background: rgb(51, 151, 190);
     visibility: hidden;
     border: 1px solid #666;
     border-radius: 5px;
