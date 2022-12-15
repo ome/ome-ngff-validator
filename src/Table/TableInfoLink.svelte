@@ -1,6 +1,4 @@
 <script>
-  import { each } from "svelte/internal";
-import { parseConsolidatedMetadata } from "../utils";
 
   export let source;
   export let tablesAttrs;

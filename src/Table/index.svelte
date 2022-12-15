@@ -5,7 +5,7 @@
   export let source;
   export let tableAttrs;
 
-  let showObsInfo = false;
+  let showObsInfo = true;
   let obsColNames;
   let obsData;
 
@@ -84,6 +84,9 @@
       table1.scrollTop = event.target.scrollTop;
     }
   }
+
+  // Load obs directly by default
+  loadObsData();
 </script>
 
 <article>
@@ -105,7 +108,8 @@
       <p style="color: red">Failed to load /obs/.zattrs {error}</p>
     {/await}
 
-    <button class="obs" on:click={toggleObsInfo}>Load obs</button>
+    <!-- Don't show "Load obs" button for now - just load by default -->
+    <!-- <button class="obs" on:click={toggleObsInfo}>Load obs</button> -->
   </div>
 
   <!-- Show the main X data table -->
