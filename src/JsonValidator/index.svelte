@@ -4,10 +4,12 @@
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
+  import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import {
     CURRENT_VERSION,
-    getSchemaUrlForJson,
+    getSchemaUrlsForJson,
     validate,
+    getJson,
     getVersion,
     getDataType,
   } from "../utils";
@@ -19,12 +21,14 @@
   const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(rootAttrs);
-  const schemaUrl = getSchemaUrlForJson(rootAttrs);
-  const shortenedUrl = schemaUrl.split("main")[1];
+  const schemaUrls = getSchemaUrlsForJson(rootAttrs);
   const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
+
+  // check for labels/.zattrs
+  const labelsPromise = getJson(source + 'labels/.zattrs');
 </script>
 
 <article>
@@ -39,7 +43,11 @@
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
 
-  Using schema: <a href={schemaUrl} target="_blank">{shortenedUrl}</a>
+  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  {#each schemaUrls as url, i}
+    {i > 0 ? " and " : ""}
+    <a href={url} target="_blank">{url.split("main")[1]}</a>
+  {/each}
 
   {#await promise}
     <div>loading schema...</div>
@@ -61,6 +69,14 @@
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
+
+  {#await labelsPromise}
+    <p>checking for labels...</p>
+  {:then labelsAttrs}
+    <LabelsInfoLink {labelsAttrs} source={source}></LabelsInfoLink>
+  {:catch error}
+    <!-- <p>No table data</p> -->
+  {/await}
 </article>
 
 {#if rootAttrs.multiscales}
