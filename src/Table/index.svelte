@@ -2,14 +2,14 @@
   import { getJson } from "../utils";
   import { AnnDataSource } from "../vitessce-utils";
 
+  import ObsmTable from "./ObsmTable.svelte";
+
   export let source;
   export let tableAttrs;
 
   let showObsInfo = true;
   let obsColNames;
   let obsData; // 2D list
-  let obsmDataNames;
-  let obsmData; // Dict: name: nD data
 
   function toggleObsInfo() {
     showObsInfo = !showObsInfo;
@@ -42,31 +42,6 @@
     // NB: some unsupported '<i8' dtype columns may have failed (undefined)
     // each obs column is a 1D array of data. obsData is 2D list (table)
     obsData = await annDataStore.loadObsColumns(toLoad);
-  }
-
-  async function loadObsmData() {
-    // obsm is "dense matrices annotating each row. For example, the coordinates of the
-    // centroid of each labeled object (Nx3 array for N cells in 3D) or output dimensions
-    // of a dimentionality reduction algorithm.""
-    let obsmAttrs = await getJson(source + "obsm/.zattrs");
-
-    // NB: we rely on custom listing of "keys" in the obsm/.zattrs
-    // See https://github.com/kevinyamauchi/ome-ngff-tables-prototype/pull/12/commits/284406d1a309203bef9d58aca76817c66ebb5912
-    obsmDataNames = obsmAttrs["keys"];
-    console.log("obsmDataNames", obsmDataNames);
-
-    let toLoad = obsmDataNames.map((colName) => `obsm/${colName}`);
-    // NB: some unsupported '<i8' dtype columns may have failed (undefined)
-    // each obsm is a ND array of data.
-    const data = await annDataStore.loadObsColumns(toLoad);
-    const temp = {};
-    obsmDataNames.forEach((colName, i) => {
-      temp[colName] = data[i];
-    });
-    // setting this will re-render...
-    obsmData = temp;
-
-    console.log("obsmData", obsmData);
   }
 
   async function loadTableData() {
@@ -118,7 +93,6 @@
 
   // Load obs directly by default
   loadObsData();
-  loadObsmData();
 </script>
 
 <article>
@@ -150,42 +124,15 @@
       <p>Loading data...</p>
     {:then data}
       <!-- 3 tables side by side -->
-      <!-- If we've loaded obsData, add extra table -->
-      {#if obsmData}
-        <div
-          class="tableScroller sideTable"
-          id="scroll3"
-          on:scroll={handleScroll}
-          bind:this={table3}
-        >
-          <table>
-            <thead>
-              <th class="row obsm">Row</th>
-              {#each obsmDataNames as matrixName}
-                {#each obsmData[matrixName][0] as x}
-                  <!-- duplicate obsm name for each column of matrix -->
-                  <th class="obsm">{matrixName}</th>
-                {/each}
-              {/each}
-            </thead>
-            <tbody>
-              {#each obsmData[obsmDataNames[0]] as firstM, rowIndex}
-                <tr>
-                  <th class="obsm">{rowIndex}</th>
-                  {#each obsmDataNames as matrixName}
-                    {#each obsmData[matrixName][rowIndex] as value}
-                      <td class="obsm">
-                        <!-- If matrix is more than 2D, this value will be a list -->
-                        {value}
-                      </td>
-                    {/each}
-                  {/each}
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+      <!-- First: obsData. TODO: does it always exist? -->
+      <div
+        class="tableScroller sideTable"
+        id="scroll3"
+        on:scroll={handleScroll}
+        bind:this={table3}
+      >
+        <ObsmTable {source} />
+      </div>
 
       <div
         id="scroll1"
@@ -277,10 +224,6 @@
 
   .obs {
     background-color: rgb(238, 195, 54);
-  }
-
-  .obsm {
-    background-color: rgb(237, 144, 50);
   }
 
   .X {
