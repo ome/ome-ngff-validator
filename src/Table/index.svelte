@@ -1,15 +1,15 @@
 <script>
   import { getJson } from "../utils";
-  import { AnnDataSource } from "../vitessce-utils";
 
   import ObsmTable from "./ObsmTable.svelte";
   import ObsTable from "./ObsTable.svelte";
   import XTable from "./XTable.svelte";
+  import JsonPanel from "./JsonPanel.svelte";
 
   export let source;
   export let tableAttrs;
 
-  const tablePromise = getJson(source + "obs/.zattrs");
+  const tables = ["obsm", "var", "X", "obs"];
 
   // we have separate tables for X and obs so that each
   // can scroll in x-dimension independently, BUT we want
@@ -33,24 +33,18 @@
 <article>
   <!-- code blocks for JSON for the table itself and the required 'obs' group -->
   <div>
-    <details>
-      <summary>table/.zattrs</summary>
-      <pre><code>{JSON.stringify(tableAttrs, null, 2)}</code></pre>
-    </details>
-
-    {#await tablePromise}
-      <p>checking for obs...</p>
-    {:then obsAttrs}
+    <div class="zattrs grey">
       <details>
-        <summary>table/obs/.zattrs</summary>
-        <pre><code>{JSON.stringify(obsAttrs, null, 2)}</code></pre>
+        <summary>table/.zattrs</summary>
+        <pre><code>{JSON.stringify(tableAttrs, null, 2)}</code></pre>
       </details>
-    {:catch error}
-      <p style="color: red">Failed to load /obs/.zattrs {error}</p>
-    {/await}
+    </div>
 
-    <!-- Don't show "Load obs" button for now - just load by default -->
-    <!-- <button class="obs" on:click={toggleObsInfo}>Load obs</button> -->
+    {#each tables as name}
+      <div class="zattrs {name}">
+        <JsonPanel title={name + "/.zattrs"} url={source + name + "/.zattrs"} />
+      </div>
+    {/each}
   </div>
 
   <div class="tablesContainer">
@@ -123,10 +117,31 @@
     }
   }
 
+  .zattrs {
+    margin: 5px 10px 10px 0;
+    width: max-content;
+    padding: 10px;
+    border-radius: 5px;
+    float: left;
+  }
 
-  p {
-    margin-top: 20px;
-    text-align: left;
+  .grey {
+    background-color: #ccc;
+  }
+
+  .obs {
+    background-color: rgb(238, 195, 54);
+  }
+  .var {
+    background-color: rgb(51, 151, 190);
+  }
+
+  .obsm {
+    background-color: rgb(237, 144, 50);
+  }
+
+  .X {
+    background-color: rgb(84, 185, 114);
   }
 
   pre {
@@ -135,5 +150,4 @@
     padding: 10px;
     font-size: 14px;
   }
-
 </style>
