@@ -3,73 +3,11 @@
   import { AnnDataSource } from "../vitessce-utils";
 
   import ObsmTable from "./ObsmTable.svelte";
+  import ObsTable from "./ObsTable.svelte";
+  import XTable from "./XTable.svelte";
 
   export let source;
   export let tableAttrs;
-
-  let showObsInfo = true;
-  let obsColNames;
-  let obsData; // 2D list
-
-  function toggleObsInfo() {
-    showObsInfo = !showObsInfo;
-    if (!obsData) {
-      loadObsData();
-    }
-  }
-
-  const annDataStore = new AnnDataSource({ url: source });
-
-  async function loadObsData() {
-    let obsAttrs = await getJson(source + `obs/.zattrs`);
-
-    // manually validate without a schema...
-    // `.zattrs` MUST contain `"_index"`, which is the name of the column in obs to be used as the index.
-    // `.zattrs` MUST contain `"column-order"`, which is a list of the order of the non-_index columns.
-    // `.zattrs` MUST contain `"encoding-type"`, which is set to `"dataframe"` by AnnData.
-    // `.zattrs` MUST contain `"encoding-version"`, which is set to `"0.2.0"` by AnnData.
-    ["_index", "column-order", "encoding-type", "encoding-version"].forEach(
-      (attr) => {
-        if (!obsAttrs[attr]) {
-          throw Error(`No ${attr} in obs/.zattrs`);
-        }
-      }
-    );
-
-    obsColNames = obsAttrs["column-order"];
-
-    let toLoad = obsColNames.map((colName) => `obs/${colName}`);
-    // NB: some unsupported '<i8' dtype columns may have failed (undefined)
-    // each obs column is a 1D array of data. obsData is 2D list (table)
-    obsData = await annDataStore.loadObsColumns(toLoad);
-  }
-
-  async function loadTableData() {
-    // E.g. "obs/cell_id" fails with: Error: Dtype not recognized or not supported in zarr.js, got <i8.
-    // "obs/category/categories" loads a list of categories, e.g. ["carcinoma"]
-    // and "obs/category/codes" loads a list of indecies for those, e.g. [0, 0, ]
-    // let columns = ["obs/category/codes", "obs/X1", "obs/center_rowcoord", "obs/center_colcoord"];
-
-    // column names for the main table data, and other stats:
-    // let columns = ["var/_index", "var/mean-0"];
-
-    let varAttrs = await getJson(source + "var/.zattrs");
-    let varColNames = varAttrs["column-order"];
-    let toLoad = varColNames.map((colName) => `var/${colName}`);
-    let varData = await annDataStore.loadObsColumns(toLoad);
-
-    let columns = ["var/_index", "X"];
-    let data = await annDataStore.loadObsColumns(columns);
-
-    return {
-      colNames: data[0],
-      rowData: data[1],
-      varColNames,
-      varData,
-    };
-  }
-
-  const tableDataPromise = loadTableData();
 
   const tablePromise = getJson(source + "obs/.zattrs");
 
@@ -90,9 +28,6 @@
       table3.scrollTop = event.target.scrollTop;
     }
   }
-
-  // Load obs directly by default
-  loadObsData();
 </script>
 
 <article>
@@ -118,95 +53,35 @@
     <!-- <button class="obs" on:click={toggleObsInfo}>Load obs</button> -->
   </div>
 
-  <!-- Show the main X data table -->
   <div class="tablesContainer">
-    {#await tableDataPromise}
-      <p>Loading data...</p>
-    {:then data}
-      <!-- 3 tables side by side -->
-      <!-- First: obsData. TODO: does it always exist? -->
-      <div
-        class="tableScroller sideTable"
-        id="scroll3"
-        on:scroll={handleScroll}
-        bind:this={table3}
-      >
-        <ObsmTable {source} />
-      </div>
+    <!-- 3 tables side by side -->
+    <!-- First: obsData. TODO: does it always exist? -->
+    <div
+      class="tableScroller sideTable"
+      id="scroll3"
+      on:scroll={handleScroll}
+      bind:this={table3}
+    >
+      <ObsmTable {source} />
+    </div>
 
-      <div
-        id="scroll1"
-        class="tableScroller"
-        on:scroll={handleScroll}
-        bind:this={table1}
-      >
-        <table>
-          <thead>
-            <th class="var row">Row</th>
-            {#each data.colNames as colName, colIndex}
-              <th class="var">
-                {colName}
-                <ul class="tooltip var">
-                  <li>var:</li>
-                  {#each data.varColNames as varAttr, i}
-                    <li>
-                      <span class="key">{varAttr}</span>:
-                      {data.varData[i][colIndex]}
-                    </li>
-                  {/each}
-                </ul>
-              </th>
-            {/each}
-          </thead>
-          <tbody class="X">
-            {#each data.rowData as rowData, rowIndex}
-              <tr>
-                <th class="X">{rowIndex}</th>
-                {#each rowData as cellData}
-                  <td>{cellData}</td>
-                {/each}
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+    <div
+      id="scroll1"
+      class="tableScroller"
+      on:scroll={handleScroll}
+      bind:this={table1}
+    >
+      <XTable {source} />
+    </div>
 
-      <!-- If we've loaded obsData, add extra table -->
-      {#if obsData && showObsInfo}
-        <div
-          class="tableScroller sideTable"
-          id="scroll2"
-          on:scroll={handleScroll}
-          bind:this={table2}
-        >
-          <table>
-            <thead>
-              <th class="obs row">Row</th>
-              {#each obsColNames as colName}
-                <th class="obs">{colName}</th>
-              {/each}
-            </thead>
-            <tbody>
-              {#each data.rowData as rowData, rowIndex}
-                <tr>
-                  <th class="obs">{rowIndex}</th>
-                  {#each obsColNames as colName, obsIndex}
-                    <td class="obs">
-                      <!-- check if column has loaded -->
-                      {#if obsData[obsIndex]}
-                        {obsData[obsIndex][rowIndex]}
-                      {/if}
-                    </td>
-                  {/each}
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
-    {:catch error}
-      <p style="color: red">{error}</p>
-    {/await}
+    <div
+      class="tableScroller sideTable"
+      id="scroll2"
+      on:scroll={handleScroll}
+      bind:this={table2}
+    >
+      <ObsTable {source} />
+    </div>
   </div>
 </article>
 
@@ -214,24 +89,6 @@
   article {
     display: flex;
     flex-direction: column;
-  }
-
-  button {
-    padding: 5px;
-    border-radius: 5px;
-    border: solid 1px #666;
-  }
-
-  .obs {
-    background-color: rgb(238, 195, 54);
-  }
-
-  .X {
-    background-color: rgb(84, 185, 114);
-  }
-
-  .var {
-    background-color: rgb(51, 151, 190);
   }
 
   article > div {
@@ -266,58 +123,6 @@
     }
   }
 
-  table {
-    border-collapse: collapse;
-    border-spacing: 0;
-  }
-
-  td,
-  th {
-    border: solid #ddd 1px;
-    padding: 3px;
-    width: 90px;
-    max-width: 90px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  th {
-    vertical-align: middle;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    left: 0px;
-    background: white;
-    z-index: 1;
-    border-width: 0;
-    overflow: visible;
-  }
-
-  tbody th,
-  th.row {
-    left: 0;
-  }
-
-  .tooltip {
-    position: absolute;
-    text-align: left;
-    padding: 5px;
-    font-weight: normal;
-    top: 110%;
-    z-index: 2;
-    visibility: hidden;
-    border: 1px solid #666;
-    border-radius: 5px;
-    color: white;
-  }
-  th:hover .tooltip {
-    visibility: visible;
-  }
-
-  li {
-    list-style: none;
-    white-space: nowrap;
-  }
 
   p {
     margin-top: 20px;
@@ -331,8 +136,4 @@
     font-size: 14px;
   }
 
-  a,
-  a:visited {
-    color: #ff512f;
-  }
 </style>

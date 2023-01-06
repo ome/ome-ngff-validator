@@ -63,7 +63,7 @@
     </tbody>
   </table>
 {:catch error}
-  <p style="color: red">Failed to load /obs/.zattrs {error}</p>
+  <p style="color: red">Failed to load obsm {error}</p>
 {/await}
 
 <style>
