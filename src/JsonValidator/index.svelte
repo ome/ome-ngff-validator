@@ -5,6 +5,7 @@
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
+  import OpenWith from "./OpenWith.svelte";
   import {
     CURRENT_VERSION,
     getSchemaUrlsForJson,
@@ -13,7 +14,6 @@
     getVersion,
     getDataType,
   } from "../utils";
-  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -28,17 +28,12 @@
   const zarrName = dirs[dirs.length - 1];
 
   // check for labels/.zattrs
-  const labelsPromise = getJson(source + 'labels/.zattrs');
+  const labelsPromise = getJson(source + '/labels/.zattrs');
 </script>
 
 <article>
-  <a title="View {dtype} in vizarr" class="vizarr_link" target="_blank"
-                href="https://hms-dbmi.github.io/vizarr/?source={source}"
-                ><img alt="Vizarr logo" src={vizarrLogoUrl}/></a>
-
-  <!-- leave space on the right for vizarr link -->
-  <p class="margin_right">
-    Validating: <a href={source}>{zarrName}/.zattrs</a>
+  <p>
+    Validating: <a href={source}>/{zarrName}/.zattrs</a>
   </p>
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
@@ -65,6 +60,8 @@
     <CheckMark valid={false}/>
     <p style="color: red">{error.message}</p>
   {/await}
+
+  <OpenWith {source} {dtype} />
 
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
@@ -103,18 +100,8 @@
     font-family: monospace;
   }
 
-  .vizarr_link {
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-  .vizarr_link img {
+  .viewer_icon {
     height: 24px;
-    margin: 15px;
-  }
-
-  .margin_right {
-    margin-right: 30px;
   }
 
   .error pre {
