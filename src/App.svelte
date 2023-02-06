@@ -10,8 +10,8 @@
 
   const searchParams = new URLSearchParams(window.location.search);
   let source = searchParams.get("source");
-  if (source && !source.endsWith("/")) {
-    source = source + "/";
+  if (source && source.endsWith("/")) {
+    source = source.slice(0, -1);
   }
 
   let location = window.location.href;
@@ -20,8 +20,8 @@
 
   if (source) {
     // load JSON to be validated...
-    console.log("Loading JSON... " + source + ".zattrs");
-    promise = getJson(source + ".zattrs");
+    console.log("Loading JSON... " + source + "/.zattrs");
+    promise = getJson(source + "/.zattrs");
   }
 </script>
 

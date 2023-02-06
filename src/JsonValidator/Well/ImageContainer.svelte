@@ -7,7 +7,7 @@
   // const promise = getJson(source + path + "/.zattrs");
 
   async function loadAndValidate() {
-    let imgAttrs = await getJson(source + path + "/.zattrs");
+    let imgAttrs = await getJson(source + "/" + path + "/.zattrs");
     console.log("imgAttrs", imgAttrs);
     let errs = await validate(imgAttrs);
     return errs;
@@ -18,7 +18,7 @@
   const url = window.location.origin + window.location.pathname;
 </script>
 
-<a title="{path}: Open Image" href="{url}?source={source + path}/">
+<a title="{path}: Open Image" href="{url}?source={source + "/" + path}/">
 {#await promise}
   <span>{path}.</span>
 {:then errs}

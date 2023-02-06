@@ -4,7 +4,7 @@
   export let source;
   export let path;
 
-  const promise = getJson(source + path + "/.zattrs");
+  const promise = getJson(source + "/" + path + "/.zattrs");
 </script>
 
 {#await promise}
