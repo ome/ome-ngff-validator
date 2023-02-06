@@ -1,8 +1,7 @@
 <script>
-  import { getXmlDom, getSchema, getJson, validate } from "../utils";
+  import { getXmlDom, getJson, validate } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
-  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -80,10 +79,6 @@
               >
 
               <ImageContainer {source} path={i} />
-
-              <a title="View image in vizarr" class="vizarr_link" target="_blank"
-                href="https://hms-dbmi.github.io/vizarr/?source={source}/{i}/"
-                ><img src={vizarrLogoUrl}/></a>
             </li>
           {/each}
         </ul>

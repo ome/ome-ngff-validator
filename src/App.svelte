@@ -51,9 +51,9 @@
         <article>
           To validate an OME-ZARR file, use e.g.
           <a
-            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr"
+            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
           >
-            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
+            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr
           </a>
         </article>
       {/if}

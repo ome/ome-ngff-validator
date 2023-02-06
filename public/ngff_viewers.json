@@ -20,6 +20,16 @@
       "name": "Allen Cell Feature Explorer 3D viewer",
       "logo": "/aics_website-3d-cell-viewer.png",
       "href": "https://allen-cell-animated.github.io/website-3d-cell-viewer/?url="
+    },
+    {
+      "name": "napari",
+      "logo": "/napari.png",
+      "html": "<p>See <a href='https://napari.org/'>napari.org</a> for install instructions.</p><p>Then <code>napari {URL}</code>"
+    },
+    {
+      "name": "MoBIE",
+      "logo": "/MoBIE.jpeg",
+      "html": "<p><a href='https://github.com/mobie/mobie-viewer-fiji/'>MoBIE</a> plugin for ImageJ/Fiji. See <a href='https://omero-guides.readthedocs.io/en/latest/fiji/docs/view_mobie_zarr.html'>MoBIE guide</a> for installation. Plugins > BigDataViewer > OME ZARR > <br> Open OME ZARR from S3…. <code>{URL}</code>"
     }
   ]
 }
