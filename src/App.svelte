@@ -45,7 +45,7 @@
           </div>
         {:catch error}
           <CheckMark valid={false}/>
-          <p style="color: red; margin: 20px 0">{error.message}</p>
+          <p class="error">{error.message}</p>
         {/await}
       {:else}
         <article>
@@ -122,5 +122,13 @@
     a {
       white-space: nowrap;
     }
+  }
+
+  .error {
+    color: red;
+    margin: 20px 0;
+    text-align: center;
+    background: white;
+    padding: 10px;
   }
 </style>
