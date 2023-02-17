@@ -1,10 +1,10 @@
 <script>
-    import viewers_json from "../../public/ngff_viewers.json"
+    import viewers_json from "../../../public/ngff_viewers.json"
+
+    import CopyButton from "./CopyButton.svelte";
 
     export let source;
     export let dtype;
-
-    console.log({source});
 
     let viewers = viewers_json.viewers.map((viewer_data) => {
       let href = viewer_data.href;
@@ -29,10 +29,11 @@
       <li>
         {#if viewer.href}
         <a title="View {dtype} in {viewer.name}" target="_blank" href="{viewer.href}">
-          <img class="viewer_icon" src={viewer.logo}/>
+          <img class="viewer_icon" src={viewer.logo} alt={"Viewer logo"}/>
         </a>
         {:else}
-          <img class="viewer_icon" src={viewer.logo}/>
+        <!-- E.g. napari, MoBIE - show a copy button on mouseover -->
+        <CopyButton copy_text={source} title={"Copy URL"} button_logo={viewer.logo} />
         {/if}
 
         {#if viewer.html}<div class="viewer_html">{@html viewer.html.replace("{URL}", source)}</div>{/if}
