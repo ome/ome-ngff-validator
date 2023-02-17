@@ -5,7 +5,7 @@
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
-  import OpenWith from "./Openwith/index.svelte";
+  import OpenWith from "./OpenWithViewers/index.svelte";
 
   import {
     CURRENT_VERSION,
