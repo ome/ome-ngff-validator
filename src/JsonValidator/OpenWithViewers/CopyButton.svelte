@@ -86,4 +86,12 @@
     visibility: visible;
   }
 
+  .viewer_icon {
+      max-height: 32px;
+      max-width: 32px;
+      margin: 2px;
+      border-radius: 5px;
+      vertical-align: middle;
+    }
+
 </style>

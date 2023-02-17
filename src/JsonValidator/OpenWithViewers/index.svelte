@@ -6,18 +6,17 @@
     export let source;
     export let dtype;
 
-    let viewers = [];
-    // let viewers = viewers_json.viewers.map((viewer_data) => {
-    //   let href = viewer_data.href;
-    //   if (href) {
-    //     if (href.includes("{URL}")) {
-    //       href = href.replace("{URL}", source);
-    //     } else {
-    //       href += source;
-    //     }
-    //   }
-    //   return {...viewer_data, href}
-    // });
+    let viewers = viewers_json.viewers.map((viewer_data) => {
+      let href = viewer_data.href;
+      if (href) {
+        if (href.includes("{URL}")) {
+          href = href.replace("{URL}", source);
+        } else {
+          href += source;
+        }
+      }
+      return {...viewer_data, href}
+    });
 
   </script>
 
