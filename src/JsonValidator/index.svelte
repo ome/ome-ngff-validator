@@ -101,9 +101,6 @@
     font-family: monospace;
   }
 
-  .viewer_icon {
-    height: 24px;
-  }
 
   .error pre {
     margin-top: 10px;

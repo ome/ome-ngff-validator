@@ -111,14 +111,6 @@
     color: #ff512f;
   }
 
-  .vizarr_link {
-    float: right;
-  }
-  .vizarr_link img {
-    height: 24px;
-    margin: 0;
-  }
-
   .json {
     text-align: left;
     margin-top: 10px;

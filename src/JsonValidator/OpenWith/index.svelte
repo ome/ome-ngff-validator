@@ -75,16 +75,6 @@
     a:visited {
       color: #ff512f;
     }
-    .json {
-      text-align: left;
-      margin-top: 10px;
-      color: #faebd7;
-      background-color: #263749;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 10px;
-      font-family: monospace;
-    }
   
     .viewer_icon {
       max-height: 32px;
