@@ -27,7 +27,7 @@
 
     for (let i = 0; i < datasets.length; i++) {
       let dataset = datasets[i];
-      let zarray = await getJson(source + dataset.path + "/.zarray");
+      let zarray = await getJson(source + "/" + dataset.path + "/.zarray");
       dimCounts.push(zarray.shape.length);
       dtypes.push(zarray.dtype);
       shapes.push(zarray.shape);

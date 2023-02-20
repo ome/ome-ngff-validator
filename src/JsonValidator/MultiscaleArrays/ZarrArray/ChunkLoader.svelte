@@ -33,7 +33,7 @@
     if (!showChunks) return;
     // clear previous chunk
     chunk = undefined;
-    const store = await openArray({ store: source + path, mode: "r" });
+    const store = await openArray({ store: source + "/" + path, mode: "r" });
 
     // we want to get exactly 1 chunk
     // e.g. chunkIndices is (0, 1, 0, 0) and chunk is (1, 125, 125, 125)

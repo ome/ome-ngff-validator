@@ -86,10 +86,6 @@
     height: 20px;
   }
 
-  a {
-    text-decoration: none;
-  }
-
   select {
     border: solid rgb(100,100,100) 1px;
     border-radius: 5px;
