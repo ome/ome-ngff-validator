@@ -1,34 +1,32 @@
 <script>
   import viewers_json from "../../../public/ngff_viewers.json";
 
+  import vizarr_logo from "/vizarr_logo.png";
+
   import CopyButton from "./CopyButton.svelte";
 
   export let source;
   export let dtype;
 
-  // Need to dynamically generate URLs for icons...
-  async function loadIcons(viewer_data) {
-    let href = viewer_data.href;
-    if (href) {
-      if (href.includes("{URL}")) {
-        href = href.replace("{URL}", source);
-      } else {
-        href += source;
+  let viewers = viewers_json.viewers.map((viewer_data) => {
+      let href = viewer_data.href;
+      if (href) {
+        if (href.includes("{URL}")) {
+          href = href.replace("{URL}", source);
+        } else {
+          href += source;
+        }
       }
-    }
-    const logo_path = (await fetch(viewer_data.logo)).url;
-    return { ...viewer_data, href, logo_path };
-  }
+      // use static import of vizarr_logo.png to get base URL for other logos
+      const logo_path = vizarr_logo.replace("/vizarr_logo.png", viewer_data.logo);
+      return {...viewer_data, href, logo_path}
+    });
 
-  const promise = Promise.all(viewers_json.viewers.map(loadIcons));
 </script>
 
 <div class="openwith">
   <span>Open with:</span>
   <ul>
-    {#await promise}
-      <p>loading...</p>
-    {:then viewers}
       {#each viewers as viewer}
         <li>
           {#if viewer.href}
@@ -57,9 +55,6 @@
             </div>{/if}
         </li>
       {/each}
-    {:catch error}
-      <span>{error}</span>
-    {/await}
   </ul>
 </div>
 

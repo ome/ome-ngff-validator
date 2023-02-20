@@ -9,7 +9,7 @@
   const metadataName = "OME/METADATA.ome.xml";
 
   // source/OME/METADATA.ome.xml
-  const metadataUrl = `${source}${metadataName}`;
+  const metadataUrl = `${source}/${metadataName}`;
 
   async function loadXml(url) {
     let dom = await getXmlDom(url);
