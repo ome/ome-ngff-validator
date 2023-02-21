@@ -1,8 +1,7 @@
 <script>
-  import { getXmlDom, getSchema, getJson, validate } from "../utils";
+  import { getXmlDom, getJson, validate } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
-  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -10,7 +9,7 @@
   const metadataName = "OME/METADATA.ome.xml";
 
   // source/OME/METADATA.ome.xml
-  const metadataUrl = `${source}${metadataName}`;
+  const metadataUrl = `${source}/${metadataName}`;
 
   async function loadXml(url) {
     let dom = await getXmlDom(url);
@@ -54,7 +53,7 @@
 </script>
 
 <article>
-  Reading: <a href={source}>{zarrName}/.zattrs</a>
+  Reading: <a href={source}>/{zarrName}/.zattrs</a>
 
   <div class="json">
     <JsonBrowser name="" version="" contents={rootAttrs} expanded />
@@ -68,22 +67,18 @@
     <!-- Show list of Images -->
     <h1>Images</h1>
     <ol>
-      {#await preloadSchema(source + "0")}
+      {#await preloadSchema(source + "/0")}
         <div>loading schema...</div>
       {:then ok}
         <ul>
           {#each metadataJson.images as image, i}
             <li class="image">
               /{i}
-              <a title="Open Image" href="{url}?source={source}{i}/"
+              <a title="Open Image" href="{url}?source={source}/{i}/"
                 >{image.name}</a
               >
 
               <ImageContainer {source} path={i} />
-
-              <a title="View image in vizarr" class="vizarr_link" target="_blank"
-                href="https://hms-dbmi.github.io/vizarr/?source={source}{i}/"
-                ><img src={vizarrLogoUrl}/></a>
             </li>
           {/each}
         </ul>
@@ -114,14 +109,6 @@
   a,
   a:visited {
     color: #ff512f;
-  }
-
-  .vizarr_link {
-    float: right;
-  }
-  .vizarr_link img {
-    height: 24px;
-    margin: 0;
   }
 
   .json {

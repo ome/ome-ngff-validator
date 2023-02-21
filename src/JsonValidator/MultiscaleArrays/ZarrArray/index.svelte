@@ -6,7 +6,7 @@
   export let source;
   export let path;
 
-  const promise = getJson(source + path + "/.zarray");
+  const promise = getJson(source + "/" + path + "/.zarray");
 
   function totalChunkCount(zarray) {
     return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
@@ -26,7 +26,7 @@
 </script>
 
 <div class="array">
-  <p>Path <a href="{source + path + '/.zarray'} ">{path + "/.zarray"}</a></p>
+  <p>Path <a href="{source + "/" + path + '/.zarray'} ">{path + "/.zarray"}</a></p>
 
   {#await promise}
     <div>loading array .zarray ...</div>

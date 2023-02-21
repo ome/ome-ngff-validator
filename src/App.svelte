@@ -10,8 +10,8 @@
 
   const searchParams = new URLSearchParams(window.location.search);
   let source = searchParams.get("source");
-  if (source && !source.endsWith("/")) {
-    source = source + "/";
+  if (source && source.endsWith("/")) {
+    source = source.slice(0, -1);
   }
 
   let location = window.location.href;
@@ -20,8 +20,8 @@
 
   if (source) {
     // load JSON to be validated...
-    console.log("Loading JSON... " + source + ".zattrs");
-    promise = getJson(source + ".zattrs");
+    console.log("Loading JSON... " + source + "/.zattrs");
+    promise = getJson(source + "/.zattrs");
   }
 </script>
 
@@ -51,9 +51,9 @@
         <article>
           To validate an OME-ZARR file, use e.g.
           <a
-            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr"
+            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
           >
-            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
+            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr
           </a>
         </article>
       {/if}

@@ -15,7 +15,7 @@
     {#if labelsPaths}
       <ul>
       {#each labelsPaths as labelPath}
-        <li><a title="Open Labels" href="{url}?source={source}labels/{labelPath}/">labels/{labelPath}</a></li>
+        <li><a title="Open Labels" href="{url}?source={source}/labels/{labelPath}/">labels/{labelPath}</a></li>
       {/each}
       </ul>
     {:else}
