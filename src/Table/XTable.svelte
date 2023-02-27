@@ -15,8 +15,8 @@
       let varData = await annDataStore.loadObsColumns(toLoad);
   
       // load xColNames and xRowData for X table
-      // FIXME: don't hard-code 'var/_index' - not universal
-      let columns = ["var/_index", "X"];
+      let indexCol = 'var/' + varAttrs["_index"];
+      let columns = [indexCol, "X"];
       let data = await annDataStore.loadObsColumns(columns);
       let xColNames = data[0];
       const xRowData = data[1];
