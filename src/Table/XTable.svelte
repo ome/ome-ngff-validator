@@ -1,5 +1,5 @@
 <script>
-    import { getJson } from "../utils";
+    import { getJson, range } from "../utils";
     import { AnnDataSource } from "../vitessce-utils";
   
     export let source;
@@ -7,25 +7,32 @@
     const annDataStore = new AnnDataSource({ url: source });
   
     async function loadTableData() {
-      // E.g. "obs/cell_id" fails with: Error: Dtype not recognized or not supported in zarr.js, got <i8.
-      // "obs/category/categories" loads a list of categories, e.g. ["carcinoma"]
-      // and "obs/category/codes" loads a list of indecies for those, e.g. [0, 0, ]
-      // let columns = ["obs/category/codes", "obs/X1", "obs/center_rowcoord", "obs/center_colcoord"];
   
-      // column names for the main table data, and other stats:
-      // let columns = ["var/_index", "var/mean-0"];
-  
+      // 'var' array contains column metadata
       let varAttrs = await getJson(source + "var/.zattrs");
       let varColNames = varAttrs["column-order"];
       let toLoad = varColNames.map((colName) => `var/${colName}`);
       let varData = await annDataStore.loadObsColumns(toLoad);
   
+      // load xColNames and xRowData for X table
+      // FIXME: don't hard-code 'var/_index' - not universal
       let columns = ["var/_index", "X"];
       let data = await annDataStore.loadObsColumns(columns);
-  
+      let xColNames = data[0];
+      const xRowData = data[1];
+
+      // in case 'var/_index' isn't loaded, just use column index:
+      if (!xColNames) {
+        // use first row of X to get column count:
+        const colCount = xRowData[0].length;
+        console.log("colCount....", xRowData[0], colCount)
+        xColNames = range(colCount);
+      }
+      console.log({xColNames,xRowData,varColNames,varData})
+
       return {
-        colNames: data[0],
-        rowData: data[1],
+        xColNames,
+        xRowData,
         varColNames,
         varData,
       };
@@ -41,15 +48,16 @@
           <table>
             <thead>
               <th class="var row">Row</th>
-              {#each data.colNames as colName, colIndex}
+              {#each data.xColNames as colName, colIndex}
                 <th class="var">
                   {colName}
+                  <!-- hover popup with column metadata -->
                   <ul class="tooltip var">
                     <li>var:</li>
                     {#each data.varColNames as varAttr, i}
                       <li>
                         <span class="key">{varAttr}</span>:
-                        {data.varData[i][colIndex]}
+                        {data.varData?.[i]?.[colIndex]}
                       </li>
                     {/each}
                   </ul>
@@ -57,10 +65,10 @@
               {/each}
             </thead>
             <tbody class="X">
-              {#each data.rowData as rowData, rowIndex}
+              {#each data.xRowData as xRowData, rowIndex}
                 <tr>
                   <th class="X">{rowIndex}</th>
-                  {#each rowData as cellData}
+                  {#each xRowData as cellData}
                     <td>{cellData}</td>
                   {/each}
                 </tr>
