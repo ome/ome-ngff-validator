@@ -15,6 +15,9 @@
     // NB: we rely on custom listing of "keys" in the obsm/.zattrs
     // See https://github.com/kevinyamauchi/ome-ngff-tables-prototype/pull/12/commits/284406d1a309203bef9d58aca76817c66ebb5912
     let obsmDataNames = obsmAttrs["keys"];
+    if (obsmDataNames == undefined) {
+      throw Error("No 'keys' list found in obsm/.zattrs as required by OME-NGFF spec")
+    }
     let toLoad = obsmDataNames.map((colName) => `obsm/${colName}`);
     // NB: some unsupported '<i8' dtype columns may have failed (undefined)
     // each obsm is a ND array of data.
