@@ -1,4 +1,4 @@
-import { HTTPStore, KeyError, openArray } from 'zarr';
+import { HTTPStore, KeyError, openArray, slice } from 'zarr';
 import { range } from './utils';
 
 // code from https://github.com/vitessce/vitessce/blob/3615b5539315be79ae8739526974d50160834183/src/loaders/data-sources/ZarrDataSource.js
@@ -138,6 +138,11 @@ export class AnnDataSource extends ZarrDataSource {
   }
 
   async _loadColumn(path) {
+    // TODO: we limit PAGE to 100 items for now to avoid loading too much data.
+    // This should be enough to understand the type and format of the data.
+    // Pagination (prev/next page) is not yet supported...
+    const pageSize = 100;
+
     const { store } = this;
     const prefix = dirname(path);
     const colAttrs = await this.getJson(`${this.store.url}${path}/.zattrs`);
@@ -156,11 +161,17 @@ export class AnnDataSource extends ZarrDataSource {
       // added this.store.url here, e.g. "obs/category/categories"
       const { dtype } = await this.getJson(`${this.store.url}${path}/.zarray`);
       if (dtype === '|O') {
-        return this.getFlatArrDecompressed(path);
+        return this.getFlatArrDecompressed(path, pageSize);
       }
     }
     const arr = await openArray({ store, path, mode: 'r' });
-    const values = await arr.get();
+    console.log("_loadColumn path", path, "shape", arr.meta.shape);
+
+    let slices;
+    if (pageSize) {
+      slices = arr.meta.shape.map(dim => slice(null, Math.min(dim, pageSize)));
+    }
+    const values = await arr.get(slices);
     const { data } = values;
     const mappedValues = Array.from(data).map(
       // NB: originally this casted to string:
@@ -190,7 +201,7 @@ export class AnnDataSource extends ZarrDataSource {
    * @param {string} path A path to a flat array location, like obs/_index
    * @returns {Promise} A promise for a zarr array containing the data.
    */
-  getFlatArrDecompressed(path) {
+  getFlatArrDecompressed(path, pageSize) {
     const { store } = this;
     return openArray({
       store,
@@ -241,6 +252,9 @@ export class AnnDataSource extends ZarrDataSource {
         },
       } = z;
       // truncate the filled in values
+      if (pageSize) {
+        return data.slice(0, pageSize);
+      }
       return data.slice(0, length);
     });
   }
