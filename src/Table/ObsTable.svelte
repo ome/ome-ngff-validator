@@ -87,14 +87,13 @@
     border: solid #ddd 1px;
     padding: 3px;
     width: 90px;
-    max-width: 90px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   th {
     vertical-align: middle;
-    text-align: center;
     position: sticky;
     top: 0;
     left: 0px;
