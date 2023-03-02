@@ -1,5 +1,5 @@
-import { HTTPStore, KeyError, openArray, slice } from 'zarr';
-import { range } from './utils';
+import { HTTPStore, KeyError, openArray, slice } from "zarr";
+import { range } from "./utils";
 
 // code from https://github.com/vitessce/vitessce/blob/3615b5539315be79ae8739526974d50160834183/src/loaders/data-sources/ZarrDataSource.js
 // and https://github.com/vitessce/vitessce/blob/3615b5539315be79ae8739526974d50160834183/src/loaders/data-sources/AnnDataSource.js
@@ -295,5 +295,52 @@ export class AnnDataSource extends ZarrDataSource {
     const index = await this.loadVarIndex();
     this.varAlias = this.varAlias.map((val, ind) => val || index[ind]);
     return this.varAlias;
+  }
+
+  async _openSparseArrays(matrix) {
+    const store = this.store;
+    const sparseArrays = Promise.all(
+      ["indptr", "indices", "data"].map((name) => {
+        console.log('openArray', `${matrix}/${name}`);
+        return openArray({ store, path: `${matrix}/${name}`, mode: "r" });
+      }
+      )
+    );
+    return sparseArrays;
+  }
+
+  // async _loadCSCGeneSelection(selection) {
+  async loadSparseData(matrix, pageSize) {
+    const sparseAttrs = await this.getJson(`${this.store.url}${matrix}/.zattrs`);
+    console.log("sparseAttrs", sparseAttrs);
+    let [numRows, numCols] = sparseAttrs.shape;
+    numRows = Math.min(numRows, pageSize);
+    numCols = Math.min(numCols, pageSize);
+    console.log({numRows, numCols});
+    const indices = range(numRows);
+    const [indptrArr, indexArr, cellXGeneArr] = await this._openSparseArrays(matrix);
+    const { data: cols } = await indptrArr.getRaw(null);
+    // If there is no change in the column indexer, then the data is all zeros
+    return Promise.all(
+      indices.map(async (index) => {
+        const startRowIndex = cols[index];
+        const endRowIndex = cols[index + 1];
+        const isColumnAllZeros = startRowIndex === endRowIndex;
+        const geneData = new Float32Array(numCols).fill(0);
+        if (isColumnAllZeros) {
+          return geneData;
+        }
+        const { data: rowIndices } = await indexArr.get([
+          slice(startRowIndex, endRowIndex),
+        ]);
+        const { data: cellXGeneData } = await cellXGeneArr.get([
+          slice(startRowIndex, endRowIndex),
+        ]);
+        for (let rowIndex = 0; rowIndex < rowIndices.length; rowIndex += 1) {
+          geneData[rowIndices[rowIndex]] = cellXGeneData[rowIndex];
+        }
+        return geneData;
+      })
+    );
   }
 }

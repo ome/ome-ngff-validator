@@ -1,6 +1,6 @@
 <script>
-  import { getJson } from "../utils";
 
+  import ObspTable from "./ObspTable.svelte";
   import ObsmTable from "./ObsmTable.svelte";
   import ObsTable from "./ObsTable.svelte";
   import XTable from "./XTable.svelte";
@@ -9,7 +9,7 @@
   export let source;
   export let tableAttrs;
 
-  const tables = ["obsm", "var", "X", "obs"];
+  const tables = ["obsp", "obsm", "var", "X", "obs"];
 
   // we have separate tables for X and obs so that each
   // can scroll in x-dimension independently, BUT we want
@@ -17,6 +17,7 @@
   let table1;
   let table2;
   let table3;
+  let table4;
   function handleScroll(event) {
     if (event.target.id != "scroll1") {
       table1.scrollTop = event.target.scrollTop;
@@ -26,6 +27,9 @@
     }
     if (event.target.id != "scroll3") {
       table3.scrollTop = event.target.scrollTop;
+    }
+    if (event.target.id != "scroll4") {
+      table4.scrollTop = event.target.scrollTop;
     }
   }
 </script>
@@ -48,24 +52,15 @@
   </div>
 
   <div class="tablesContainer">
-    <!-- 3 tables side by side -->
-    <!-- First: obsData. TODO: does it always exist? -->
+    <!-- several tables side by side -->
+    <!-- TODO: only show table if we have data -->
     <div
       class="tableScroller sideTable"
-      id="scroll3"
-      on:scroll={handleScroll}
-      bind:this={table3}
-    >
-      <ObsmTable {source} />
-    </div>
-
-    <div
       id="scroll1"
-      class="tableScroller"
       on:scroll={handleScroll}
       bind:this={table1}
     >
-      <XTable {source} />
+      <ObspTable {source} />
     </div>
 
     <div
@@ -73,6 +68,24 @@
       id="scroll2"
       on:scroll={handleScroll}
       bind:this={table2}
+    >
+      <ObsmTable {source} />
+    </div>
+
+    <div
+      id="scroll3"
+      class="tableScroller"
+      on:scroll={handleScroll}
+      bind:this={table3}
+    >
+      <XTable {source} />
+    </div>
+
+    <div
+      class="tableScroller sideTable"
+      id="scroll4"
+      on:scroll={handleScroll}
+      bind:this={table4}
     >
       <ObsTable {source} />
     </div>
@@ -129,6 +142,9 @@
     background-color: #ccc;
   }
 
+  .obsp {
+    background-color: rgb(224, 102, 96);
+  }
   .obs {
     background-color: rgb(238, 195, 54);
   }
