@@ -12,9 +12,10 @@ export class ZarrDataSource {
   constructor({ url, requestInit }) {
     // TODO: We should probably add a way of allowing HEAD requests as well:
     // https://github.com/gzuidhof/zarr.js/blob/375ce0c299469a970da6bb5653513564e25806bb/docs/getting-started/remote-data.md#stores
-    const supportedMethods = ['GET'];
+    const supportedMethods = ["GET"];
     this.store = new HTTPStore(url, {
-      supportedMethods, fetchOptions: requestInit,
+      supportedMethods,
+      fetchOptions: requestInit,
     });
   }
 
@@ -28,7 +29,7 @@ export class ZarrDataSource {
   async getJson(key) {
     try {
       const buf = await this.store.getItem(key);
-      const text = new TextDecoder('utf-8').decode(buf);
+      const text = new TextDecoder("utf-8").decode(buf);
       return JSON.parse(text);
     } catch (err) {
       if (err instanceof KeyError) {
@@ -39,10 +40,9 @@ export class ZarrDataSource {
   }
 }
 
-
 const readFloat32FromUint8 = (bytes) => {
   if (bytes.length !== 4) {
-    throw new Error('readFloat32 only takes in length 4 byte buffers');
+    throw new Error("readFloat32 only takes in length 4 byte buffers");
   }
   return new Int32Array(bytes.buffer)[0];
 };
@@ -50,34 +50,34 @@ const readFloat32FromUint8 = (bytes) => {
 const HEADER_LENGTH = 4;
 
 function dirname(path) {
-  const arr = path.split('/');
+  const arr = path.split("/");
   arr.pop();
-  return arr.join('/');
+  return arr.join("/");
 }
 
 /**
-   * Method for decoding text arrays from zarr.
-   * Largerly a port of https://github.com/zarr-developers/numcodecs/blob/2c1aff98e965c3c4747d9881d8b8d4aad91adb3a/numcodecs/vlen.pyx#L135-L178
-   * @returns {string[]} An array of strings.
-   */
+ * Method for decoding text arrays from zarr.
+ * Largerly a port of https://github.com/zarr-developers/numcodecs/blob/2c1aff98e965c3c4747d9881d8b8d4aad91adb3a/numcodecs/vlen.pyx#L135-L178
+ * @returns {string[]} An array of strings.
+ */
 function parseVlenUtf8(buffer) {
   const decoder = new TextDecoder();
   let data = 0;
   const dataEnd = data + buffer.length;
   const length = readFloat32FromUint8(buffer.slice(data, HEADER_LENGTH));
   if (buffer.length < HEADER_LENGTH) {
-    throw new Error('corrupt buffer, missing or truncated header');
+    throw new Error("corrupt buffer, missing or truncated header");
   }
   data += HEADER_LENGTH;
   const output = new Array(length);
   for (let i = 0; i < length; i += 1) {
     if (data + 4 > dataEnd) {
-      throw new Error('corrupt buffer, data seem truncated');
+      throw new Error("corrupt buffer, data seem truncated");
     }
     const l = readFloat32FromUint8(buffer.slice(data, data + 4));
     data += 4;
     if (data + l > dataEnd) {
-      throw new Error('corrupt buffer, data seem truncated');
+      throw new Error("corrupt buffer, data seem truncated");
     }
     output[i] = decoder.decode(buffer.slice(data, data + l));
     data += l;
@@ -150,33 +150,37 @@ export class AnnDataSource extends ZarrDataSource {
     // ? I don't see "categories" in any sample .zattrs files?
     let categories = colAttrs["encoding-type"] == "categorical";
     if (categories) {
-      const { dtype } = await this.getJson(`${this.store.url}${path}/categories/.zarray`);
-      if (dtype === '|O') {
+      const { dtype } = await this.getJson(
+        `${this.store.url}${path}/categories/.zarray`
+      );
+      if (dtype === "|O") {
         categoriesValues = await this.getFlatArrDecompressed(
-          `${path}/categories/`,
+          `${path}/categories/`
         );
       }
       path = `${path}/codes/`;
     } else {
       // added this.store.url here, e.g. "obs/category/categories"
       const { dtype } = await this.getJson(`${this.store.url}${path}/.zarray`);
-      if (dtype === '|O') {
+      if (dtype === "|O") {
         return this.getFlatArrDecompressed(path, pageSize);
       }
     }
-    const arr = await openArray({ store, path, mode: 'r' });
+    const arr = await openArray({ store, path, mode: "r" });
     console.log("_loadColumn path", path, "shape", arr.meta.shape);
 
     let slices;
     if (pageSize) {
-      slices = arr.meta.shape.map(dim => slice(null, Math.min(dim, pageSize)));
+      slices = arr.meta.shape.map((dim) =>
+        slice(null, Math.min(dim, pageSize))
+      );
     }
     const values = await arr.get(slices);
     const { data } = values;
     const mappedValues = Array.from(data).map(
       // NB: originally this casted to string:
       // i => (!categoriesValues ? String(i) : categoriesValues[i]),
-      i => (!categoriesValues ? i : categoriesValues[i]),
+      (i) => (!categoriesValues ? i : categoriesValues[i])
     );
     return mappedValues;
   }
@@ -191,8 +195,8 @@ export class AnnDataSource extends ZarrDataSource {
     return openArray({
       store,
       path,
-      mode: 'r',
-    }).then(arr => arr.get());
+      mode: "r",
+    }).then((arr) => arr.get());
   }
 
   /**
@@ -206,7 +210,7 @@ export class AnnDataSource extends ZarrDataSource {
     return openArray({
       store,
       path,
-      mode: 'r',
+      mode: "r",
     }).then(async (z) => {
       let data;
       const parseAndMergeTextBytes = (dbytes) => {
@@ -222,7 +226,7 @@ export class AnnDataSource extends ZarrDataSource {
           data = dbytes;
         } else {
           const tmp = new Uint8Array(
-            dbytes.buffer.byteLength + data.buffer.byteLength,
+            dbytes.buffer.byteLength + data.buffer.byteLength
           );
           tmp.set(new Uint8Array(data.buffer), 0);
           tmp.set(dbytes, data.buffer.byteLength);
@@ -230,15 +234,19 @@ export class AnnDataSource extends ZarrDataSource {
         }
       };
       const numRequests = Math.ceil(z.meta.shape[0] / z.meta.chunks[0]);
-      const requests = range(numRequests).map(async item => store
-        .getItem(`${z.keyPrefix}${String(item)}`)
-        .then(buf => z.compressor.then(compressor => compressor.decode(buf))));
+      const requests = range(numRequests).map(async (item) =>
+        store
+          .getItem(`${z.keyPrefix}${String(item)}`)
+          .then((buf) =>
+            z.compressor.then((compressor) => compressor.decode(buf))
+          )
+      );
       const dbytesArr = await Promise.all(requests);
       dbytesArr.forEach((dbytes) => {
         // Use vlenutf-8 decoding if necessary and merge `data` as a normal array.
         if (
-          Array.isArray(z.meta.filters)
-          && z.meta.filters[0].id === 'vlen-utf8'
+          Array.isArray(z.meta.filters) &&
+          z.meta.filters[0].id === "vlen-utf8"
         ) {
           parseAndMergeTextBytes(dbytes);
           // Otherwise just merge the bytes as a typed array.
@@ -267,7 +275,9 @@ export class AnnDataSource extends ZarrDataSource {
     if (this.obsIndex) {
       return this.obsIndex;
     }
-    this.obsIndex = this.getJson('obs/.zattrs').then(({ _index }) => this.getFlatArrDecompressed(`/obs/${_index}`));
+    this.obsIndex = this.getJson("obs/.zattrs").then(({ _index }) =>
+      this.getFlatArrDecompressed(`/obs/${_index}`)
+    );
     return this.obsIndex;
   }
 
@@ -279,7 +289,9 @@ export class AnnDataSource extends ZarrDataSource {
     if (this.varIndex) {
       return this.varIndex;
     }
-    this.varIndex = this.getJson('var/.zattrs').then(({ _index }) => this.getFlatArrDecompressed(`/var/${_index}`));
+    this.varIndex = this.getJson("var/.zattrs").then(({ _index }) =>
+      this.getFlatArrDecompressed(`/var/${_index}`)
+    );
     return this.varIndex;
   }
 
