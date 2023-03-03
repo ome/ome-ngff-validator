@@ -39,7 +39,7 @@
   <div>
     <div class="zattrs grey">
       <details>
-        <summary>table/.zattrs</summary>
+        <summary>.zattrs</summary>
         <pre><code>{JSON.stringify(tableAttrs, null, 2)}</code></pre>
       </details>
     </div>

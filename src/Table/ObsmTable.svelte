@@ -39,6 +39,7 @@
 {#await promise}
   <p>Loading Obsm...</p>
 {:then data}
+  {#if data.colNames.length > 0}
   <table>
     <thead>
       <th class="row obsm">Row</th>
@@ -65,6 +66,9 @@
       {/each}
     </tbody>
   </table>
+  {:else}
+    <p>No obsm data</p>
+  {/if}
 {:catch error}
   <p style="color: red">Failed to load obsm {error}</p>
 {/await}
@@ -108,7 +112,7 @@
   }
 
   p {
-    margin-top: 20px;
+    margin: 20px;
     text-align: left;
   }
 </style>
