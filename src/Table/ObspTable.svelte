@@ -57,8 +57,10 @@
         <tr>
           <th class="obsm">{rowIndex}</th>
           {#each data.colNames as matrixName}
-            {#each data.rowData[matrixName][rowIndex] as value}
-              <td class="obsm">
+            {#each data.rowData[matrixName][rowIndex] as value, colIndex}
+              <td class="obsm"
+                class:identity="{rowIndex === colIndex}"
+                title="Row: {rowIndex}, Column: {colIndex}">
                 <!-- If matrix is more than 2D, this value will be a list -->
                 {value}
               </td>
@@ -75,6 +77,9 @@
 <style>
   .obsm {
     background-color: rgb(224, 102, 96);
+  }
+  .identity {
+    background-color: rgb(242, 139, 134);
   }
 
   table {
