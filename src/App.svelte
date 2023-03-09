@@ -4,6 +4,7 @@
   import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
+  import SplashScreen from "./SplashScreen.svelte";
 
   import { getJson } from "./utils";
   import CheckMark from "./CheckMark.svelte";
@@ -45,17 +46,10 @@
           </div>
         {:catch error}
           <CheckMark valid={false}/>
-          <p style="color: red; margin: 20px 0">{error.message}</p>
+          <p class="error">{error.message}</p>
         {/await}
       {:else}
-        <article>
-          To validate an OME-ZARR file, use e.g.
-          <a
-            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
-          >
-            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr
-          </a>
-        </article>
+        <SplashScreen />
       {/if}
     </section>
   </main>
@@ -122,5 +116,13 @@
     a {
       white-space: nowrap;
     }
+  }
+
+  .error {
+    color: red;
+    margin: 20px 0;
+    text-align: center;
+    background: white;
+    padding: 10px;
   }
 </style>

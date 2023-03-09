@@ -12,15 +12,36 @@ export function getSchemaUrl(schemaName, version) {
 
 // fetch() doesn't error for 404 etc.
 async function fetchHandleError(url) {
-  return await fetch(url).then(function (response) {
-    if (!response.ok) {
-      console.log("Fetch error:", response);
-      // make the promise be rejected if we didn't get a 2xx response
-      throw new Error(`Error loading ${url}: ${response.statusText}`);
-    } else {
-      return response;
+  let msg = `Error Loading ${url}:`;
+  let rsp;
+  try {
+    rsp = await fetch(url).then(function (response) {
+      if (!response.ok) {
+        // make the promise be rejected if we didn't get a 2xx response
+        msg += ` ${response.statusText}`;
+      } else {
+        return response;
+      }
+    });
+  } catch (error) {
+    console.log("check for CORS...");
+    console.log(error);
+    try {
+      let corsRsp = await fetch(url, { mode: "no-cors" });
+      console.log("corsRsp", corsRsp);
+      // If the 'no-cors' mode allows this to return, then we
+      // likely failed due to CORS in the original request
+      msg += " Failed due to CORS issues.";
+    } catch (anotherError) {
+      console.log("Even `no-cors` request failed!", anotherError);
+      // return the original error (same as anotherError?)
+      msg += ` ${error}`;
     }
-  });
+  }
+  if (rsp) {
+    return rsp;
+  }
+  throw Error(msg);
 }
 
 export async function getJson(url) {
