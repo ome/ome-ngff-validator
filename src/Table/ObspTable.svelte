@@ -19,6 +19,8 @@
         "No 'keys' list found in obsp/.zattrs as required by OME-NGFF spec"
       );
     }
+    // ingnore "/data", "/indices" & "/indptr" subgroups
+    obspDataNames = obsmAttrs["keys"].filter(key => !key.includes("/"));
 
     const obspData = {};
     for (let k = 0; k < obspDataNames.length; k++) {
