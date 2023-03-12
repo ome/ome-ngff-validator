@@ -9,7 +9,7 @@
     async function loadTableData() {
   
       // 'var' array contains column metadata
-      let varAttrs = await getJson(source + "var/.zattrs");
+      let varAttrs = await getJson(source + "/var/.zattrs");
       let varColNames = varAttrs["column-order"];
       let toLoad = varColNames.map((colName) => `var/${colName}`);
       let varData = await annDataStore.loadObsColumns(toLoad);

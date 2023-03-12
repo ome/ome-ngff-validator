@@ -28,7 +28,7 @@
         return ["Invalid Well index: " + index];
       }
       loadingIndex = index;
-      let imgAttrs = await getJson(source + path + "/" + imgs[index].path + "/.zattrs");
+      let imgAttrs = await getJson(source + "/" + path + "/" + imgs[index].path + "/.zattrs");
       errs = errs.concat(await validate(imgAttrs));
     };
     return errs;
@@ -45,7 +45,7 @@
   <td>...</td>
 {:then errors}
   <td class={errors.length === 0 ? "valid" : "invalid"}>
-    <a title="{path}: Open Well" href="{url}?source={source + path}/">
+    <a title="{path}: Open Well" href="{url}?source={source + "/" + path}/">
       {#await imagePromise}
         {#if wellToValidate == "all"}
           <span title="Loading Well index: {loadingIndex}" style="color:rgba(0,0,0,0.2)">{loadingIndex}</span>

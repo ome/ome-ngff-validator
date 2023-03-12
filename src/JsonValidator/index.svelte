@@ -5,15 +5,17 @@
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
+  import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
+  import OpenWith from "./OpenWithViewers/index.svelte";
+
   import {
     CURRENT_VERSION,
-    getSchemaUrlForJson,
+    getSchemaUrlsForJson,
     validate,
     getJson,
     getVersion,
     getDataType,
   } from "../utils";
-  import vizarrLogoUrl from "../assets/vizarr_logo.png"
 
   export let source;
   export let rootAttrs;
@@ -21,30 +23,30 @@
   const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(rootAttrs);
-  const schemaUrl = getSchemaUrlForJson(rootAttrs);
-  const shortenedUrl = schemaUrl.split("main")[1];
+  const schemaUrls = getSchemaUrlsForJson(rootAttrs);
   const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
 
   // check for tables/.zattrs
-  const tablePromise = getJson(source + 'tables/.zattrs');
+  const tablePromise = getJson(source + '/tables/.zattrs');
+  // check for labels/.zattrs
+  const labelsPromise = getJson(source + '/labels/.zattrs');
 </script>
 
 <article>
-  <a title="View {dtype} in vizarr" class="vizarr_link" target="_blank"
-                href="https://hms-dbmi.github.io/vizarr/?source={source}"
-                ><img src={vizarrLogoUrl}/></a>
-
-  <!-- leave space on the right for vizarr link -->
-  <p class="margin_right">
-    Validating: <a href={source}>{zarrName}/.zattrs</a>
+  <p>
+    Validating: <a href={source}>/{zarrName}/.zattrs</a>
   </p>
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
 
-  Using schema: <a href={schemaUrl} target="_blank">{shortenedUrl}</a>
+  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  {#each schemaUrls as url, i}
+    {i > 0 ? " and " : ""}
+    <a href={url} target="_blank">{url.split("main")[1]}</a>
+  {/each}
 
   {#await promise}
     <div>loading schema...</div>
@@ -63,6 +65,8 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
+  <OpenWith {source} {dtype} />
+
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
@@ -71,6 +75,13 @@
     <p>checking for table...</p>
   {:then tablesAttrs}
     <TableInfoLink {tablesAttrs} source={source}></TableInfoLink>
+  {:catch error}
+    <!-- <p>No labels data</p> -->
+  {/await}
+    {#await labelsPromise}
+    <p>checking for labels...</p>
+  {:then labelsAttrs}
+    <LabelsInfoLink {labelsAttrs} source={source}></LabelsInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
@@ -100,19 +111,6 @@
     font-family: monospace;
   }
 
-  .vizarr_link {
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-  .vizarr_link img {
-    height: 24px;
-    margin: 15px;
-  }
-
-  .margin_right {
-    margin-right: 30px;
-  }
 
   .error pre {
     margin-top: 10px;

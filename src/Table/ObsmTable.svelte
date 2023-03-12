@@ -10,7 +10,7 @@
     // obsm is "dense matrices annotating each row. For example, the coordinates of the
     // centroid of each labeled object (Nx3 array for N cells in 3D) or output dimensions
     // of a dimentionality reduction algorithm.""
-    let obsmAttrs = await getJson(source + "obsm/.zattrs");
+    let obsmAttrs = await getJson(source + "/obsm/.zattrs");
 
     // NB: we rely on custom listing of "keys" in the obsm/.zattrs
     // See https://github.com/kevinyamauchi/ome-ngff-tables-prototype/pull/12/commits/284406d1a309203bef9d58aca76817c66ebb5912

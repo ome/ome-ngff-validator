@@ -5,14 +5,15 @@
   import Table from "./Table/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
+  import SplashScreen from "./SplashScreen.svelte";
 
   import { getJson } from "./utils";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
   let source = searchParams.get("source");
-  if (source && !source.endsWith("/")) {
-    source = source + "/";
+  if (source && source.endsWith("/")) {
+    source = source.slice(0, -1);
   }
 
   let location = window.location.href;
@@ -21,8 +22,8 @@
 
   if (source) {
     // load JSON to be validated...
-    console.log("Loading JSON... " + source + ".zattrs");
-    promise = getJson(source + ".zattrs");
+    console.log("Loading JSON... " + source + "/.zattrs");
+    promise = getJson(source + "/.zattrs");
   }
 </script>
 
@@ -46,17 +47,10 @@
             {/if}
         {:catch error}
           <CheckMark valid={false}/>
-          <p style="color: red; margin: 20px 0">{error.message}</p>
+          <p class="error">{error.message}</p>
         {/await}
       {:else}
-        <article>
-          To validate an OME-ZARR file, use e.g.
-          <a
-            href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr"
-          >
-            ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.3/9836842.zarr
-          </a>
-        </article>
+        <SplashScreen />
       {/if}
     </section>
   </main>
@@ -123,5 +117,13 @@
     a {
       white-space: nowrap;
     }
+  }
+
+  .error {
+    color: red;
+    margin: 20px 0;
+    text-align: center;
+    background: white;
+    padding: 10px;
   }
 </style>

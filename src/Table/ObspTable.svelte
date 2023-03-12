@@ -1,5 +1,5 @@
 <script>
-  import { getJson, range } from "../utils";
+  import { getJson } from "../utils";
   import { AnnDataSource } from "../vitessce-utils";
 
   export let source;
@@ -9,7 +9,7 @@
   const annDataStore = new AnnDataSource({ url: source });
 
   async function loadObsmData() {
-    let obsmAttrs = await getJson(source + "obsp/.zattrs");
+    let obsmAttrs = await getJson(source + "/obsp/.zattrs");
 
     // NB: we rely on custom listing of "keys" in the obsp/.zattrs
     // See https://github.com/kevinyamauchi/ome-ngff-tables-prototype/pull/12/commits/284406d1a309203bef9d58aca76817c66ebb5912

@@ -19,7 +19,7 @@
   {#if tableNames}
     <ul>
     {#each tableNames as tableName}
-      <li><a title="Open Table" href="{url}?source={source}tables/{tableName}/">{tableName}</a></li>
+      <li><a title="Open Table" href="{url}?source={source}/tables/{tableName}/">{tableName}</a></li>
     {/each}
     </ul>
   {:else}

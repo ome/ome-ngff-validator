@@ -46,7 +46,7 @@
 
     {#each tables as name}
       <div class="zattrs {name}">
-        <JsonPanel title={name + "/.zattrs"} url={source + name + "/.zattrs"} />
+        <JsonPanel title={name + "/.zattrs"} url={source + "/" + name + "/.zattrs"} />
       </div>
     {/each}
   </div>

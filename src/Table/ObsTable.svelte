@@ -7,7 +7,7 @@
   const annDataStore = new AnnDataSource({ url: source });
 
   async function loadObsData() {
-    let obsAttrs = await getJson(source + `obs/.zattrs`);
+    let obsAttrs = await getJson(source + `/obs/.zattrs`);
 
     // manually validate without a schema...
     // `.zattrs` MUST contain `"_index"`, which is the name of the column in obs to be used as the index.
