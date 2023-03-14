@@ -327,7 +327,7 @@ export class AnnDataSource extends ZarrDataSource {
 
   // async _loadCSCGeneSelection(selection) {
   async loadSparseData(matrix, pageSize) {
-    const sparseAttrs = await this.getJson(`${this.store.url}/${matrix}/.zattrs`);
+    const sparseAttrs = await this.getJson(`${this.store.url}${matrix}/.zattrs`);
     let [numRows, numCols] = sparseAttrs.shape;
     numRows = Math.min(numRows, pageSize);
     numCols = Math.min(numCols, pageSize);
