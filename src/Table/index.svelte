@@ -11,6 +11,15 @@
 
   const tables = ["obsp", "obsm", "var", "X", "obs"];
 
+  function getUrls(name) {
+    let urls = [source + "/" + name + "/.zattrs"];
+
+    if (name == "X") {
+      urls.push(source + "/" + name + "/.zarray")
+    }
+    return urls;
+  }
+
   // we have separate tables for X and obs so that each
   // can scroll in x-dimension independently, BUT we want
   // to syncronise the scrolling in y -> need JS solution
@@ -46,7 +55,7 @@
 
     {#each tables as name}
       <div class="zattrs {name}">
-        <JsonPanel title={name + "/.zattrs"} url={source + "/" + name + "/.zattrs"} />
+        <JsonPanel title={name + "/.zattrs"} urls={getUrls(name)} />
       </div>
     {/each}
   </div>

@@ -2,20 +2,22 @@
   import { getJson } from "../utils";
 
   export let title;
-  export let url;
+  export let urls;
 
-  const promise = getJson(url);
+  const promise = Promise.all(urls.map(async (url) => getJson(url)));
 </script>
 
 {#await promise}
   <p>Loading {title}...</p>
-{:then jsonData}
+{:then jsonObjs}
   <details>
     <summary>{title}</summary>
-    <pre><code>{JSON.stringify(jsonData, null, 2)}</code></pre>
+    {#each jsonObjs as jsonData}
+      <pre><code>{JSON.stringify(jsonData, null, 2)}</code></pre>
+    {/each}
   </details>
 {:catch error}
-  <p style="color: red">Failed to load {url} {error}</p>
+  <p style="color: red">Failed to load {urls} {error}</p>
 {/await}
 
 <style>
@@ -27,7 +29,8 @@
   pre {
     color: #faebd7;
     background-color: #2c3e50;
-    padding: 10px;
+    padding: 8px;
     font-size: 14px;
+    margin: 3px;
   }
 </style>
