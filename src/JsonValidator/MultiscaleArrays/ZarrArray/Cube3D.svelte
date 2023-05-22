@@ -88,14 +88,14 @@
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent var(--chunkX)
+        transparent var(--chunkY)
       ),
       repeating-linear-gradient(
         90deg,
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent var(--chunkY)
+        transparent var(--chunkX)
       ),
       linear-gradient(90deg, rgb(255, 255, 255), rgb(255, 255, 255));
   }
@@ -162,7 +162,7 @@
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent var(--chunkX)
+        transparent var(--chunkY)
       ),
       repeating-linear-gradient(
         90deg,
