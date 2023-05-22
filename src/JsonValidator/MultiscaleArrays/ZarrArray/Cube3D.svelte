@@ -162,7 +162,7 @@
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
         transparent 1px,
-        transparent var(--chunkX)
+        transparent var(--chunkY)
       ),
       repeating-linear-gradient(
         90deg,
