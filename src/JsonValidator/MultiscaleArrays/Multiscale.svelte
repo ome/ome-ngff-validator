@@ -5,17 +5,23 @@
   export let source;
   export let multiscale;
 
+  const WARNING = "warning";
+
   // We check that all multiscale Datasets have same dtype and
   // shape.length (number of dimensions)
 
   // If multiscale.axes (version > 0.3) check it matches shape
-  const {axes, datasets, version} = multiscale;
+  const { axes, datasets, version } = multiscale;
 
-  const checkDtypes = !["0.1", "0.2", "0.3", "0.4"].includes(version);
+  const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
 
   function allEqual(items) {
     return items.every((value) => value == items[0]);
+  }
+
+  function containsError(checks) {
+    return checks.some((check) => check.status != WARNING);
   }
 
   async function loadAndValidate() {
@@ -33,32 +39,50 @@
       dimSeparators.push(zarray.dimension_separator);
     }
 
-    let errors = [];
+    // Each check is {msg: "Message"}, with status: "warning" if it isn't an Error.
+    let checks = [];
     if (dtypes.length === 0) {
-      errors.push("No multiscale datasets")
+      checks.push({ msg: "No multiscale datasets" });
     }
 
-    if (checkDtypes && !allEqual(dtypes)) {
-      errors.push(`dtypes mismatch: ${dtypes.join(", ")}`)
+    if (!allEqual(dtypes)) {
+      if (permitDtypeMismatch) {
+        checks.push({
+          msg: `dtypes mismatch: ${dtypes.join(
+            ", "
+          )} not valid after version 0.4`,
+          status: WARNING,
+        });
+      } else {
+        checks.push({ msg: `dtypes mismatch: ${dtypes.join(", ")}` });
+      }
     }
     if (!allEqual(dimCounts)) {
-      errors.push(`number of dimensions mismatch: ${dimCounts.join(", ")}`)
+      checks.push({
+        msg: `number of dimensions mismatch: ${dimCounts.join(", ")}`,
+      });
     }
     if (axes) {
       shapes.forEach((shape) => {
         if (shape.length != axes.length) {
-          errors.push(`Shape (${shape.join(", ")}) doesn't match axes length: ${axes.length}`)
+          checks.push({
+            msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
+              axes.length
+            }`,
+          });
         }
       });
     }
     if (checkDimSeparator) {
       dimSeparators.forEach((sep) => {
         if (sep != "/") {
-          errors.push(`Dimension separator must be / for version ${version}`)
+          checks.push({
+            msg: `Dimension separator must be / for version ${version}`,
+          });
         }
       });
     }
-    return errors;
+    return checks;
   }
 
   const promise = loadAndValidate();
@@ -66,18 +90,22 @@
 
 {#await promise}
   <p>loading...</p>
-{:then errors}
-  {#if errors.length > 0}
+{:then checks}
+  {#if containsError(checks)}
     <!-- only show X if not valid - no tick if valid -->
     <CheckMark valid={false} />
-    {#each errors as error}
-      <p style="color: red">Error: {error}</p>
-    {/each}
   {:else}
     <p title="dtypes match and shapes are consistent">
       {datasets.length} Datasets checked <span style="color:green">✓</span>
     </p>
   {/if}
+  {#each checks as check}
+    {#if check.status == "warning"}
+      <p style="color: orange">Warning: {check.msg}</p>
+    {:else}
+      <p style="color: red">Error: {check.msg}</p>
+    {/if}
+  {/each}
 {:catch error}
   <p style="color: red">{error.message}</p>
 {/await}
