@@ -39,14 +39,14 @@
     // e.g. chunkIndices is (0, 1, 0, 0) and chunk is (1, 125, 125, 125)
     // we want to get [0, 125:250, 0:125, 0:125]
     let ch = store.meta.chunks;
-    const indecies = get(chunkIndices).map((index, dim) => {
+    const indices = get(chunkIndices).map((index, dim) => {
       if (ch[dim] > 1) {
         return slice(index * ch[dim], (index + 1) * ch[dim]);
       } else {
         return index * ch[dim];
       }
     });
-    chunk = await store.get(indecies);
+    chunk = await store.get(indices);
   }
 
   chunkIndices.subscribe(function () {
