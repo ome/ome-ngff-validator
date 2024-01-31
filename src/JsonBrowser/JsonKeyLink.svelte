@@ -12,7 +12,7 @@
   export let name;
   export let version;
 
-  // mapping from Spec key-words -> #achors on ngff page
+  // mapping from Spec key-words -> #anchors on ngff page
   const urls_01 = {
     "multiscales": "multiscale-md",
     "omero": "omero-md",
