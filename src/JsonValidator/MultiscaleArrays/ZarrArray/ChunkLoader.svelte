@@ -75,7 +75,7 @@
     </select>
   {/each}
 
-  {#if showChunks}
+  {#if showChunks && showSliceControls}
     <div class="sliceControls">
       Slice chunk to 2D:
       {#each chunkSlice.slice(0, -2) as cc, dim}
