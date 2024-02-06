@@ -3,10 +3,14 @@
 import Ajv from "ajv";
 
 export const CURRENT_VERSION = "0.4";
+export const DEV_VERSION = "0.5-dev"
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 export function getSchemaUrl(schemaName, version) {
+  if (version == DEV_VERSION) {
+    return `https://raw.githubusercontent.com/bogovicj/ngff/coord-transforms/latest/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
 }
 
@@ -133,8 +137,10 @@ export function getSchemaUrlsForJson(rootAttrs) {
   return schemaNames.map(name => getSchemaUrl(name, version));
 }
 
-export function validateData(schema, jsonData) {
-  const validate = ajv.compile(schema);
+export function validateData(schema, jsonData, extraSchemas) {
+  // call ajv.addSchema(schema) for each schema
+  let withSchema = extraSchemas.reduce((prev, curr) => prev.addSchema(curr), ajv);
+  const validate = withSchema.compile(schema);
   const valid = validate(jsonData);
   let errors = [];
   if (!valid) {
@@ -159,10 +165,19 @@ export async function validate(jsonData) {
     version = CURRENT_VERSION;
   }
 
+  let refSchemas = [];
+  // TODO: need to know whether to load other schemas...
+  // For now, we can use version check... 
+  if (version === DEV_VERSION) {
+    const ctSchema = await getSchema(version, "coordinate_transformation");
+    const csSchema = await getSchema(version, "coordinate_systems");
+    const axes = await getSchema(version, "axes");
+    refSchemas = [ctSchema, csSchema, axes];
+  }
   let errors = [];
   for (let s=0; s<schemaNames.length; s++) {
     let schema = await getSchema(version, schemaNames[s]);
-    let errs = validateData(schema, jsonData);
+    let errs = validateData(schema, jsonData, refSchemas);
     errors = errors.concat(errs);
   }
   return errors;
