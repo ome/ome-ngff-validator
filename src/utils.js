@@ -3,6 +3,7 @@
 import Ajv from "ajv";
 
 export const CURRENT_VERSION = "0.4";
+export const FILE_NOT_FOUND = "File not found";
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
@@ -18,7 +19,14 @@ async function fetchHandleError(url) {
     rsp = await fetch(url).then(function (response) {
       if (!response.ok) {
         // make the promise be rejected if we didn't get a 2xx response
-        msg += ` ${response.statusText}`;
+        console.log("response.statusText", response.statusText, 'statusCode', response.status)
+        // NB. statusText could be "Not Found" or "File not found" depending on server
+        // Standardise based on response.status
+        if (response.status == 404) {
+          msg += ` ${FILE_NOT_FOUND}`;
+        } else {
+          msg += ` ${response.statusText}`;
+        }
       } else {
         return response;
       }
@@ -42,6 +50,36 @@ async function fetchHandleError(url) {
     return rsp;
   }
   throw Error(msg);
+}
+
+
+export async function getZarrJson(zarr_dir) {
+  let zarrJson;
+  let msg;
+  // try to load v2 /.zattrs or v3 /zarr.json
+  try {
+    zarrJson = await getJson(zarr_dir + "/zarr.json");
+  } catch (error) {
+    console.log("getZarrJson", error)
+    if (!error.message.includes(FILE_NOT_FOUND)) {
+      throw error;
+    }
+    // IF we got a 404 then try other URL
+    try {
+      zarrJson = await getJson(zarr_dir + "/.zattrs");
+    } catch (err2) {
+      if (err2.message.includes(FILE_NOT_FOUND)) {
+        throw Error(`No .zattrs or zarr.json at ${zarr_dir}: ${FILE_NOT_FOUND}`);
+      } else {
+        // First error was 404 but this isn't...
+        throw err2;
+      }
+    }
+
+  }
+  if (zarrJson) {
+    return zarrJson;
+  }
 }
 
 export async function getJson(url) {
