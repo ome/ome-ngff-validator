@@ -42,7 +42,7 @@
   Using schema{schemaUrls.length > 1 ? "s" : ""}: 
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
-    <a href={url} target="_blank">{url.split("main")[1]}</a>
+    <a href={url} target="_blank">{url}</a>
   {/each}
 
   {#await promise}

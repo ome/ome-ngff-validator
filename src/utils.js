@@ -2,14 +2,29 @@
 
 import Ajv from "ajv";
 
-export const CURRENT_VERSION = "0.4";
+export const CURRENT_VERSION = "0.5";
+// versions to check for e.g. attributes['https://ngff.openmicroscopy.org/0.5']
+// which start at version 0.5
+export const NAMESPACED_VERSIONS = ["0.5"]
 export const FILE_NOT_FOUND = "File not found";
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 export function getSchemaUrl(schemaName, version) {
+  if (version == "0.5") {
+    // TEMP: use open PR branch
+    return `https://raw.githubusercontent.com/normanrz/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
 }
+
+function getNamespacedKey(version) {
+  if (!version) {
+    version = CURRENT_VERSION;
+  }
+  return `https://ngff.openmicroscopy.org/${version}`;
+}
+
 
 // fetch() doesn't error for 404 etc.
 async function fetchHandleError(url) {
@@ -19,7 +34,6 @@ async function fetchHandleError(url) {
     rsp = await fetch(url).then(function (response) {
       if (!response.ok) {
         // make the promise be rejected if we didn't get a 2xx response
-        console.log("response.statusText", response.statusText, 'statusCode', response.status)
         // NB. statusText could be "Not Found" or "File not found" depending on server
         // Standardise based on response.status
         if (response.status == 404) {
@@ -101,24 +115,26 @@ export async function getText(url) {
 
 let schemas = {};
 
-export async function getSchema(version, schemaName = "image") {
-  let cacheKey = schemaName + version;
-  if (!schemas[cacheKey]) {
-    const schema_url = getSchemaUrl(schemaName, version);
-    console.log("Loading schema... " + schema_url);
-    try {
-      const schema = await getJson(schema_url);
-      // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
-      delete schema["$schema"];
-      schemas[cacheKey] = schema;
-    } catch (error) {
-      throw new Error(`No schema at ${schema_url}. Version ${version} may be invalid.`);
-    }
+export async function getSchema(schemaUrl) {
+  if (!schemas[schemaUrl]) {
+    console.log("Loading schema... " + schemaUrl);
+    const schema = await getJson(schemaUrl);
+    // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
+    delete schema["$schema"];
+    schemas[schemaUrl] = schema;
   }
-  return schemas[cacheKey];
+  return schemas[schemaUrl];
 }
 
 export function getVersion(jsonData) {
+  if (jsonData.attributes) {
+    for(let v=0; v<NAMESPACED_VERSIONS.length; v++) {
+      let key = getNamespacedKey(NAMESPACED_VERSIONS[v]);
+      if (jsonData.attributes.hasOwnProperty(key)) {
+        return (NAMESPACED_VERSIONS[v]);
+      }
+    }
+  }
   let version = jsonData.multiscales
     ? jsonData.multiscales[0].version
     : jsonData.plate
@@ -167,6 +183,10 @@ export function getSchemaNames(jsonData) {
 export function getSchemaUrlsForJson(rootAttrs) {
   const msVersion = getVersion(rootAttrs);
   const version = msVersion || CURRENT_VERSION;
+  // for v0.5 onwards, rootAttrs is nested under attributes.namespace...
+  if (NAMESPACED_VERSIONS.includes(version)) {
+    rootAttrs = rootAttrs.attributes[getNamespacedKey(version)];
+  }
   const schemaNames = getSchemaNames(rootAttrs);
   return schemaNames.map(name => getSchemaUrl(name, version));
 }
@@ -184,13 +204,14 @@ export function validateData(schema, jsonData) {
 
 export async function validate(jsonData) {
   // get version, lookup schema, do validation...
-  const schemaNames = getSchemaNames(jsonData);
+  let version = getVersion(jsonData);
+  console.log("VERSION", version);
 
-  if (schemaNames.length == 0) {
+  const schemaUrls = getSchemaUrlsForJson(jsonData);
+
+  if (schemaUrls.length == 0) {
     return ["Unrecognised JSON data"];
   }
-
-  let version = getVersion(jsonData);
 
   if (!version) {
     console.log("No version found, using: " + CURRENT_VERSION);
@@ -198,8 +219,8 @@ export async function validate(jsonData) {
   }
 
   let errors = [];
-  for (let s=0; s<schemaNames.length; s++) {
-    let schema = await getSchema(version, schemaNames[s]);
+  for (let s=0; s<schemaUrls.length; s++) {
+    let schema = await getSchema(schemaUrls[s]);
     let errs = validateData(schema, jsonData);
     errors = errors.concat(errs);
   }
