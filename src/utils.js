@@ -66,6 +66,19 @@ async function fetchHandleError(url) {
   throw Error(msg);
 }
 
+export function getZarrGroupAttrsFileName(ngffVersion) {
+  if (["0.1", "0.2", "0.3", "0.4"].includes(ngffVersion)) {
+    return ".zattrs";
+  }
+  return "zarr.json";
+}
+
+export function getZarrArrayAttrsFileName(ngffVersion) {
+  if (["0.1", "0.2", "0.3", "0.4"].includes(ngffVersion)) {
+    return ".zarray";
+  }
+  return "zarr.json";
+}
 
 export async function getZarrArrayJson(zarr_dir) {
   return getZarrJson(zarr_dir, ".zarray");
@@ -145,6 +158,7 @@ export function getNgffData(jsonData) {
 
 export function getVersion(jsonData) {
   let ngffData = getNgffData(jsonData);
+  // TODO: v0.5 won't likely have version at multiscales[0].version
   console.log("getVersion", jsonData, ngffData);
   let version = ngffData.multiscales
     ? ngffData.multiscales[0].version

@@ -15,6 +15,7 @@
     getJson,
     getVersion,
     getDataType,
+    getZarrGroupAttrsFileName,
   } from "../utils";
 
   export let source;
@@ -32,12 +33,13 @@
   const zarrName = dirs[dirs.length - 1];
 
   // check for labels/.zattrs
-  const labelsPromise = getJson(source + '/labels/.zattrs');
+  const zarrAttrsFileName = getZarrGroupAttrsFileName(msVersion);
+  const labelsPromise = getJson(source + '/labels/' + zarrAttrsFileName);
 </script>
 
 <article>
   <p>
-    Validating: <a href={source}>/{zarrName}/.zattrs</a>
+    Validating: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
 
   {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}

@@ -1,12 +1,12 @@
 <script>
-  import { getZarrArrayJson, formatBytes, getChunkShape, getArrayDtype } from "../../../utils";
+  import { getJson, formatBytes, getChunkShape, getArrayDtype } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
   import ChunkLoader from "./ChunkLoader.svelte";
 
   export let source;
   export let path;
 
-  const promise = getZarrArrayJson(source + "/" + path);
+  const promise = getJson(source + "/" + path);
 
   function totalChunkCount(zarray) {
     return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
@@ -28,7 +28,7 @@
 </script>
 
 <div class="array">
-  <p>Path <a href="{source + "/" + path + '/.zarray'} ">{path + "/.zarray"}</a></p>
+  <p>Path <a href="{source + "/" + path} ">{path}</a></p>
 
   {#await promise}
     <div>loading array .zarray ...</div>
@@ -64,7 +64,7 @@
     <Cube3D {zarray} />
 
     <details>
-      <summary>{path}/.zarray</summary>
+      <summary>{path}</summary>
       <pre><code>{JSON.stringify(zarray, null, 2)}</code></pre>
     </details>
   {:catch error}
