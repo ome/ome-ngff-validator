@@ -67,7 +67,11 @@ async function fetchHandleError(url) {
 }
 
 
-export async function getZarrJson(zarr_dir) {
+export async function getZarrArrayJson(zarr_dir) {
+  return getZarrJson(zarr_dir, ".zarray");
+}
+
+export async function getZarrJson(zarr_dir, alternative=".zattrs") {
   let zarrJson;
   let msg;
   // try to load v2 /.zattrs or v3 /zarr.json
@@ -80,10 +84,10 @@ export async function getZarrJson(zarr_dir) {
     }
     // IF we got a 404 then try other URL
     try {
-      zarrJson = await getJson(zarr_dir + "/.zattrs");
+      zarrJson = await getJson(zarr_dir + `/${alternative}`);
     } catch (err2) {
       if (err2.message.includes(FILE_NOT_FOUND)) {
-        throw Error(`No .zattrs or zarr.json at ${zarr_dir}: ${FILE_NOT_FOUND}`);
+        throw Error(`No ${alternative} or zarr.json at ${zarr_dir}: ${FILE_NOT_FOUND}`);
       } else {
         // First error was 404 but this isn't...
         throw err2;
@@ -126,21 +130,28 @@ export async function getSchema(schemaUrl) {
   return schemas[schemaUrl];
 }
 
-export function getVersion(jsonData) {
+export function getNgffData(jsonData) {
+  // Handle nesting of NGFF data under namespace key for v0.5+
   if (jsonData.attributes) {
     for(let v=0; v<NAMESPACED_VERSIONS.length; v++) {
       let key = getNamespacedKey(NAMESPACED_VERSIONS[v]);
       if (jsonData.attributes.hasOwnProperty(key)) {
-        return (NAMESPACED_VERSIONS[v]);
+        return jsonData.attributes[key];
       }
     }
   }
-  let version = jsonData.multiscales
-    ? jsonData.multiscales[0].version
-    : jsonData.plate
-    ? jsonData.plate.version
-    : jsonData.well
-    ? jsonData.well.version
+  return jsonData;
+}
+
+export function getVersion(jsonData) {
+  let ngffData = getNgffData(jsonData);
+  console.log("getVersion", jsonData, ngffData);
+  let version = ngffData.multiscales
+    ? ngffData.multiscales[0].version
+    : ngffData.plate
+    ? ngffData.plate.version
+    : ngffData.well
+    ? ngffData.well.version
     : undefined;
   return version;
 }
@@ -164,17 +175,18 @@ export function getSchemaName(jsonData) {
 }
 
 export function getSchemaNames(jsonData) {
+  let ngffData = getNgffData(jsonData);
   let names = [];
-  if (jsonData.multiscales) {
+  if (ngffData.multiscales) {
     names.push("image");
   }
-  if (jsonData.plate) {
+  if (ngffData.plate) {
     names.push("plate");
   }
-  if (jsonData.well) {
+  if (ngffData.well) {
     names.push("well");
   }
-  if (jsonData["image-label"]) {
+  if (ngffData["image-label"]) {
     names.push("label");
   }
   return names;
@@ -232,6 +244,14 @@ export function formatBytes(bytes) {
   if (bytes == 0) return "0 Byte";
   var i = Math.floor(Math.log(bytes) / Math.log(1000));
   return (bytes / Math.pow(1000, i)).toFixed(2) + " " + sizes[i];
+}
+
+export function getChunkShape(zarray) {
+  return zarray.chunks || zarray.chunk_grid?.configuration?.chunk_shape;
+}
+
+export function getArrayDtype(zarray) {
+  return zarray.dtype || zarray.data_type;
 }
 
 export function getSearchParam(key) {

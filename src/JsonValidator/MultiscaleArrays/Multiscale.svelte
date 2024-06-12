@@ -1,5 +1,5 @@
 <script>
-  import { getJson } from "../../utils";
+  import { getZarrArrayJson, getChunkShape } from "../../utils";
   import CheckMark from "../../CheckMark.svelte";
 
   export let source;
@@ -32,11 +32,13 @@
 
     for (let i = 0; i < datasets.length; i++) {
       let dataset = datasets[i];
-      let zarray = await getJson(source + "/" + dataset.path + "/.zarray");
+      let zarray = await getZarrArrayJson(source + "/" + dataset.path);
+      console.log('zarray', zarray);
+      // Need to handle Zarr v2 and Zarr v3:
       dimCounts.push(zarray.shape.length);
-      dtypes.push(zarray.dtype);
+      dtypes.push(zarray.dtype || zarray.data_type);
       shapes.push(zarray.shape);
-      dimSeparators.push(zarray.dimension_separator);
+      dimSeparators.push(zarray.dimension_separator || zarray.chunk_key_encoding?.configuration?.separator);
     }
 
     // Each check is {msg: "Message"}, with status: "warning" if it isn't an Error.

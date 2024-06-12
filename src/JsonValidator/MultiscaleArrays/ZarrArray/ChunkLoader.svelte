@@ -1,6 +1,6 @@
 <script>
   import { openArray, slice } from "zarr";
-  import { range } from "../../../utils";
+  import { range, getChunkShape } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
 
@@ -11,7 +11,7 @@
   let showChunks = false;
   let chunk;
 
-  const chunks = zarray.chunks;
+  const chunks = getChunkShape(zarray);
   const chunkCounts = zarray.shape.map((sh, index) =>
     Math.ceil(sh / chunks[index])
   );

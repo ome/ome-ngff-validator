@@ -1,4 +1,5 @@
 <script>
+  import { getChunkShape } from "../../../utils";
   export let zarray;
 
   // reference to parent element
@@ -21,7 +22,7 @@
   const scaledZ = sizeZ * scale;
 
   const minC = 5;
-  const chunks = zarray.chunks;
+  const chunks = getChunkShape(zarray);
   const chunkX = Math.max(minC, chunks[chunks.length - 1] * scale);
   const chunkY = Math.max(minC, chunks[chunks.length - 2] * scale);
   const chunkZ = Math.max(minC, chunks[chunks.length - 3] * scale);

@@ -1,24 +1,26 @@
 <script>
-  import { getJson, formatBytes, range } from "../../../utils";
+  import { getZarrArrayJson, formatBytes, getChunkShape, getArrayDtype } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
   import ChunkLoader from "./ChunkLoader.svelte";
 
   export let source;
   export let path;
 
-  const promise = getJson(source + "/" + path + "/.zarray");
+  const promise = getZarrArrayJson(source + "/" + path);
 
   function totalChunkCount(zarray) {
     return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
   }
 
   function chunkCounts(zarray) {
-    const ch = zarray.chunks;
+    const ch = getChunkShape(zarray);
     return zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
   }
 
   function getBytes(shape, zarray) {
-    let bytesPerPixel = [1, 2, 4, 8].find((n) => zarray.dtype.includes(n));
+    // handle v2 and v3 zarr
+    let dtype = getArrayDtype(zarray)
+    let bytesPerPixel = [1, 2, 4, 8].find((n) => dtype.includes(n));
     if (!bytesPerPixel) return "";
     let pixels = shape.reduce((i, p) => i * p, 1);
     return formatBytes(bytesPerPixel * pixels);
@@ -38,12 +40,12 @@
       <tr>
         <th>Bytes</th>
         <td>{getBytes(zarray.shape, zarray)}</td>
-        <td>{getBytes(zarray.chunks, zarray)}</td>
+        <td>{getBytes(getChunkShape(zarray), zarray)}</td>
       </tr>
       <tr>
         <th>Shape</th>
         <td>{JSON.stringify(zarray.shape)}</td>
-        <td>{JSON.stringify(zarray.chunks)}</td>
+        <td>{JSON.stringify(getChunkShape(zarray))}</td>
       </tr>
       <tr>
         <th>Counts</th>
@@ -52,7 +54,7 @@
       </tr>
       <tr>
         <th>Type</th>
-        <td>{zarray.dtype}</td>
+        <td>{getArrayDtype(zarray)}</td>
         <td>numpy.ndarray</td>
       </tr>
     </table>
