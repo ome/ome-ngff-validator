@@ -31,7 +31,7 @@
   <p>Path <a href="{source + "/" + path} ">{path}</a></p>
 
   {#await promise}
-    <div>loading array .zarray ...</div>
+    <div>loading array data ...</div>
   {:then zarray}
     <table>
       <tr>

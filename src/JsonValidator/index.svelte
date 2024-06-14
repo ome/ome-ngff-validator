@@ -11,7 +11,6 @@
     CURRENT_VERSION,
     getSchemaUrlsForJson,
     validate,
-    getNgffData,
     getJson,
     getVersion,
     getDataType,
@@ -24,7 +23,6 @@
   const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(rootAttrs);
-  const ngffData = getNgffData(rootAttrs);
   const schemaUrls = getSchemaUrlsForJson(rootAttrs);
   console.log("index.svelte schemaUrls", schemaUrls)
   const promise = validate(rootAttrs);
@@ -82,12 +80,12 @@
   {/await}
 </article>
 
-{#if ngffData.multiscales}
-  <MultiscaleArrays {source} rootAttrs={ngffData} />
-{:else if ngffData.plate}
-  <Plate {source} rootAttrs={ngffData} />
-{:else if ngffData.well}
-  <Well {source} rootAttrs={ngffData} />
+{#if rootAttrs.multiscales}
+  <MultiscaleArrays {source} rootAttrs={rootAttrs} />
+{:else if rootAttrs.plate}
+  <Plate {source} rootAttrs={rootAttrs} />
+{:else if rootAttrs.well}
+  <Well {source} rootAttrs={rootAttrs} />
 {/if}
 
 <style>

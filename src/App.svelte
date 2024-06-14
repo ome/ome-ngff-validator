@@ -6,7 +6,7 @@
   import Modal from "svelte-simple-modal";
   import SplashScreen from "./SplashScreen.svelte";
 
-  import { getZarrJson } from "./utils";
+  import { getZarrGroupAttrs } from "./utils";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -22,7 +22,7 @@
   if (source) {
     // load JSON to be validated...
     console.log("Loading JSON... " + source);
-    promise = getZarrJson(source);
+    promise = getZarrGroupAttrs(source);
   }
 </script>
 

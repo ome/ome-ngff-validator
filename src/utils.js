@@ -14,6 +14,8 @@ export function getSchemaUrl(schemaName, version) {
   if (version == "0.5") {
     // TEMP: use open PR branch
     return `https://raw.githubusercontent.com/normanrz/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
+  } else if (version == "0.5-dev") {
+    return `https://raw.githubusercontent.com/d-v-b/ngff/multiple_zarr_versions/0.5-dev1/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
 }
@@ -80,11 +82,17 @@ export function getZarrArrayAttrsFileName(ngffVersion) {
   return "zarr.json";
 }
 
+export async function getZarrGroupAttrs(zarr_dir) {
+  let rawJson = await getZarrJson(zarr_dir, ".zattrs");
+  let groupAttrs = rawJson.attributes || rawJson;
+  return groupAttrs;
+}
+
 export async function getZarrArrayJson(zarr_dir) {
   return getZarrJson(zarr_dir, ".zarray");
 }
 
-export async function getZarrJson(zarr_dir, alternative=".zattrs") {
+async function getZarrJson(zarr_dir, alternative=".zattrs") {
   let zarrJson;
   let msg;
   // try to load v2 /.zattrs or v3 /zarr.json
@@ -143,23 +151,7 @@ export async function getSchema(schemaUrl) {
   return schemas[schemaUrl];
 }
 
-export function getNgffData(jsonData) {
-  // Handle nesting of NGFF data under namespace key for v0.5+
-  if (jsonData.attributes) {
-    for(let v=0; v<NAMESPACED_VERSIONS.length; v++) {
-      let key = getNamespacedKey(NAMESPACED_VERSIONS[v]);
-      if (jsonData.attributes.hasOwnProperty(key)) {
-        return jsonData.attributes[key];
-      }
-    }
-  }
-  return jsonData;
-}
-
-export function getVersion(jsonData) {
-  let ngffData = getNgffData(jsonData);
-  // TODO: v0.5 won't likely have version at multiscales[0].version
-  console.log("getVersion", jsonData, ngffData);
+export function getVersion(ngffData) {
   let version = ngffData.multiscales
     ? ngffData.multiscales[0].version
     : ngffData.plate
@@ -167,6 +159,7 @@ export function getVersion(jsonData) {
     : ngffData.well
     ? ngffData.well.version
     : undefined;
+  console.log("version", version);
   return version;
 }
 
@@ -188,8 +181,7 @@ export function getSchemaName(jsonData) {
   return names[0];
 }
 
-export function getSchemaNames(jsonData) {
-  let ngffData = getNgffData(jsonData);
+export function getSchemaNames(ngffData) {
   let names = [];
   if (ngffData.multiscales) {
     names.push("image");
@@ -207,6 +199,7 @@ export function getSchemaNames(jsonData) {
 }
 
 export function getSchemaUrlsForJson(rootAttrs) {
+  console.log('getSchemaUrlsForJson rootAttrs', rootAttrs)
   const msVersion = getVersion(rootAttrs);
   const version = msVersion || CURRENT_VERSION;
   // for v0.5 onwards, rootAttrs is nested under attributes.namespace...
