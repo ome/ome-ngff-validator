@@ -126,7 +126,7 @@
   .top {
     top: calc((var(--size-y) - var(--size-z)) / 2);
     height: var(--size-z);
-    transform: rotateX(90deg) translateZ(calc(var(--size-y) / 2));
+    transform: rotateX(270deg) translateZ(calc(var(--size-y)* -1 / 2));
     background-image: repeating-linear-gradient(
         0deg,
         rgba(70, 70, 70, 0.7) 0px,
