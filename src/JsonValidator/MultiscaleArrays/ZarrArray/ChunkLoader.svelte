@@ -3,7 +3,7 @@
   import { range, getChunkShape } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
-  // import * as zarr from "zarrita";
+  import * as zarr from "zarrita";
   import { slice } from "@zarrita/indexing";
 
 
@@ -41,34 +41,26 @@
     chunk = undefined;
 
     // Use zarr like this, otherwise we get "Error: Unknown codec: bytes"
-    let zarr = await import("https://cdn.jsdelivr.net/npm/zarrita@next/+esm");
+    // let zarr = await import("https://cdn.jsdelivr.net/npm/zarrita@next/+esm");
     let url = source + "/" + zarrPath;
     const store = new zarr.FetchStore(url);
-    console.log("store", store)
     const arr = await zarr.open(store, { kind: "array" });
-    console.log("arr", arr)
-    const view = await zarr.get(arr, [0, 0, null, null]);
-
-    console.log("view", view)
 
     // we want to get exactly 1 chunk
     // e.g. chunkIndices is (0, 1, 0, 0) and chunk is (1, 125, 125, 125)
     // we want to get [0, 125:250, 0:125, 0:125]
-    console.log('arr', arr, arr.chunks);
     let ch = arr.chunks;
     const indices = get(chunkIndices);
-    console.log('indices', indices);
     let slices = indices.map((index, dim) => {
       if (ch[dim] > 1) {
-        console.log('dim', dim, 'slice', index * ch[dim], (index + 1) * ch[dim])
         return slice(index * ch[dim], (index + 1) * ch[dim]);
       } else {
-        console.log('-', index * ch[dim])
-        return index * ch[dim];
+        return index;
       }
     });
+    // Updating chunk will trigger ChunkViewer to re-render
+    console.log("loading chunk", slices)
     chunk = await zarr.get(arr, slices);
-    console.log("slices chunk2", chunk);
   }
 
   chunkIndices.subscribe(function () {
