@@ -14,7 +14,8 @@ export function getSchemaUrl(schemaName, version) {
   if (version == "0.5") {
     // TEMP: use open PR branch
     return `https://raw.githubusercontent.com/normanrz/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
-  } else if (version == "0.5-dev") {
+  } else if (version == "0.5-dev1") {
+    https://raw.githubusercontent.com/d-v-b/ngff/multiple_zarr_versions/0.5-dev1/schemas/image.schema
     return `https://raw.githubusercontent.com/d-v-b/ngff/multiple_zarr_versions/0.5-dev1/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
