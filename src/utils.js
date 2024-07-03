@@ -3,29 +3,18 @@
 import Ajv from "ajv";
 
 export const CURRENT_VERSION = "0.5";
-// versions to check for e.g. attributes['https://ngff.openmicroscopy.org/0.5']
-// which start at version 0.5
-export const NAMESPACED_VERSIONS = ["0.5"]
 export const FILE_NOT_FOUND = "File not found";
 
 const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 export function getSchemaUrl(schemaName, version) {
-  if (version == "0.5") {
+  if (version == "0.5" || version == "0.5-dev2") {
     // TEMP: use open PR branch
     return `https://raw.githubusercontent.com/normanrz/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
   } else if (version == "0.5-dev1") {
-    https://raw.githubusercontent.com/d-v-b/ngff/multiple_zarr_versions/0.5-dev1/schemas/image.schema
     return `https://raw.githubusercontent.com/d-v-b/ngff/multiple_zarr_versions/0.5-dev1/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
-}
-
-function getNamespacedKey(version) {
-  if (!version) {
-    version = CURRENT_VERSION;
-  }
-  return `https://ngff.openmicroscopy.org/${version}`;
 }
 
 
@@ -153,6 +142,10 @@ export async function getSchema(schemaUrl) {
 }
 
 export function getVersion(ngffData) {
+  console.log("getVersion...", ngffData, ngffData.ome?.version)
+  if (ngffData.ome?.version) {
+    return ngffData.ome.version;
+  }
   let version = ngffData.multiscales
     ? ngffData.multiscales[0].version
     : ngffData.plate
@@ -203,9 +196,9 @@ export function getSchemaUrlsForJson(rootAttrs) {
   console.log('getSchemaUrlsForJson rootAttrs', rootAttrs)
   const msVersion = getVersion(rootAttrs);
   const version = msVersion || CURRENT_VERSION;
-  // for v0.5 onwards, rootAttrs is nested under attributes.namespace...
-  if (NAMESPACED_VERSIONS.includes(version)) {
-    rootAttrs = rootAttrs.attributes[getNamespacedKey(version)];
+  // for v0.5 onwards, rootAttrs is nested under attributes.ome...
+  if (rootAttrs.ome) {
+    rootAttrs = rootAttrs.ome;
   }
   const schemaNames = getSchemaNames(rootAttrs);
   return schemaNames.map(name => getSchemaUrl(name, version));

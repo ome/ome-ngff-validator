@@ -20,12 +20,15 @@
   export let source;
   export let rootAttrs;
 
+  // v0.5+ unwrap the attrs under "ome"
+  const omeAttrs = rootAttrs.ome || rootAttrs;
+
   const msVersion = getVersion(rootAttrs);
 
-  const dtype = getDataType(rootAttrs);
-  const schemaUrls = getSchemaUrlsForJson(rootAttrs);
+  const dtype = getDataType(omeAttrs);
+  const schemaUrls = getSchemaUrlsForJson(omeAttrs);
   console.log("index.svelte schemaUrls", schemaUrls)
-  const promise = validate(rootAttrs);
+  const promise = validate(omeAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
@@ -80,12 +83,12 @@
   {/await}
 </article>
 
-{#if rootAttrs.multiscales}
-  <MultiscaleArrays {source} rootAttrs={rootAttrs} />
-{:else if rootAttrs.plate}
-  <Plate {source} rootAttrs={rootAttrs} />
-{:else if rootAttrs.well}
-  <Well {source} rootAttrs={rootAttrs} />
+{#if omeAttrs.multiscales}
+  <MultiscaleArrays {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.plate}
+  <Plate {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.well}
+  <Well {source} rootAttrs={omeAttrs} />
 {/if}
 
 <style>
