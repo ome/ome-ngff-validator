@@ -15,6 +15,11 @@
 
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
+  const allowMissingDimNames = ["0.1", "0.2", "0.3", "0.4"].includes(version);
+  let successMsg = "dtypes match and shapes are consistent";
+  if (!allowMissingDimNames) {
+    successMsg = "dimension_names checked, " + successMsg;
+  }
 
   function allEqual(items) {
     return items.every((value) => value == items[0]);
@@ -29,11 +34,12 @@
     let dimCounts = [];
     let shapes = [];
     let dimSeparators = [];
+    let zarrayJsonList = [];
 
     for (let i = 0; i < datasets.length; i++) {
       let dataset = datasets[i];
       let zarray = await getZarrArrayJson(source + "/" + dataset.path);
-      console.log('zarray', zarray);
+      zarrayJsonList.push(zarray);
       // Need to handle Zarr v2 and Zarr v3:
       dimCounts.push(zarray.shape.length);
       dtypes.push(zarray.dtype || zarray.data_type);
@@ -74,6 +80,24 @@
           });
         }
       });
+
+      if (!allowMissingDimNames) {
+        let axesNames = JSON.stringify(axes.map(axis => axis.name));
+        zarrayJsonList.forEach((arrData, i) => {
+          let msg;
+          if (!arrData.dimension_names) {
+            msg = `No dimension_names found for dataset ${i}`;
+          } else {
+            let dimNames = JSON.stringify(arrData.dimension_names);
+            if (dimNames != axesNames) {
+              msg = `dimension_names: ${dimNames} don't match axes names: ${axesNames}`;
+            }
+          }
+          if (msg) {
+            checks.push({msg});
+          }
+        });
+      }
     }
     if (checkDimSeparator) {
       dimSeparators.forEach((sep) => {
@@ -97,7 +121,7 @@
     <!-- only show X if not valid - no tick if valid -->
     <CheckMark valid={false} />
   {:else}
-    <p title="dtypes match and shapes are consistent">
+    <p title="{successMsg}">
       {datasets.length} Datasets checked <span style="color:green">✓</span>
     </p>
   {/if}
