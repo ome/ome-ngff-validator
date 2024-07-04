@@ -73,8 +73,7 @@ export function getZarrArrayAttrsFileName(ngffVersion) {
 }
 
 export async function getZarrGroupAttrs(zarr_dir) {
-  let rawJson = await getZarrJson(zarr_dir, ".zattrs");
-  let groupAttrs = rawJson.attributes || rawJson;
+  let groupAttrs = await getZarrJson(zarr_dir, ".zattrs");
   return groupAttrs;
 }
 
@@ -146,6 +145,9 @@ export function getVersion(ngffData) {
   if (ngffData.ome?.version) {
     return ngffData.ome.version;
   }
+  if (ngffData.version) {
+    return ngffData.version;
+  }
   let version = ngffData.multiscales
     ? ngffData.multiscales[0].version
     : ngffData.plate
@@ -194,18 +196,24 @@ export function getSchemaNames(ngffData) {
 
 export function getSchemaUrlsForJson(rootAttrs) {
   console.log('getSchemaUrlsForJson rootAttrs', rootAttrs)
-  const msVersion = getVersion(rootAttrs);
+  // v0.5+ unwrap the attrs under "attributes.ome"
+  let omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
+
+  const msVersion = getVersion(omeAttrs);
   const version = msVersion || CURRENT_VERSION;
   // for v0.5 onwards, rootAttrs is nested under attributes.ome...
-  if (rootAttrs.ome) {
-    rootAttrs = rootAttrs.ome;
+  if (omeAttrs.ome) {
+    console.trace("WARNING - FIXME!")
+    omeAttrs = omeAttrs.ome;
   }
-  const schemaNames = getSchemaNames(rootAttrs);
+  const schemaNames = getSchemaNames(omeAttrs);
   return schemaNames.map(name => getSchemaUrl(name, version));
 }
 
-export function validateData(schema, jsonData) {
-  const validate = ajv.compile(schema);
+export function validateData(schema, jsonData, extraSchemas) {
+  // call ajv.addSchema(schema) for each schema
+  let withSchema = extraSchemas.reduce((prev, curr) => prev.addSchema(curr), ajv);
+  const validate = withSchema.compile(schema);
   const valid = validate(jsonData);
   let errors = [];
   if (!valid) {
@@ -217,13 +225,15 @@ export function validateData(schema, jsonData) {
 
 export async function validate(jsonData) {
   // get version, lookup schema, do validation...
-  let version = getVersion(jsonData);
-  console.log("VERSION", version);
+  // v0.5+ unwrap the attrs under "attributes.ome"
+  let omeAttrs = jsonData?.attributes?.ome || jsonData;
+  let version = getVersion(omeAttrs);
+  console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
 
   if (schemaUrls.length == 0) {
-    return ["Unrecognised JSON data"];
+    return ["No schemas found. Unrecognised JSON data"];
   }
 
   if (!version) {
@@ -231,10 +241,19 @@ export async function validate(jsonData) {
     version = CURRENT_VERSION;
   }
 
+  let refSchemas = [];
+  // TODO: need to know whether to load other schemas...
+  // For now, we can use version check... 
+  if (version === "0.5") {
+    // const ctSchema = await getSchema(version, "coordinate_transformation");
+    // const csSchema = await getSchema(version, "coordinate_systems");
+    const versionSchema = await getSchema(getSchemaUrl("version", version));
+    refSchemas = [versionSchema];
+  }
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
     let schema = await getSchema(schemaUrls[s]);
-    let errs = validateData(schema, jsonData);
+    let errs = validateData(schema, jsonData, refSchemas);
     errors = errors.concat(errs);
   }
   return errors;

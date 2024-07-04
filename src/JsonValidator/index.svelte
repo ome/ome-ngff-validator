@@ -21,14 +21,14 @@
   export let rootAttrs;
 
   // v0.5+ unwrap the attrs under "ome"
-  const omeAttrs = rootAttrs.ome || rootAttrs;
+  const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
   const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(omeAttrs);
   const schemaUrls = getSchemaUrlsForJson(omeAttrs);
   console.log("index.svelte schemaUrls", schemaUrls)
-  const promise = validate(omeAttrs);
+  const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
