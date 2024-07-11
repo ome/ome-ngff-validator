@@ -1,5 +1,5 @@
 <script>
-  import { getJson, validate } from "../../utils";
+  import { getZarrGroupAttrs, validate } from "../../utils";
 
   export let source;
   export let path;
@@ -7,8 +7,7 @@
   // const promise = getJson(source + path + "/.zattrs");
 
   async function loadAndValidate() {
-    let imgAttrs = await getJson(source + "/" + path + "/.zattrs");
-    console.log("imgAttrs", imgAttrs);
+    let imgAttrs = await getZarrGroupAttrs(source + "/" + path);
     let errs = await validate(imgAttrs);
     return errs;
   }

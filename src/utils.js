@@ -5,7 +5,6 @@ import Ajv from "ajv";
 export const CURRENT_VERSION = "0.5";
 export const FILE_NOT_FOUND = "File not found";
 
-const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 export function getSchemaUrl(schemaName, version) {
   if (version == "0.5" || version == "0.5-dev2") {
@@ -212,6 +211,7 @@ export function getSchemaUrlsForJson(rootAttrs) {
 
 export function validateData(schema, jsonData, extraSchemas) {
   // call ajv.addSchema(schema) for each schema
+  const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
   let withSchema = extraSchemas.reduce((prev, curr) => prev.addSchema(curr), ajv);
   const validate = withSchema.compile(schema);
   const valid = validate(jsonData);
