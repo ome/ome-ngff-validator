@@ -3,7 +3,7 @@
     {
       "name": "vizarr",
       "logo": "/vizarr_logo.png",
-      "href": "https://deploy-preview-172--vizarr.netlify.app/?source="
+      "href": "https://hms-dbmi.github.io/vizarr/?source="
     },
     {
       "name": "itk-vtk-viewer",
