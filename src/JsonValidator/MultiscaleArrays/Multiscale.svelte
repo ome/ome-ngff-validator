@@ -1,5 +1,5 @@
 <script>
-  import { getZarrArrayJson, getChunkShape } from "../../utils";
+  import { getZarrArrayJson, getChunkAndShardShapes } from "../../utils";
   import CheckMark from "../../CheckMark.svelte";
 
   export let source;

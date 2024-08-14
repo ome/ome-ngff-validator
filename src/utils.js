@@ -266,8 +266,23 @@ export function formatBytes(bytes) {
   return (bytes / Math.pow(1000, i)).toFixed(2) + " " + sizes[i];
 }
 
-export function getChunkShape(zarray) {
-  return zarray.chunks || zarray.chunk_grid?.configuration?.chunk_shape;
+export function getChunkAndShardShapes(zarray) {
+  // Returns [chunkShape, shardShape]. shardShape may be undefined
+  // For zarr v2 we just have chunks:
+  if (zarray.chunks) {
+    return [zarray.chunks, undefined]
+  }
+  // For zarr v3 we check for sharding
+  // Based on https://github.com/zarr-developers/zarr-specs/blob/main/docs/v3/codecs/sharding-indexed/v1.0.rst#configuration-parameters
+  const chunk_shape = zarray.chunk_grid?.configuration?.chunk_shape;
+  let sharding_codecs = zarray.codecs?.filter(codec => codec.name == "sharding_indexed");
+  const sub_chunks = sharding_codecs?.[0].configuration?.chunk_shape;
+  // if we have sharding, a 'chunk' is the sub-chunk of a shard
+  if (sub_chunks) {
+    return [sub_chunks, chunk_shape]
+  } else {
+    return [chunk_shape, undefined];
+  }
 }
 
 export function getArrayDtype(zarray) {

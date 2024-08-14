@@ -1,5 +1,5 @@
 <script>
-  import { getJson, formatBytes, getChunkShape, getArrayDtype } from "../../../utils";
+  import { getJson, formatBytes, getChunkAndShardShapes, getArrayDtype } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
   import ChunkLoader from "./ChunkLoader.svelte";
 
@@ -12,9 +12,21 @@
     return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
   }
 
+  function totalShardCount(zarray) {
+    return shardCounts(zarray).reduce((prev, curr) => prev * curr, 1);
+  }
+
   function chunkCounts(zarray) {
-    const ch = getChunkShape(zarray);
+    const [ch, shards] = getChunkAndShardShapes(zarray);
     return zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
+  }
+
+  function shardCounts(zarray) {
+    const [ch, shards] = getChunkAndShardShapes(zarray);
+    if (!shards) {
+      return [];
+    }
+    return zarray.shape.map((sh, index) => Math.ceil(sh / shards[index]));
   }
 
   function getBytes(shape, zarray) {
@@ -33,24 +45,31 @@
   {#await promise}
     <div>loading array data ...</div>
   {:then zarray}
+    {@const shard = getChunkAndShardShapes(zarray)[1]}
     <table>
       <tr>
-        <th /><th>Array</th><th>Chunk</th>
+        <th />
+        <th>Array</th>
+        <th>Chunk</th>
+        {#if shard}<th style:border-color="#ff512f">Shard</th>{/if}
       </tr>
       <tr>
         <th>Bytes</th>
         <td>{getBytes(zarray.shape, zarray)}</td>
-        <td>{getBytes(getChunkShape(zarray), zarray)}</td>
+        <td>{getBytes(getChunkAndShardShapes(zarray)[0], zarray)}</td>
+        {#if shard}<td>{getBytes(shard, zarray)}</td>{/if}
       </tr>
       <tr>
         <th>Shape</th>
         <td>{JSON.stringify(zarray.shape)}</td>
-        <td>{JSON.stringify(getChunkShape(zarray))}</td>
+        <td>{JSON.stringify(getChunkAndShardShapes(zarray)[0])}</td>
+        {#if shard}<td>{JSON.stringify(shard)}</td>{/if}
       </tr>
       <tr>
         <th>Counts</th>
         <td>{chunkCounts(zarray)}</td>
         <td>{totalChunkCount(zarray)} Chunks</td>
+        {#if shard}<td>{totalShardCount(zarray)} Shards</td>{/if}
       </tr>
       <tr>
         <th>Type</th>
