@@ -77,7 +77,7 @@
   {#await labelsPromise}
     <p>checking for labels...</p>
   {:then labelsAttrs}
-    <LabelsInfoLink {labelsAttrs} source={source}></LabelsInfoLink>
+    <LabelsInfoLink {labelsAttrs} source={source} {zarrAttrsFileName}></LabelsInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}

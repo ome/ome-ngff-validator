@@ -1,11 +1,14 @@
 <script>
     export let source;
     export let labelsAttrs;
+    export let zarrAttrsFileName;
     console.log("labelsAttrs:", labelsAttrs);
     const url = window.location.origin + window.location.pathname;
     let labelsPaths;
     if (labelsAttrs.labels) {
       labelsPaths = labelsAttrs.labels;
+    } else if (labelsAttrs?.attributes?.ome?.labels) {
+      labelsPaths = labelsAttrs.attributes.ome.labels;
     }
   </script>
   
@@ -19,11 +22,11 @@
       {/each}
       </ul>
     {:else}
-      <div style="color:red">labels/.zattrs has no 'labels' list</div>
+      <div style="color:red">labels/{zarrAttrsFileName} has no 'labels' list</div>
     {/if}
   
     <details>
-      <summary>labels/.zattrs</summary>
+      <summary>labels/{zarrAttrsFileName}</summary>
       <pre><code>{JSON.stringify(labelsAttrs, null, 2)}</code></pre>
     </details>
   </div>
