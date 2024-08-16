@@ -18,6 +18,6 @@
     "ndarray": "^1.0.19",
     "svelte-icons-pack": "^1.4.6",
     "svelte-simple-modal": "^1.4.1",
-    "zarrita": "^0.4.0-next.14"
+    "zarrita": "^0.4.0-next.15"
   }
 }
