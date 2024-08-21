@@ -1,6 +1,7 @@
 <script>
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
+  import RoCrate from "./RoCrate/index.svelte";
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -73,6 +74,8 @@
   <div class="json">
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
+
+  <RoCrate version={msVersion} {source}></RoCrate>
 
   {#await labelsPromise}
     <p>checking for labels...</p>

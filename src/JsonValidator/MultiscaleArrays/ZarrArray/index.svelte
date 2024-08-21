@@ -2,6 +2,7 @@
   import { getJson, formatBytes, getChunkAndShardShapes, getArrayDtype } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
   import ChunkLoader from "./ChunkLoader.svelte";
+  import DetailsPrePanel from "../../../JsonBrowser/DetailsPrePanel.svelte";
 
   export let source;
   export let path;
@@ -82,10 +83,9 @@
 
     <Cube3D {zarray} />
 
-    <details>
-      <summary>{path}</summary>
-      <pre><code>{JSON.stringify(zarray, null, 2)}</code></pre>
-    </details>
+    <div style="margin: 0 15px">
+      <DetailsPrePanel jsonData={zarray} summary={path} />
+    </div>
   {:catch error}
     <p style="color: red">{error.message}</p>
   {/await}
@@ -99,13 +99,6 @@
     box-shadow: 5px 5px 10px #c3c0c0;
     background: linear-gradient(to right, #ccc, #aaa);
     text-align: center;
-  }
-
-  pre {
-    color: #faebd7;
-    background-color: #2c3e50;
-    padding: 10px;
-    font-size: 14px;
   }
 
   table {
@@ -132,19 +125,5 @@
   a,
   a:visited {
     color: #ff512f;
-  }
-
-  details {
-    font-size: 1.1em;
-    margin: 0 15px;
-    text-align: left;
-  }
-  pre {
-    margin-top: 10px;
-    color: #faebd7;
-    background-color: #2c3e50;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 10px;
   }
 </style>
