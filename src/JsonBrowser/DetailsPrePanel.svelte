@@ -16,6 +16,7 @@
 details {
     font-size: 1.1em;
     text-align: left;
+    margin: 0 15px;
   }
   pre {
     margin-top: 10px;

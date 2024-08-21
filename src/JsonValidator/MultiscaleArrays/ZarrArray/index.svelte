@@ -83,9 +83,7 @@
 
     <Cube3D {zarray} />
 
-    <div style="margin: 0 15px">
-      <DetailsPrePanel jsonData={zarray} summary={path} />
-    </div>
+    <DetailsPrePanel jsonData={zarray} summary={path} />
   {:catch error}
     <p style="color: red">{error.message}</p>
   {/await}

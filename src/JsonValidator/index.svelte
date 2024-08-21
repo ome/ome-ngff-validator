@@ -75,7 +75,10 @@
     <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
 
-  <RoCrate version={msVersion} {source}></RoCrate>
+  <!-- for v0.5+ we check for ro-crate-metadata.json -->
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(msVersion)}
+    <RoCrate {source}></RoCrate>
+  {/if}
 
   {#await labelsPromise}
     <p>checking for labels...</p>
