@@ -1,10 +1,43 @@
 
 <script>
+  import { getJson } from "../../utils";
+
     export let jsonData;
 
+    // Try to find various fields in the Ro-Crate metadata
     let license = jsonData["@graph"].find(item => item["license"])?.license;
     let name = jsonData["@graph"].find(item => item["name"])?.name;
     let description = jsonData["@graph"].find(item => item["description"])?.description;
+
+    let biosample = jsonData["@graph"].find(item => item["@type"] === "biosample");
+    let organismId = biosample?.organism_classification?.["@id"];
+
+    let image_acquisition = jsonData["@graph"].find(item => item["@type"] === "image_acquisition");
+    let fbbiId = image_acquisition?.fbbi_id?.["@id"];
+
+    let organismName = "";
+    let imagingMethod = "";
+
+    async function lookupOrganism(taxonId) {
+        // taxonId e.g. 9606
+        const orgJson = await getJson(`https://rest.ensembl.org/taxonomy/id/${taxonId}?content-type=application/json`);
+        organismName = orgJson.name;
+    }
+
+    async function lookupImagingMethod(fbbiId) {
+        // fbbiId e.g. FBbi_00000246
+        // http://purl.obolibrary.org/obo/FBbi_00000246
+        // https://www.ebi.ac.uk/ols4/api/ontologies/fbbi/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FFBbi_00000246
+        const methodJson = await getJson(`https://www.ebi.ac.uk/ols4/api/ontologies/fbbi/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FFBbi_00000246`);
+        imagingMethod = methodJson.label;
+    }
+
+    if (organismId) {
+        lookupOrganism(organismId.replace("NCBI:txid", ""));
+    }
+    if (fbbiId) {
+        lookupImagingMethod(fbbiId);
+    }
 
     const report = [
         {name: "Name", value: name},
@@ -30,6 +63,23 @@
             {/if}
         </li>
     {/each}
+        <li>
+            <strong>Organism:</strong>
+            {#if organismId}
+                <span style="color: green;">✓</span> {organismId}  {organismName}
+            {:else}
+                <span style="color: red;">x</span> Not found
+            {/if}
+        </li>
+
+        <li>
+            <strong>Imaging method:</strong>
+            {#if fbbiId}
+                <span style="color: green;">✓</span> {fbbiId} {imagingMethod}
+            {:else}
+                <span style="color: red;">x</span> Not found
+            {/if}
+        </li>
 </ul>
 
 
