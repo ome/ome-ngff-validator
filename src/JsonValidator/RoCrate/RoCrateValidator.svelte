@@ -40,44 +40,52 @@
     }
 
     const report = [
-        {name: "Name", value: name},
-        {name: "Description", value: description},
-        {name: "License", value: license},
+        {name: "License", value: license, level: "SHOULD"},
+        {name: "Name", value: name, level: "SUGGESTED"},
+        {name: "Description", value: description, level: "SUGGESTED"},
     ];
+
+    const warningSymbols = {
+        SHOULD: "<span title='Missing SHOULD metadata'>&#x274C</span>",   // big red X
+        SUGGESTED: "<span title='Missing SUGGESTED metadata' style='font-size: 20px;'>&times;</span>",   // black X
+        RECOMMENDED: "",
+        OK: "<span style='color: green;'>✓</span>",
+    }
+
 </script>
 
 
 <ul>
-    {#each report as {name, value}}
+    {#each report as {name, value, level}}
         <li>
             <strong>{name}:</strong>
             {#if value}
-                <span style="color: green;">✓</span>
+                {@html warningSymbols.OK }
                 {#if value.startsWith("http")}
                     <a href={value} target="_blank">{value}</a>
                 {:else}
                     {value}
                 {/if}
             {:else}
-                <span style="color: red;">x</span> Not found
+                {@html warningSymbols[level] } Not found
             {/if}
         </li>
     {/each}
         <li>
             <strong>Organism:</strong>
             {#if organismId}
-                <span style="color: green;">✓</span> {organismId}  {organismName}
+                {@html warningSymbols.OK } {organismId}  {organismName}
             {:else}
-                <span style="color: red;">x</span> Not found
+            {@html warningSymbols.SUGGESTED } Not found
             {/if}
         </li>
 
         <li>
             <strong>Imaging method:</strong>
             {#if fbbiId}
-                <span style="color: green;">✓</span> {fbbiId} {imagingMethod}
+                {@html warningSymbols.OK } {fbbiId} {imagingMethod}
             {:else}
-                <span style="color: red;">x</span> Not found
+                {@html warningSymbols.SUGGESTED } Not found
             {/if}
         </li>
 </ul>
