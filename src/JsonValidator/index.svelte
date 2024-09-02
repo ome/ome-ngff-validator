@@ -21,10 +21,32 @@
   export let source;
   export let rootAttrs;
 
+  let versionMessage= "";
+  let version = null;
+  // Initial validation of version
+  // Top level 'version' is required "MUST" for v0.5+
+  if (rootAttrs?.attributes?.ome) {
+    if (!rootAttrs.attributes.ome.version) {
+      versionMessage = "Missing 'version' field under attributes.ome.";
+    } else {
+      version = rootAttrs.attributes.ome.version;
+      versionMessage = `Using version ${version}.`;
+    }
+  } else {
+    // version for older versions can be nested under "multiscales" or "plate" or "well"
+    version = getVersion(rootAttrs);
+    if (!version) {
+      versionMessage = "No version found. Using version 0.4.";
+      version = "0.4";
+    } else {
+      versionMessage = `Using version ${version}.`;
+    }
+  }
+
+
   // v0.5+ unwrap the attrs under "ome"
   const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
-  const msVersion = getVersion(rootAttrs);
 
   const dtype = getDataType(omeAttrs);
   const schemaUrls = getSchemaUrlsForJson(omeAttrs);
@@ -35,7 +57,7 @@
   const zarrName = dirs[dirs.length - 1];
 
   // check for labels/.zattrs
-  const zarrAttrsFileName = getZarrGroupAttrsFileName(msVersion);
+  const zarrAttrsFileName = getZarrGroupAttrsFileName(version);
   const labelsPromise = getJson(source + '/labels/' + zarrAttrsFileName);
 </script>
 
@@ -44,7 +66,7 @@
     Validating: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
 
-  {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
+  {versionMessage}
 
   Using schema{schemaUrls.length > 1 ? "s" : ""}: 
   {#each schemaUrls as url, i}
@@ -72,11 +94,11 @@
   <OpenWith {source} {dtype} />
 
   <div class="json">
-    <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
+    <JsonBrowser name="" version={version || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
 
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
-  {#if !["0.1", "0.2", "0.3", "0.4"].includes(msVersion)}
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
     <RoCrate {source}></RoCrate>
   {/if}
 

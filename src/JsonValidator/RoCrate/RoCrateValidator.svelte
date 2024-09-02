@@ -103,4 +103,9 @@
         margin-bottom: 10px;
     }
 
+    .suggested {
+        color: orange;
+        font-size: 20px;
+    }
+
 </style>

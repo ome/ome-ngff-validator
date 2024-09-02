@@ -140,13 +140,26 @@ export async function getSchema(schemaUrl) {
 }
 
 export function getVersion(ngffData) {
-  console.log("getVersion...", ngffData, ngffData.ome?.version)
+  console.log("getVersion...", ngffData, 'attributes?', ngffData.attributes)
+  // if we have attributes.ome then this is version 0.5+
+  if (ngffData.attributes?.ome) {
+    if (ngffData.attributes.ome.version) {
+      return ngffData.attributes.ome.version;
+    } else {
+      throw Error("No version found in attributes.ome");
+    }
+  }
+
+  // Used if we have our 'attributes' at the root
   if (ngffData.ome?.version) {
+    console.trace("WARNING - using ngffData.ome?.version FIXME?")
     return ngffData.ome.version;
   }
   if (ngffData.version) {
+    console.trace("WARNING - using ngffData.version FIXME?")
     return ngffData.version;
   }
+  // Handle version 0.4 and earlier
   let version = ngffData.multiscales
     ? ngffData.multiscales[0].version
     : ngffData.plate
@@ -155,7 +168,10 @@ export function getVersion(ngffData) {
     ? ngffData.well.version
     : undefined;
   console.log("version", version);
-  return version;
+  // for 0.4 and earlier, version wasn't MUST and we defaulted
+  // to using v0.4 for validation. To preserve that behaviour
+  // return "0.4" if no version found.
+  return version || "0.4";
 }
 
 export function toTitleCase(text) {
@@ -200,11 +216,6 @@ export function getSchemaUrlsForJson(rootAttrs) {
 
   const msVersion = getVersion(omeAttrs);
   const version = msVersion || CURRENT_VERSION;
-  // for v0.5 onwards, rootAttrs is nested under attributes.ome...
-  if (omeAttrs.ome) {
-    console.trace("WARNING - FIXME!")
-    omeAttrs = omeAttrs.ome;
-  }
   const schemaNames = getSchemaNames(omeAttrs);
   return schemaNames.map(name => getSchemaUrl(name, version));
 }
@@ -227,7 +238,18 @@ export async function validate(jsonData) {
   // get version, lookup schema, do validation...
   // v0.5+ unwrap the attrs under "attributes.ome"
   let omeAttrs = jsonData?.attributes?.ome || jsonData;
+
   let version = getVersion(omeAttrs);
+  // v0.5+ (with attributes.ome) MUST have top-level version
+  if (jsonData?.attributes?.ome) {
+    if (!jsonData.attributes.ome.version) {
+      return ["No version found under attributes.ome"];
+    }
+  } else if (!version) {
+    // default to last version pre 0.5 rules.
+    version = "0.4";
+  }
+  
   console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
