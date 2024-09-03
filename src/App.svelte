@@ -15,14 +15,17 @@
     source = source.slice(0, -1);
   }
 
-  let location = window.location.href;
-
   let promise;
 
   if (source) {
     // load JSON to be validated...
     console.log("Loading JSON... " + source);
     promise = getZarrGroupAttrs(source);
+  }
+
+  function isBioFormats2Raw(data) {
+    let omeAttrs = data?.attributes?.ome || data;
+    return omeAttrs["bioformats2raw.layout"] === 3 && !omeAttrs.plate;
   }
 </script>
 
@@ -38,7 +41,7 @@
         {:then data}
           <Title {source} zattrs={data} />
           <div>
-            {#if data["bioformats2raw.layout"] === 3 && !data.plate}
+            {#if isBioFormats2Raw(data)}
               <Bioformats2rawLayout rootAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />

@@ -1,5 +1,5 @@
 <script>
-  import { getXmlDom, getJson, validate } from "../utils";
+  import { getXmlDom, getZarrGroupAttrs, validate } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
 
@@ -40,7 +40,7 @@
   // wait for schema to be cached, so we don't load them multiple times
   // let schemasPromise = getSchema("0.2", "image");
   async function preloadSchema(imagePath) {
-    let imgAttrs = await getJson(imagePath + "/.zattrs");
+    let imgAttrs = getZarrGroupAttrs(imagePath);
     console.log("preloadSchema", imgAttrs);
     let errs = await validate(imgAttrs);
     return errs;
