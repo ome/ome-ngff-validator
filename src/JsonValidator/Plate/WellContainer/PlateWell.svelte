@@ -5,6 +5,10 @@
   export let source;
   export let path;
 
+  let rootAttrs = wellAttrs;
+  // unwrap attributes.ome if present
+  wellAttrs = wellAttrs.attributes?.ome || wellAttrs;
+
   const wellToValidate = getSearchParam("well");
   let wellIndex = parseInt(wellToValidate);
   let wellIndices = [0];
@@ -22,7 +26,7 @@
     let errs = [];
     console.log("loadAndValidate wellAttrs", wellAttrs);
 
-    const imgs = wellAttrs.attributes?.ome?.well.images || wellAttrs.well.images;
+    const imgs = wellAttrs.well.images;
     for (let i=0; i < wellIndices.length; i++) {
       // this will fail if e.g. any getZarrGroupAttrs() raises exception
       let index = wellIndices[i];
@@ -37,7 +41,7 @@
     return errs;
   }
 
-  let validatePromise = validate(wellAttrs);
+  let validatePromise = validate(rootAttrs);
 
   let imagePromise = loadAndValidate();
 
