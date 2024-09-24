@@ -1,12 +1,18 @@
 <script>
-  import { getXmlDom, getZarrGroupAttrs, validate } from "../utils";
+  import { getXmlDom, getZarrGroupAttrs, validate, getVersion, getZarrGroupAttrsFileName } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
+  import RoCrate from "../JsonValidator/RoCrate/index.svelte";
 
   export let source;
   export let rootAttrs;
 
   const metadataName = "OME/METADATA.ome.xml";
+
+  const version = getVersion(rootAttrs);
+  console.log("BF2RAW version", version, rootAttrs);
+  const zarrAttrsFileName = getZarrGroupAttrsFileName(version);
+  console.log("zarrAttrsFileName", zarrAttrsFileName);
 
   // source/OME/METADATA.ome.xml
   const metadataUrl = `${source}/${metadataName}`;
@@ -53,7 +59,7 @@
 </script>
 
 <article>
-  Reading: <a href={source}>/{zarrName}/.zattrs</a>
+  Reading: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
 
   <div class="json">
     <JsonBrowser name="" version="" contents={rootAttrs} expanded />
@@ -99,6 +105,11 @@
   {:catch error}
     <p style="color: red">{error.message}</p>
   {/await}
+
+    <!-- for v0.5+ we check for ro-crate-metadata.json -->
+    {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
+      <RoCrate {source}></RoCrate>
+  {/if}
 </article>
 
 <style>
