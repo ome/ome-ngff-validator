@@ -140,7 +140,7 @@ export async function getSchema(schemaUrl) {
 }
 
 export function getVersion(ngffData) {
-  console.log("getVersion...", ngffData, 'attributes?', ngffData.attributes)
+  // console.log("getVersion...", ngffData, 'attributes?', ngffData.attributes)
   // if we have attributes.ome then this is version 0.5+
   if (ngffData.attributes?.ome) {
     if (ngffData.attributes.ome.version) {
@@ -267,16 +267,22 @@ export async function validate(jsonData) {
   // TODO: need to know whether to load other schemas...
   // For now, we can use version check... 
   if (version === "0.5") {
-    // const ctSchema = await getSchema(version, "coordinate_transformation");
-    // const csSchema = await getSchema(version, "coordinate_systems");
-    const versionSchema = await getSchema(getSchemaUrl("version", version));
+    const versionSchema = await getSchema(getSchemaUrl("_version", version));
+    // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
     refSchemas = [versionSchema];
   }
   let errors = [];
-  for (let s=0; s<schemaUrls.length; s++) {
-    let schema = await getSchema(schemaUrls[s]);
-    let errs = validateData(schema, jsonData, refSchemas);
-    errors = errors.concat(errs);
+  if (jsonData.attributes) {
+    for (let s=0; s<schemaUrls.length; s++) {
+      let schema = await getSchema(schemaUrls[s]);
+      let errs = validateData(schema, jsonData.attributes, refSchemas);
+      errors = errors.concat(errs);
+    }
+  } else {
+    errors.push("No 'attributes' key found in JSON data");
+  }
+  if (errors.length > 0) {
+    console.log("Validation errors", errors, jsonData);
   }
   return errors;
 }
