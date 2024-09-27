@@ -140,7 +140,6 @@ export async function getSchema(schemaUrl) {
 }
 
 export function getVersion(ngffData) {
-  // console.log("getVersion...", ngffData, 'attributes?', ngffData.attributes)
   // if we have attributes.ome then this is version 0.5+
   if (ngffData.attributes?.ome) {
     if (ngffData.attributes.ome.version) {
@@ -152,11 +151,9 @@ export function getVersion(ngffData) {
 
   // Used if we have our 'attributes' at the root
   if (ngffData.ome?.version) {
-    console.trace("WARNING - using ngffData.ome?.version FIXME?")
     return ngffData.ome.version;
   }
   if (ngffData.version) {
-    console.trace("WARNING - using ngffData.version FIXME?")
     return ngffData.version;
   }
   // Handle version 0.4 and earlier
