@@ -267,17 +267,17 @@ export async function validate(jsonData) {
     const versionSchema = await getSchema(getSchemaUrl("_version", version));
     // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
     refSchemas = [versionSchema];
+    // For version 0.5+, we validate the "attributes" content.
+    // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
+    jsonData = jsonData.attributes;
   }
   let errors = [];
-  if (jsonData.attributes) {
-    for (let s=0; s<schemaUrls.length; s++) {
-      let schema = await getSchema(schemaUrls[s]);
-      let errs = validateData(schema, jsonData.attributes, refSchemas);
-      errors = errors.concat(errs);
-    }
-  } else {
-    errors.push("No 'attributes' key found in JSON data");
+  for (let s=0; s<schemaUrls.length; s++) {
+    let schema = await getSchema(schemaUrls[s]);
+    let errs = validateData(schema, jsonData, refSchemas);
+    errors = errors.concat(errs);
   }
+
   if (errors.length > 0) {
     console.log("Validation errors", errors, jsonData);
   }
