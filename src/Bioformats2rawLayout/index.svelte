@@ -1,5 +1,5 @@
 <script>
-  import { getXmlDom, getZarrGroupAttrs, validate, getVersion, getZarrGroupAttrsFileName } from "../utils";
+  import { getJson, getXmlDom, getZarrGroupAttrs, validate, getVersion, getZarrGroupAttrsFileName } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
   import RoCrate from "../JsonValidator/RoCrate/index.svelte";
@@ -17,17 +17,56 @@
   // source/OME/METADATA.ome.xml
   const metadataUrl = `${source}/${metadataName}`;
 
-  async function loadXml(url) {
-    let dom = await getXmlDom(url);
+  async function loadXmlOrSeries(url) {
+    // We can get the series info from /OME/METADATA.ome.xml or
+    // /OME/zarr.json group attributes
+    // returns {images: [{name, id}]} or {error: message}
+    let dom;
+    try {
+      dom = await getXmlDom(url);
+    } catch (error) {}
+    let xmlRsp;
+    if (dom) {
+      xmlRsp = parseXml(dom);
+    }
+    // Try to get series info
+    let rsp = {};
+    let series;
+    try {
+      let zarrAttrs = await getJson(`${source}/OME/${zarrAttrsFileName}`);
+      series = zarrAttrs?.attributes?.ome?.series || zarrAttrs.series;
+    } catch (error) {}
+    
+    if (series && xmlRsp && xmlRsp?.images) {
+      // MUST match if we have both...
+      if (series.length !== xmlRsp.images.length) {
+        rsp.errors = [
+          `Length mismatch: series: ${series.length} != ome.xml: ${5}`,
+        ];
+      }
+    }
+    if (series) {
+      rsp.images = series.map((seriesName) => ({ name: seriesName, path: seriesName }));
+    } else if (xmlRsp) {
+      rsp = xmlRsp;
+    } else {
+      rsp.errors = ["No OME/METADATA.ome.xml or /OME series found"];
+    }
+    return rsp;
+  }
+
+  function parseXml(dom) {
     const root = dom.documentElement;
 
     let rsp = { images: [] };
+    let index = 0;
     for (const child of root.children) {
       console.log(child.tagName);
       if (child.tagName === "Image") {
         rsp.images.push({
           name: child.getAttribute("Name"),
           id: child.getAttribute("ID"),
+          path: "" + index++,
         });
       }
       // error handling - parsererror gives html doc
@@ -41,7 +80,7 @@
     }
     return rsp;
   }
-  const promise = loadXml(metadataUrl);
+  const promise = loadXmlOrSeries(metadataUrl);
 
   // wait for schema to be cached, so we don't load them multiple times
   // let schemasPromise = getSchema("0.2", "image");
@@ -77,14 +116,14 @@
         <div>loading schema...</div>
       {:then ok}
         <ul>
-          {#each metadataJson.images as image, i}
+          {#each metadataJson.images as image}
             <li class="image">
-              /{i}
-              <a title="Open Image" href="{url}?source={source}/{i}/"
+              /{image.path}
+              <a title="Open Image" href="{url}?source={source}/{image.path}/"
                 >{image.name}</a
               >
 
-              <ImageContainer {source} path={i} />
+              <ImageContainer {source} path={image.path} />
             </li>
           {/each}
         </ul>
@@ -96,7 +135,7 @@
     <!-- Error handling... -->
     {#if metadataJson.errors}
       <div class="error">
-        <h2>Error parsing {metadataName}</h2>
+        <h3>Error loading series metadata:</h3>
         {#each metadataJson.errors as err, i}
           <div>{err}</div>
         {/each}
