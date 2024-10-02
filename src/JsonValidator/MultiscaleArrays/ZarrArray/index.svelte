@@ -32,8 +32,16 @@
 
   function getBytes(shape, zarray) {
     // handle v2 and v3 zarr
-    let dtype = getArrayDtype(zarray)
-    let bytesPerPixel = [1, 2, 4, 8].find((n) => dtype.includes(n));
+    let dtype = getArrayDtype(zarray);
+    let bytesPerPixel;
+    // e.g. v3: uint8, uint16, uint32, uint64, int8, int16, int32 (4), int64 (8), float32 (4), float64 (8)
+    if (dtype.includes("int") || dtype.includes("float")) {
+      // use regex to get numbers from dtype
+      bytesPerPixel = parseInt(dtype.match(/\d+/)[0]) / 8;
+    } else {
+      // e.g. v2: >i1, >i2, >i4, >i8, >u1, >u2, >u4, >u8, >f4, >f8
+      bytesPerPixel = [1, 2, 4, 8].find((n) => dtype.includes(n));
+    }
     if (!bytesPerPixel) return "";
     let pixels = shape.reduce((i, p) => i * p, 1);
     return formatBytes(bytesPerPixel * pixels);
