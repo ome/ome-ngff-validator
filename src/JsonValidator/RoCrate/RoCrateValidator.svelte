@@ -28,7 +28,8 @@
         // fbbiId e.g. FBbi_00000246
         // http://purl.obolibrary.org/obo/FBbi_00000246
         // https://www.ebi.ac.uk/ols4/api/ontologies/fbbi/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FFBbi_00000246
-        const methodJson = await getJson(`https://www.ebi.ac.uk/ols4/api/ontologies/fbbi/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FFBbi_00000246`);
+        const fbbi_id = fbbiId.replace("obo:", "");
+        const methodJson = await getJson(`https://www.ebi.ac.uk/ols4/api/ontologies/fbbi/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252F${fbbi_id}`);
         imagingMethod = methodJson.label;
     }
 
