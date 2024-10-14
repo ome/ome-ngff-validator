@@ -3,9 +3,17 @@
   import AboutDialog from "./Dialogs/AboutDialog.svelte";
   const { open } = getContext("simple-modal");
   const showAbout = () => open(AboutDialog);
+  import omelogo from "/ome-main-nav.svg"
 </script>
 
-<h1>OME-NGFF Validator</h1>
+
+<div class="navLeft">
+
+  <img style="height: 30px" alt="OME Logo" src="{omelogo}"/>
+
+  <h1>NGFF Validator</h1>
+
+</div>
 
 <ul>
   <li>
@@ -14,6 +22,13 @@
 </ul>
 
 <style>
+  .navLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 15px;
+  }
+
   h1 {
     color: white;
     font-weight: 300;
