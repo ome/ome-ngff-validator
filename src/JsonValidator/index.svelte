@@ -122,7 +122,7 @@
 <style>
   a,
   a:visited {
-    color: #ff512f;
+    color: var(--omeLinkBlue);
   }
   .json {
     text-align: left;

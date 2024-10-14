@@ -60,7 +60,7 @@
         <th />
         <th>Array</th>
         <th>Chunk</th>
-        {#if shard}<th style:border-color="#ff512f">Shard</th>{/if}
+        {#if shard}<th style:border-color="var(--omeLinkBlue)">Shard</th>{/if}
       </tr>
       <tr>
         <th>Bytes</th>
@@ -130,6 +130,6 @@
 
   a,
   a:visited {
-    color: #ff512f;
+    color: var(--omeLinkBlue);
   }
 </style>

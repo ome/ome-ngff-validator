@@ -86,7 +86,7 @@
 
   a,
   a:visited {
-    color: #ff512f;
+    color: var(--omeLinkBlue);
   }
 
   .viewer_icon {

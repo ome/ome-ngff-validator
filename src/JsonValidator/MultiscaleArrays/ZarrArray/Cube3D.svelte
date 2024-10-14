@@ -33,7 +33,7 @@
     shardX = shards[shards.length - 1] * scale;
     shardY = shards[shards.length - 2] * scale;
     shardZ = shards[shards.length - 3] * scale;
-    shardColor = "#ff512f"
+    shardColor = "var(--omeLinkBlue)"
   }
 </script>
 
