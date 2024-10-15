@@ -77,19 +77,7 @@
     width: 100%;
     flex: 1;
     padding: 15px 0;
-    background: rgb(249, 59, 85); /* fallback for old browsers */
-    background: -webkit-linear-gradient(
-      to right,
-      rgb(244, 106, 124),
-      var(--omeRed)
-    ); /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(
-      to right,
-      rgb(245, 82, 104),
-      var(--omeRed)
-    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    /* https://uigradients.com/ */
-    /* OME green->blue rgb(61,132,107), rgb(68,139,200) */
+    background: white;
   }
 
   section > div {
