@@ -9,7 +9,7 @@
 
 
 <div class="rocrate">
-<h1>Ro-crate metadata</h1>
+<h1>RO-Crate metadata</h1>
 
 
 
