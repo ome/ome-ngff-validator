@@ -7,6 +7,7 @@
 
   export let source;
   export let dtype;
+  export let version;
 
   let viewers = viewers_json.viewers.map((viewer_data) => {
       let href = viewer_data.href;
@@ -21,6 +22,11 @@
       const logo_path = vizarr_logo.replace("/vizarr_logo.png", viewer_data.logo);
       return {...viewer_data, href, logo_path}
     });
+
+    if (version == "0.5") {
+      // TODO: update when other viewers support zarr v3
+      viewers = viewers.filter((viewer) => viewer.name == "vizarr");
+    }
 
 </script>
 

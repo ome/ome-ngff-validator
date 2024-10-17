@@ -91,7 +91,7 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  <OpenWith {source} {dtype} />
+  <OpenWith {source} {dtype} {version} />
 
   <div class="json">
     <JsonBrowser name="" version={version || CURRENT_VERSION} contents={rootAttrs} expanded />
