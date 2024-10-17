@@ -75,7 +75,12 @@
         <li>
             <strong>Organism:</strong>
             {#if organismId}
-                {@html warningSymbols.OK } {organismId}  {organismName}
+                {@html warningSymbols.OK }
+                <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=info&id={organismId.replace("NCBI:txid", "")}" target="_blank">
+                    {organismId}
+                </a>
+                {organismName}
+
             {:else}
             {@html warningSymbols.SUGGESTED } Not found
             {/if}
@@ -84,7 +89,11 @@
         <li>
             <strong>Imaging method:</strong>
             {#if fbbiId}
-                {@html warningSymbols.OK } {fbbiId} {imagingMethod}
+                {@html warningSymbols.OK }
+                <a href="https://ontobee.org/ontology/FBbi?iri=http://purl.obolibrary.org/obo/FBbi_{fbbiId.replace("obo:FBbi_", "")}" target="_blank">
+                    {fbbiId}
+                </a>
+                {imagingMethod}
             {:else}
                 {@html warningSymbols.SUGGESTED } Not found
             {/if}
