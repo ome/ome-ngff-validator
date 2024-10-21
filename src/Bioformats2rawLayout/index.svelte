@@ -1,8 +1,16 @@
 <script>
-  import { getJson, getXmlDom, getZarrGroupAttrs, validate, getVersion, getZarrGroupAttrsFileName } from "../utils";
+  import {
+    getJson,
+    getXmlDom,
+    getZarrGroupAttrs,
+    validate,
+    getVersion,
+    getZarrGroupAttrsFileName,
+  } from "../utils";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
   import RoCrate from "../JsonValidator/RoCrate/index.svelte";
+  import OpenWith from "../JsonValidator/OpenWithViewers/index.svelte";
 
   export let source;
   export let rootAttrs;
@@ -36,7 +44,7 @@
       let zarrAttrs = await getJson(`${source}/OME/${zarrAttrsFileName}`);
       series = zarrAttrs?.attributes?.ome?.series || zarrAttrs.series;
     } catch (error) {}
-    
+
     if (series && xmlRsp && xmlRsp?.images) {
       // MUST match if we have both...
       if (series.length !== xmlRsp.images.length) {
@@ -46,7 +54,10 @@
       }
     }
     if (series) {
-      rsp.images = series.map((seriesName) => ({ name: seriesName, path: seriesName }));
+      rsp.images = series.map((seriesName) => ({
+        name: seriesName,
+        path: seriesName,
+      }));
     } else if (xmlRsp) {
       rsp = xmlRsp;
     } else {
@@ -100,17 +111,13 @@
 <article>
   Reading: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
 
-  <div class="json">
-    <JsonBrowser name="" version="" contents={rootAttrs} expanded />
-  </div>
-
   Loading metadata:<a href={metadataUrl}>{metadataName}</a><br />
 
   {#await promise}
     <div>loading {metadataUrl}...</div>
   {:then metadataJson}
     <!-- Show list of Images -->
-    <h1>Images</h1>
+    <h1>{metadataJson.images.length} Images</h1>
     <ol>
       {#await preloadSchema(source + "/0")}
         <div>loading schema...</div>
@@ -124,6 +131,14 @@
               >
 
               <ImageContainer {source} path={image.path} />
+
+              <a title="Open Image" href="{url}?source={source}/{image.path}/"
+                >Open in validator</a
+              >
+
+              <div style="margin-top: 10px">
+                <OpenWith {source} dtype={"image"} {version} />
+              </div>
             </li>
           {/each}
         </ul>
@@ -131,6 +146,11 @@
         <p style="color: red">{error.message}</p>
       {/await}
     </ol>
+
+    <h3>{zarrName}/{zarrAttrsFileName}</h3>
+    <div class="json">
+      <JsonBrowser name="" version="" contents={rootAttrs} expanded />
+    </div>
 
     <!-- Error handling... -->
     {#if metadataJson.errors}
@@ -145,14 +165,13 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-    <!-- for v0.5+ we check for ro-crate-metadata.json -->
-    {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
-      <RoCrate {source}></RoCrate>
+  <!-- for v0.5+ we check for ro-crate-metadata.json -->
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
+    <RoCrate {source}></RoCrate>
   {/if}
 </article>
 
 <style>
-
   h1 {
     margin-top: 20px;
   }
