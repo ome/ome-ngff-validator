@@ -137,7 +137,7 @@
               >
 
               <div style="margin-top: 10px">
-                <OpenWith {source} dtype={"image"} {version} />
+                <OpenWith source={`${source}/${image.path}`} dtype={"image"} {version} />
               </div>
             </li>
           {/each}
