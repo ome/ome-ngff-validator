@@ -4,7 +4,7 @@
 
     export let jsonData;
 
-    // Try to find various fields in the Ro-Crate metadata
+    // Try to find various fields in the RO-Crate metadata
     let license = jsonData["@graph"].find(item => item["license"])?.license;
     let name = jsonData["@graph"].find(item => item["name"])?.name;
     let description = jsonData["@graph"].find(item => item["description"])?.description;

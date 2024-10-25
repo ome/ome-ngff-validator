@@ -63,7 +63,7 @@
 
 <article>
   <p>
-    Validating: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
+    Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
 
   {versionMessage}

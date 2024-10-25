@@ -92,7 +92,6 @@
       try {
         console.log('renderImageToCanvas...', chunk.shape)
         chunk2d = sliceArray(chunk, chunkSlice);
-        // chunk2d = chunk;
         errorMsg = undefined;
       } catch (error) {
         errorMsg = `Slicing (${chunk.shape}) failed with slice (${chunkSlice})`;

@@ -1,5 +1,4 @@
 <script>
-  // import { openArray, slice } from "zarr";
   import { range, getChunkAndShardShapes } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
@@ -40,8 +39,6 @@
     // clear previous chunk
     chunk = undefined;
 
-    // Use zarr like this, otherwise we get "Error: Unknown codec: bytes"
-    // let zarr = await import("https://cdn.jsdelivr.net/npm/zarrita@next/+esm");
     let url = source + "/" + zarrPath;
     const store = new zarr.FetchStore(url);
     const arr = await zarr.open(store, { kind: "array" });

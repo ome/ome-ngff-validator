@@ -49,7 +49,7 @@
       // MUST match if we have both...
       if (series.length !== xmlRsp.images.length) {
         rsp.errors = [
-          `Length mismatch: series: ${series.length} != ome.xml: ${5}`,
+          `Images length mismatch: series: ${series.length} != ome.xml: ${xmlRsp.images.length}`,
         ];
       }
     }
@@ -109,7 +109,7 @@
 </script>
 
 <article>
-  Reading: <a href={source}>/{zarrName}/{zarrAttrsFileName}</a>
+  Reading: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
 
   Loading metadata:<a href={metadataUrl}>{metadataName}</a><br />
 

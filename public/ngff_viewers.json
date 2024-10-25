@@ -14,7 +14,7 @@
       "name": "neuroglancer",
       "logo": "/neuroglancer.png",
       "//": "NB: The {URL} in the href is replaced with NGFF image URL",
-      "href": "https://neuroglancer-demo.appspot.com/#!{%22layers%22:[{%22source%22:%22zarr3://{URL}%22,%22name%22:%22OME-NGFF%22}]}"
+      "href": "https://neuroglancer-demo.appspot.com/#!{%22layers%22:[{%22source%22:%22zarr://{URL}%22,%22name%22:%22OME-NGFF%22}]}"
     },
     {
       "name": "Allen Cell Feature Explorer 3D viewer",
