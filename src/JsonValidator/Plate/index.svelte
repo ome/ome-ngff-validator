@@ -1,5 +1,5 @@
 <script>
-  import { CURRENT_VERSION, getVersion, getSchema, getSearchParam, range } from "../../utils";
+  import { CURRENT_VERSION, getVersion, getSchema, getSchemaUrl, getSearchParam, range } from "../../utils";
 
   import WellContainer from "./WellContainer/index.svelte";
 
@@ -30,8 +30,8 @@
 
   // wait for schemas to be cached, so we don't load them multiple times
   let schemasPromise = Promise.all([
-    getSchema(version, "well"),
-    getSchema(version, "image"),
+    getSchema(getSchemaUrl("well", version)),
+    getSchema(getSchemaUrl("image", version)),
   ]);
 
   function handleSelect(event) {

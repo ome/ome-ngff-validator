@@ -1,24 +1,47 @@
 <script>
-  import { getJson, formatBytes, range } from "../../../utils";
+  import { getJson, formatBytes, getChunkAndShardShapes, getArrayDtype } from "../../../utils";
   import Cube3D from "./Cube3D.svelte";
   import ChunkLoader from "./ChunkLoader.svelte";
+  import DetailsPrePanel from "../../../JsonBrowser/DetailsPrePanel.svelte";
 
   export let source;
   export let path;
 
-  const promise = getJson(source + "/" + path + "/.zarray");
+  const promise = getJson(source + "/" + path);
 
   function totalChunkCount(zarray) {
     return chunkCounts(zarray).reduce((prev, curr) => prev * curr, 1);
   }
 
+  function totalShardCount(zarray) {
+    return shardCounts(zarray).reduce((prev, curr) => prev * curr, 1);
+  }
+
   function chunkCounts(zarray) {
-    const ch = zarray.chunks;
+    const [ch, shards] = getChunkAndShardShapes(zarray);
     return zarray.shape.map((sh, index) => Math.ceil(sh / ch[index]));
   }
 
+  function shardCounts(zarray) {
+    const [ch, shards] = getChunkAndShardShapes(zarray);
+    if (!shards) {
+      return [];
+    }
+    return zarray.shape.map((sh, index) => Math.ceil(sh / shards[index]));
+  }
+
   function getBytes(shape, zarray) {
-    let bytesPerPixel = [1, 2, 4, 8].find((n) => zarray.dtype.includes(n));
+    // handle v2 and v3 zarr
+    let dtype = getArrayDtype(zarray);
+    let bytesPerPixel;
+    // e.g. v3: uint8, uint16, uint32, uint64, int8, int16, int32 (4), int64 (8), float32 (4), float64 (8)
+    if (dtype.includes("int") || dtype.includes("float")) {
+      // use regex to get numbers from dtype
+      bytesPerPixel = parseInt(dtype.match(/\d+/)[0]) / 8;
+    } else {
+      // e.g. v2: >i1, >i2, >i4, >i8, >u1, >u2, >u4, >u8, >f4, >f8
+      bytesPerPixel = [1, 2, 4, 8].find((n) => dtype.includes(n));
+    }
     if (!bytesPerPixel) return "";
     let pixels = shape.reduce((i, p) => i * p, 1);
     return formatBytes(bytesPerPixel * pixels);
@@ -26,33 +49,40 @@
 </script>
 
 <div class="array">
-  <p>Path <a href="{source + "/" + path + '/.zarray'} ">{path + "/.zarray"}</a></p>
+  <p>Path <a href="{source + "/" + path} ">{path}</a></p>
 
   {#await promise}
-    <div>loading array .zarray ...</div>
+    <div>loading array data ...</div>
   {:then zarray}
+    {@const shard = getChunkAndShardShapes(zarray)[1]}
     <table>
       <tr>
-        <th /><th>Array</th><th>Chunk</th>
+        <th />
+        <th>Array</th>
+        <th>Chunk</th>
+        {#if shard}<th style:border-color="var(--omeLinkBlue)">Shard</th>{/if}
       </tr>
       <tr>
         <th>Bytes</th>
         <td>{getBytes(zarray.shape, zarray)}</td>
-        <td>{getBytes(zarray.chunks, zarray)}</td>
+        <td>{getBytes(getChunkAndShardShapes(zarray)[0], zarray)}</td>
+        {#if shard}<td>{getBytes(shard, zarray)}</td>{/if}
       </tr>
       <tr>
         <th>Shape</th>
         <td>{JSON.stringify(zarray.shape)}</td>
-        <td>{JSON.stringify(zarray.chunks)}</td>
+        <td>{JSON.stringify(getChunkAndShardShapes(zarray)[0])}</td>
+        {#if shard}<td>{JSON.stringify(shard)}</td>{/if}
       </tr>
       <tr>
         <th>Counts</th>
         <td>{chunkCounts(zarray)}</td>
         <td>{totalChunkCount(zarray)} Chunks</td>
+        {#if shard}<td>{totalShardCount(zarray)} Shards</td>{/if}
       </tr>
       <tr>
         <th>Type</th>
-        <td>{zarray.dtype}</td>
+        <td>{getArrayDtype(zarray)}</td>
         <td>numpy.ndarray</td>
       </tr>
     </table>
@@ -61,10 +91,7 @@
 
     <Cube3D {zarray} />
 
-    <details>
-      <summary>{path}/.zarray</summary>
-      <pre><code>{JSON.stringify(zarray, null, 2)}</code></pre>
-    </details>
+    <DetailsPrePanel jsonData={zarray} summary={path} />
   {:catch error}
     <p style="color: red">{error.message}</p>
   {/await}
@@ -78,13 +105,6 @@
     box-shadow: 5px 5px 10px #c3c0c0;
     background: linear-gradient(to right, #ccc, #aaa);
     text-align: center;
-  }
-
-  pre {
-    color: #faebd7;
-    background-color: #2c3e50;
-    padding: 10px;
-    font-size: 14px;
   }
 
   table {
@@ -110,20 +130,6 @@
 
   a,
   a:visited {
-    color: #ff512f;
-  }
-
-  details {
-    font-size: 1.1em;
-    margin: 0 15px;
-    text-align: left;
-  }
-  pre {
-    margin-top: 10px;
-    color: #faebd7;
-    background-color: #2c3e50;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 10px;
+    color: var(--omeLinkBlue);
   }
 </style>

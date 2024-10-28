@@ -2,13 +2,18 @@
 
 import Ajv from "ajv";
 
-export const CURRENT_VERSION = "0.4";
+export const CURRENT_VERSION = "0.5";
+export const FILE_NOT_FOUND = "File not found";
 
-const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
 
 export function getSchemaUrl(schemaName, version) {
+  if (version == "0.5" || version == "0.5-dev2") {
+    // TEMP: use our branch based on Norman's spec-rfc2 PR at https://github.com/ome/ngff/pull/242
+    return `https://raw.githubusercontent.com/ome/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
 }
+
 
 // fetch() doesn't error for 404 etc.
 async function fetchHandleError(url) {
@@ -18,7 +23,13 @@ async function fetchHandleError(url) {
     rsp = await fetch(url).then(function (response) {
       if (!response.ok) {
         // make the promise be rejected if we didn't get a 2xx response
-        msg += ` ${response.statusText}`;
+        // NB. statusText could be "Not Found" or "File not found" depending on server
+        // Standardise based on response.status
+        if (response.status == 404) {
+          msg += ` ${FILE_NOT_FOUND}`;
+        } else {
+          msg += ` ${response.statusText}`;
+        }
       } else {
         return response;
       }
@@ -44,6 +55,58 @@ async function fetchHandleError(url) {
   throw Error(msg);
 }
 
+export function getZarrGroupAttrsFileName(ngffVersion) {
+  if (["0.1", "0.2", "0.3", "0.4"].includes(ngffVersion)) {
+    return ".zattrs";
+  }
+  return "zarr.json";
+}
+
+export function getZarrArrayAttrsFileName(ngffVersion) {
+  if (["0.1", "0.2", "0.3", "0.4"].includes(ngffVersion)) {
+    return ".zarray";
+  }
+  return "zarr.json";
+}
+
+export async function getZarrGroupAttrs(zarr_dir) {
+  let groupAttrs = await getZarrJson(zarr_dir, ".zattrs");
+  return groupAttrs;
+}
+
+export async function getZarrArrayJson(zarr_dir) {
+  return getZarrJson(zarr_dir, ".zarray");
+}
+
+async function getZarrJson(zarr_dir, alternative=".zattrs") {
+  let zarrJson;
+  let msg;
+  // try to load v2 /.zattrs or v3 /zarr.json
+  try {
+    zarrJson = await getJson(zarr_dir + "/zarr.json");
+  } catch (error) {
+    console.log("getZarrJson", error)
+    if (!error.message.includes(FILE_NOT_FOUND)) {
+      throw error;
+    }
+    // IF we got a 404 then try other URL
+    try {
+      zarrJson = await getJson(zarr_dir + `/${alternative}`);
+    } catch (err2) {
+      if (err2.message.includes(FILE_NOT_FOUND)) {
+        throw Error(`No ${alternative} or zarr.json at ${zarr_dir}: ${FILE_NOT_FOUND}`);
+      } else {
+        // First error was 404 but this isn't...
+        throw err2;
+      }
+    }
+
+  }
+  if (zarrJson) {
+    return zarrJson;
+  }
+}
+
 export async function getJson(url) {
   return fetchHandleError(url).then((rsp) => rsp.json());
 }
@@ -63,32 +126,47 @@ export async function getText(url) {
 
 let schemas = {};
 
-export async function getSchema(version, schemaName = "image") {
-  let cacheKey = schemaName + version;
-  if (!schemas[cacheKey]) {
-    const schema_url = getSchemaUrl(schemaName, version);
-    console.log("Loading schema... " + schema_url);
-    try {
-      const schema = await getJson(schema_url);
-      // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
-      delete schema["$schema"];
-      schemas[cacheKey] = schema;
-    } catch (error) {
-      throw new Error(`No schema at ${schema_url}. Version ${version} may be invalid.`);
-    }
+export async function getSchema(schemaUrl) {
+  if (!schemas[schemaUrl]) {
+    console.log("Loading schema... " + schemaUrl);
+    const schema = await getJson(schemaUrl);
+    // delete to avoid invalid: $schema: "https://json-schema.org/draft/2020-12/schema" not found
+    delete schema["$schema"];
+    schemas[schemaUrl] = schema;
   }
-  return schemas[cacheKey];
+  return schemas[schemaUrl];
 }
 
-export function getVersion(jsonData) {
-  let version = jsonData.multiscales
-    ? jsonData.multiscales[0].version
-    : jsonData.plate
-    ? jsonData.plate.version
-    : jsonData.well
-    ? jsonData.well.version
+export function getVersion(ngffData) {
+  // if we have attributes.ome then this is version 0.5+
+  if (ngffData.attributes?.ome) {
+    if (ngffData.attributes.ome.version) {
+      return ngffData.attributes.ome.version;
+    } else {
+      throw Error("No version found in attributes.ome");
+    }
+  }
+
+  // Used if we have our 'attributes' at the root
+  if (ngffData.ome?.version) {
+    return ngffData.ome.version;
+  }
+  if (ngffData.version) {
+    return ngffData.version;
+  }
+  // Handle version 0.4 and earlier
+  let version = ngffData.multiscales
+    ? ngffData.multiscales[0].version
+    : ngffData.plate
+    ? ngffData.plate.version
+    : ngffData.well
+    ? ngffData.well.version
     : undefined;
-  return version;
+  console.log("version", version);
+  // for 0.4 and earlier, version wasn't MUST and we defaulted
+  // to using v0.4 for validation. To preserve that behaviour
+  // return "0.4" if no version found.
+  return version || "0.4";
 }
 
 export function toTitleCase(text) {
@@ -109,32 +187,39 @@ export function getSchemaName(jsonData) {
   return names[0];
 }
 
-export function getSchemaNames(jsonData) {
+export function getSchemaNames(ngffData) {
   let names = [];
-  if (jsonData.multiscales) {
+  if (ngffData.multiscales) {
     names.push("image");
   }
-  if (jsonData.plate) {
+  if (ngffData.plate) {
     names.push("plate");
   }
-  if (jsonData.well) {
+  if (ngffData.well) {
     names.push("well");
   }
-  if (jsonData["image-label"]) {
+  if (ngffData["image-label"]) {
     names.push("label");
   }
   return names;
 }
 
 export function getSchemaUrlsForJson(rootAttrs) {
-  const msVersion = getVersion(rootAttrs);
+  console.log('getSchemaUrlsForJson rootAttrs', rootAttrs)
+  // v0.5+ unwrap the attrs under "attributes.ome"
+  let omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
+
+  const msVersion = getVersion(omeAttrs);
   const version = msVersion || CURRENT_VERSION;
-  const schemaNames = getSchemaNames(rootAttrs);
+  const schemaNames = getSchemaNames(omeAttrs);
   return schemaNames.map(name => getSchemaUrl(name, version));
 }
 
-export function validateData(schema, jsonData) {
-  const validate = ajv.compile(schema);
+export function validateData(schema, jsonData, extraSchemas) {
+  // call ajv.addSchema(schema) for each schema
+  const ajv = new Ajv({ strict: false }); // options can be passed, e.g. {allErrors: true}
+  let withSchema = extraSchemas.reduce((prev, curr) => prev.addSchema(curr), ajv);
+  const validate = withSchema.compile(schema);
   const valid = validate(jsonData);
   let errors = [];
   if (!valid) {
@@ -146,24 +231,53 @@ export function validateData(schema, jsonData) {
 
 export async function validate(jsonData) {
   // get version, lookup schema, do validation...
-  const schemaNames = getSchemaNames(jsonData);
+  // v0.5+ unwrap the attrs under "attributes.ome"
+  let omeAttrs = jsonData?.attributes?.ome || jsonData;
 
-  if (schemaNames.length == 0) {
-    return ["Unrecognised JSON data"];
+  let version = getVersion(omeAttrs);
+  // v0.5+ (with attributes.ome) MUST have top-level version
+  if (jsonData?.attributes?.ome) {
+    if (!jsonData.attributes.ome.version) {
+      return ["No version found under attributes.ome"];
+    }
+  } else if (!version) {
+    // default to last version pre 0.5 rules.
+    version = "0.4";
   }
+  
+  console.log("validate VERSION", version, jsonData);
 
-  let version = getVersion(jsonData);
+  const schemaUrls = getSchemaUrlsForJson(jsonData);
+
+  if (schemaUrls.length == 0) {
+    return ["No schemas found. Unrecognised JSON data"];
+  }
 
   if (!version) {
     console.log("No version found, using: " + CURRENT_VERSION);
     version = CURRENT_VERSION;
   }
 
+  let refSchemas = [];
+  // TODO: need to know whether to load other schemas...
+  // For now, we can use version check... 
+  if (version === "0.5") {
+    const versionSchema = await getSchema(getSchemaUrl("_version", version));
+    // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
+    refSchemas = [versionSchema];
+    // For version 0.5+, we validate the "attributes" content.
+    // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
+    jsonData = jsonData.attributes;
+  }
   let errors = [];
-  for (let s=0; s<schemaNames.length; s++) {
-    let schema = await getSchema(version, schemaNames[s]);
-    let errs = validateData(schema, jsonData);
+  for (let s=0; s<schemaUrls.length; s++) {
+    let schema = await getSchema(schemaUrls[s]);
+    let errs = validateData(schema, jsonData, refSchemas);
     errors = errors.concat(errs);
+  }
+
+  if (errors.length > 0) {
+    console.log("Validation errors", errors, jsonData);
   }
   return errors;
 }
@@ -173,6 +287,29 @@ export function formatBytes(bytes) {
   if (bytes == 0) return "0 Byte";
   var i = Math.floor(Math.log(bytes) / Math.log(1000));
   return (bytes / Math.pow(1000, i)).toFixed(2) + " " + sizes[i];
+}
+
+export function getChunkAndShardShapes(zarray) {
+  // Returns [chunkShape, shardShape]. shardShape may be undefined
+  // For zarr v2 we just have chunks:
+  if (zarray.chunks) {
+    return [zarray.chunks, undefined]
+  }
+  // For zarr v3 we check for sharding
+  // Based on https://github.com/zarr-developers/zarr-specs/blob/main/docs/v3/codecs/sharding-indexed/v1.0.rst#configuration-parameters
+  const chunk_shape = zarray.chunk_grid?.configuration?.chunk_shape;
+  let sharding_codecs = zarray.codecs?.filter(codec => codec.name == "sharding_indexed");
+  const sub_chunks = sharding_codecs?.[0]?.configuration?.chunk_shape;
+  // if we have sharding, a 'chunk' is the sub-chunk of a shard
+  if (sub_chunks) {
+    return [sub_chunks, chunk_shape]
+  } else {
+    return [chunk_shape, undefined];
+  }
+}
+
+export function getArrayDtype(zarray) {
+  return zarray.dtype || zarray.data_type;
 }
 
 export function getSearchParam(key) {

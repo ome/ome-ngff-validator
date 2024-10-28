@@ -1,6 +1,7 @@
 <script>
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
+  import RoCrate from "./RoCrate/index.svelte";
   import Well from "./Well/index.svelte"
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -14,35 +15,63 @@
     getJson,
     getVersion,
     getDataType,
+    getZarrGroupAttrsFileName,
   } from "../utils";
 
   export let source;
   export let rootAttrs;
 
-  const msVersion = getVersion(rootAttrs);
+  let versionMessage= "";
+  let version = null;
+  // Initial validation of version
+  // Top level 'version' is required "MUST" for v0.5+
+  if (rootAttrs?.attributes?.ome) {
+    if (!rootAttrs.attributes.ome.version) {
+      versionMessage = "Missing 'version' field under attributes.ome.";
+    } else {
+      version = rootAttrs.attributes.ome.version;
+      versionMessage = `Using version ${version}.`;
+    }
+  } else {
+    // version for older versions can be nested under "multiscales" or "plate" or "well"
+    version = getVersion(rootAttrs);
+    if (!version) {
+      versionMessage = "No version found. Using version 0.4.";
+      version = "0.4";
+    } else {
+      versionMessage = `Using version ${version}.`;
+    }
+  }
 
-  const dtype = getDataType(rootAttrs);
-  const schemaUrls = getSchemaUrlsForJson(rootAttrs);
+
+  // v0.5+ unwrap the attrs under "ome"
+  const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
+
+
+  const dtype = getDataType(omeAttrs);
+  const schemaUrls = getSchemaUrlsForJson(omeAttrs);
+  console.log("index.svelte schemaUrls", schemaUrls)
   const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
 
   // check for labels/.zattrs
-  const labelsPromise = getJson(source + '/labels/.zattrs');
+  const zarrAttrsFileName = getZarrGroupAttrsFileName(version);
+  const labelsPromise = getJson(source + '/labels/' + zarrAttrsFileName);
 </script>
 
 <article>
   <p>
-    Validating: <a href={source}>/{zarrName}/.zattrs</a>
+    Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
 
-  {#if !msVersion}No version found. Using {CURRENT_VERSION}<br />{/if}
+  {versionMessage}
 
   Using schema{schemaUrls.length > 1 ? "s" : ""}: 
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
-    <a href={url} target="_blank">{url.split("main")[1]}</a>
+    <a href={url} target="_blank">{url.split("ngff")[1]}</a>
   {/each}
 
   {#await promise}
@@ -62,33 +91,38 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  <OpenWith {source} {dtype} />
+  <OpenWith {source} {dtype} {version} />
 
   <div class="json">
-    <JsonBrowser name="" version={msVersion || CURRENT_VERSION} contents={rootAttrs} expanded />
+    <JsonBrowser name="" version={version || CURRENT_VERSION} contents={rootAttrs} expanded />
   </div>
+
+  <!-- for v0.5+ we check for ro-crate-metadata.json -->
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
+    <RoCrate {source}></RoCrate>
+  {/if}
 
   {#await labelsPromise}
     <p>checking for labels...</p>
   {:then labelsAttrs}
-    <LabelsInfoLink {labelsAttrs} source={source}></LabelsInfoLink>
+    <LabelsInfoLink {labelsAttrs} source={source} {zarrAttrsFileName}></LabelsInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
 </article>
 
-{#if rootAttrs.multiscales}
-  <MultiscaleArrays {source} {rootAttrs} />
-{:else if rootAttrs.plate}
-  <Plate {source} {rootAttrs} />
-{:else if rootAttrs.well}
-  <Well {source} {rootAttrs} />
+{#if omeAttrs.multiscales}
+  <MultiscaleArrays {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.plate}
+  <Plate {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.well}
+  <Well {source} rootAttrs={omeAttrs} />
 {/if}
 
 <style>
   a,
   a:visited {
-    color: #ff512f;
+    color: var(--omeLinkBlue);
   }
   .json {
     text-align: left;

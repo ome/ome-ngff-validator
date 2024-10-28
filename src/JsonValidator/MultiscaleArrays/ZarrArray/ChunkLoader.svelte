@@ -1,17 +1,22 @@
 <script>
-  import { openArray, slice } from "zarr";
-  import { range } from "../../../utils";
+  import { range, getChunkAndShardShapes } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
+  import * as zarr from "zarrita";
+  import { slice } from "@zarrita/indexing";
+
 
   export let source;
   export let path;
   export let zarray;
 
+  // zarrita wants /path/to/data.zarr directory
+  let zarrPath = path.replace("/zarr.json", "").replace("/.zarray", "")
+
   let showChunks = false;
   let chunk;
 
-  const chunks = zarray.chunks;
+  const [chunks, shards] = getChunkAndShardShapes(zarray);
   const chunkCounts = zarray.shape.map((sh, index) =>
     Math.ceil(sh / chunks[index])
   );
@@ -33,20 +38,26 @@
     if (!showChunks) return;
     // clear previous chunk
     chunk = undefined;
-    const store = await openArray({ store: source + "/" + path, mode: "r" });
+
+    let url = source + "/" + zarrPath;
+    const store = new zarr.FetchStore(url);
+    const arr = await zarr.open(store, { kind: "array" });
 
     // we want to get exactly 1 chunk
     // e.g. chunkIndices is (0, 1, 0, 0) and chunk is (1, 125, 125, 125)
     // we want to get [0, 125:250, 0:125, 0:125]
-    let ch = store.meta.chunks;
-    const indices = get(chunkIndices).map((index, dim) => {
+    let ch = arr.chunks;
+    const indices = get(chunkIndices);
+    let slices = indices.map((index, dim) => {
       if (ch[dim] > 1) {
         return slice(index * ch[dim], (index + 1) * ch[dim]);
       } else {
-        return index * ch[dim];
+        return index;
       }
     });
-    chunk = await store.get(indices);
+    // Updating chunk will trigger ChunkViewer to re-render
+    console.log("loading chunk", slices)
+    chunk = await zarr.get(arr, slices);
   }
 
   chunkIndices.subscribe(function () {

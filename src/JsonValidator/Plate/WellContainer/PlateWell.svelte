@@ -1,9 +1,13 @@
 <script>
-  import { getJson, validate, getSearchParam, range } from "../../../utils";
+  import { getZarrGroupAttrs, validate, getSearchParam, range } from "../../../utils";
 
   export let wellAttrs;
   export let source;
   export let path;
+
+  let rootAttrs = wellAttrs;
+  // unwrap attributes.ome if present
+  wellAttrs = wellAttrs.attributes?.ome || wellAttrs;
 
   const wellToValidate = getSearchParam("well");
   let wellIndex = parseInt(wellToValidate);
@@ -20,21 +24,24 @@
 
   async function loadAndValidate() {
     let errs = [];
+    console.log("loadAndValidate wellAttrs", wellAttrs);
+
     const imgs = wellAttrs.well.images;
     for (let i=0; i < wellIndices.length; i++) {
-      // this will fail if e.g. any getJson() raises exception
+      // this will fail if e.g. any getZarrGroupAttrs() raises exception
       let index = wellIndices[i];
       if (index >= imgs.length) {
         return ["Invalid Well index: " + index];
       }
       loadingIndex = index;
-      let imgAttrs = await getJson(source + "/" + path + "/" + imgs[index].path + "/.zattrs");
+      let imgAttrs = await getZarrGroupAttrs(source + "/" + path + "/" + imgs[index].path);
       errs = errs.concat(await validate(imgAttrs));
+      console.log("PlateWell imgAttrs errs", errs);
     };
     return errs;
   }
 
-  let validatePromise = validate(wellAttrs);
+  let validatePromise = validate(rootAttrs);
 
   let imagePromise = loadAndValidate();
 

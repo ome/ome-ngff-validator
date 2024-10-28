@@ -1,5 +1,5 @@
 <script>
-  import { CURRENT_VERSION, getVersion, getSchema } from "../../utils";
+  import { CURRENT_VERSION, getVersion, getSchema, getSchemaUrl } from "../../utils";
 
   import ImageContainer from "./ImageContainer.svelte";
 
@@ -13,7 +13,7 @@
   const version = getVersion(rootAttrs) || CURRENT_VERSION;
 
   // wait for schema to be cached, so we don't load them multiple times
-  let schemasPromise = getSchema(version, "image")
+  let schemasPromise = getSchema(getSchemaUrl("image", version))
 </script>
 
 <article>

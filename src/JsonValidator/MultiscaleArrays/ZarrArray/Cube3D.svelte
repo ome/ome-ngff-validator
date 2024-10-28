@@ -1,8 +1,7 @@
 <script>
+  import { getChunkAndShardShapes } from "../../../utils";
   export let zarray;
 
-  // reference to parent element
-  let parent;
   let scrollX = 50;
   function handleMousemove(event) {
     // scrollX goes from 20 -> 50. parent is 200px wide
@@ -14,20 +13,31 @@
   const sizeY = shape[shape.length - 2];
   const sizeZ = shape.length < 3 ? 1 : shape[shape.length - 3];
 
-  // Scale 3D so the longest dimension is 200px...
-  const scale = 200 / Math.max(sizeX, sizeY, sizeZ);
+  // Scale 3D so the longest dimension is 300px...
+  const scale = 300 / Math.max(sizeX, sizeY, sizeZ);
   const scaledX = sizeX * scale;
   const scaledY = sizeY * scale;
   const scaledZ = sizeZ * scale;
 
-  const minC = 5;
-  const chunks = zarray.chunks;
-  const chunkX = Math.max(minC, chunks[chunks.length - 1] * scale);
-  const chunkY = Math.max(minC, chunks[chunks.length - 2] * scale);
-  const chunkZ = Math.max(minC, chunks[chunks.length - 3] * scale);
+  const [chunks, shards] = getChunkAndShardShapes(zarray);
+  let chunkX = chunks[chunks.length - 1] * scale;
+  let chunkY = chunks[chunks.length - 2] * scale;
+  let chunkZ = chunks[chunks.length - 3] * scale;
+
+  let shardX = 100;
+  let shardY = 100;
+  let shardZ = 100;
+  let shardColor = "transparent";
+  
+  if (shards) {
+    shardX = shards[shards.length - 1] * scale;
+    shardY = shards[shards.length - 2] * scale;
+    shardZ = shards[shards.length - 3] * scale;
+    shardColor = "var(--omeLinkBlue)"
+  }
 </script>
 
-<div class="parent" bind:this={parent} on:mousemove={handleMousemove}>
+<div class="parent" on:mousemove={handleMousemove}>
   <div
     class="container"
     style="
@@ -37,6 +47,10 @@
     --chunkX: {chunkX}px;
     --chunkY: {chunkY}px;
     --chunkZ: {chunkZ}px;
+    --shardX: {shardX}px;
+    --shardY: {shardY}px;
+    --shardZ: {shardZ}px;
+    --shardColor: {shardColor};
     --scrollX: {scrollX}deg"
   >
     <div class="cube">
@@ -57,7 +71,7 @@
 
 <style>
   .parent {
-    width: 200px;
+    width: 400px;
     margin: auto;
   }
   .container {
@@ -84,6 +98,20 @@
     width: 100%;
     height: 100%;
     background-image: repeating-linear-gradient(
+        0deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardY))
+      ),
+      repeating-linear-gradient(
+        90deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardX))
+      ),
+      repeating-linear-gradient(
         0deg,
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
@@ -125,8 +153,22 @@
   .top {
     top: calc((var(--size-y) - var(--size-z)) / 2);
     height: var(--size-z);
-    transform: rotateX(90deg) translateZ(calc(var(--size-y) / 2));
+    transform: rotateX(270deg) translateZ(calc(var(--size-y)* -1 / 2));
     background-image: repeating-linear-gradient(
+        0deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardZ))
+      ),
+      repeating-linear-gradient(
+        90deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardX))
+      ),
+      repeating-linear-gradient(
         0deg,
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,
@@ -158,6 +200,20 @@
     left: calc((var(--size-x) - var(--size-z)) / 2);
     transform: rotateY(-90deg) translateZ(calc(var(--size-x) / 2));
     background-image: repeating-linear-gradient(
+        0deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardY))
+      ),
+      repeating-linear-gradient(
+        90deg,
+        var(--shardColor) 0px,
+        var(--shardColor) 2px,
+        transparent 2px,
+        transparent calc(var(--shardZ))
+      ),
+      repeating-linear-gradient(
         0deg,
         rgba(70, 70, 70, 0.7) 0px,
         rgba(70, 70, 70, 0.7) 1px,

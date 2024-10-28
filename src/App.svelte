@@ -6,7 +6,7 @@
   import Modal from "svelte-simple-modal";
   import SplashScreen from "./SplashScreen.svelte";
 
-  import { getJson } from "./utils";
+  import { getZarrGroupAttrs } from "./utils";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -15,14 +15,17 @@
     source = source.slice(0, -1);
   }
 
-  let location = window.location.href;
-
   let promise;
 
   if (source) {
     // load JSON to be validated...
-    console.log("Loading JSON... " + source + "/.zattrs");
-    promise = getJson(source + "/.zattrs");
+    console.log("Loading JSON... " + source);
+    promise = getZarrGroupAttrs(source);
+  }
+
+  function isBioFormats2Raw(data) {
+    let omeAttrs = data?.attributes?.ome || data;
+    return omeAttrs["bioformats2raw.layout"] === 3 && !omeAttrs.plate;
   }
 </script>
 
@@ -38,7 +41,7 @@
         {:then data}
           <Title {source} zattrs={data} />
           <div>
-            {#if data["bioformats2raw.layout"] === 3 && !data.plate}
+            {#if isBioFormats2Raw(data)}
               <Bioformats2rawLayout rootAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />
@@ -74,24 +77,7 @@
     width: 100%;
     flex: 1;
     padding: 15px 0;
-    background: #ff512f; /* fallback for old browsers */
-    background: -webkit-linear-gradient(
-      to right,
-      #f09819,
-      #ff512f
-    ); /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(
-      to right,
-      #f09819,
-      #ff512f
-    ); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    /* https://uigradients.com/ */
-    /* OME green->blue rgb(61,132,107), rgb(68,139,200) */
-  }
-
-  article {
-    width: 90%;
-    margin: auto;
+    background: white;
   }
 
   section > div {
@@ -107,14 +93,6 @@
   @media (min-width: 1000px) {
     section > div {
       flex-direction: row;
-    }
-
-    article {
-      width: 60%;
-      margin: auto;
-    }
-    a {
-      white-space: nowrap;
     }
   }
 
