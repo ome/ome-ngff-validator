@@ -17,9 +17,9 @@
       "href": "https://neuroglancer-demo.appspot.com/#!{%22layers%22:[{%22source%22:%22zarr://{URL}%22,%22name%22:%22OME-NGFF%22}]}"
     },
     {
-      "name": "Allen Cell Feature Explorer 3D viewer",
+      "name": "Allen Cell 3D viewer",
       "logo": "/aics_website-3d-cell-viewer.png",
-      "href": "https://allen-cell-animated.github.io/website-3d-cell-viewer/?url="
+      "href": "https://volumeviewer.allencell.org/viewer?url="
     },
     {
       "name": "napari",
