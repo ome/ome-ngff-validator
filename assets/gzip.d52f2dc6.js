@@ -1,0 +1,1 @@
+import{g as t,a as i}from"./browser.22f8ba56.js";var n=class r{static codecId="gzip";level;constructor(e=1){if(e<0||e>9)throw new Error("Invalid gzip compression level, it should be between 0 and 9");this.level=e}static fromConfig({level:e}){return new r(e)}encode(e){return t(e,{level:this.level})}decode(e){return i(e)}},a=n;export{a as default};

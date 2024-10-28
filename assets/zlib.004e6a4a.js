@@ -1,0 +1,1 @@
+import{z as l,u as t}from"./browser.22f8ba56.js";var i=class r{static codecId="zlib";level;constructor(e=1){if(e<-1||e>9)throw new Error("Invalid zlib compression level, it should be between -1 and 9");this.level=e}static fromConfig({level:e}){return new r(e)}encode(e){return l(e,{level:this.level})}decode(e){return t(e)}},o=i;export{o as default};
