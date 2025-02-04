@@ -139,34 +139,40 @@ export async function getSchema(schemaUrl) {
 
 export function getVersion(ngffData) {
   // if we have attributes.ome then this is version 0.5+
+  let version;
   if (ngffData.attributes?.ome) {
     if (ngffData.attributes.ome.version) {
-      return ngffData.attributes.ome.version;
+      version = ngffData.attributes.ome.version;
     } else {
       throw Error("No version found in attributes.ome");
     }
   }
 
   // Used if we have our 'attributes' at the root
-  if (ngffData.ome?.version) {
-    return ngffData.ome.version;
+  else if (ngffData.ome?.version) {
+    version = ngffData.ome.version;
   }
-  if (ngffData.version) {
-    return ngffData.version;
+  else if (ngffData.version) {
+    version = ngffData.version;
   }
   // Handle version 0.4 and earlier
-  let version = ngffData.multiscales
-    ? ngffData.multiscales[0].version
-    : ngffData.plate
-    ? ngffData.plate.version
-    : ngffData.well
-    ? ngffData.well.version
-    : undefined;
+  else {
+    version = ngffData.multiscales
+      ? ngffData.multiscales[0].version
+      : ngffData.plate
+      ? ngffData.plate.version
+      : ngffData.well
+      ? ngffData.well.version
+      : undefined;
+  }
   console.log("version", version);
   // for 0.4 and earlier, version wasn't MUST and we defaulted
   // to using v0.4 for validation. To preserve that behaviour
   // return "0.4" if no version found.
-  return version || "0.4";
+  version = version || "0.4";
+
+  // remove any -dev2 etc.
+  return version.split("-")[0];
 }
 
 export function toTitleCase(text) {
