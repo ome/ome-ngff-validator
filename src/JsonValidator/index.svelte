@@ -47,7 +47,9 @@
   // v0.5+ unwrap the attrs under "ome"
   const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
+  // For Plate or Well, we need to get the first image (field '0') for Thumbnail
   const firstPlateImageUrl = omeAttrs.plate?.wells[0].path ? `${source}/${omeAttrs.plate.wells[0].path}/0` : null;
+  const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
   const schemaUrls = getSchemaUrlsForJson(omeAttrs);
@@ -65,7 +67,7 @@
 <article>
   <div class="thumbnail_row">
     <div class="thumbnail_wrapper">
-      <Thumbnail source = {firstPlateImageUrl || source} targetSize=150 />
+      <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 />
     </div>
   </div>
   <div class="validation_row">

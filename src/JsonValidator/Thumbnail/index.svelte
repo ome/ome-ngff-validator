@@ -22,7 +22,14 @@
 {:then src}
   <img {src} alt="Thumbnail" class="thumbnail" />
 {:catch error}
-  <div>Failed to load thumbnail: {error.message}</div>
+  <div title="Failed to load thumbnail: {error.message}" class="failed">
+    <img
+      src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      alt="Failed to load thumbnail: {error.message}"
+      class="thumbnail"
+    />
+    <div>×</div>
+  </div>
 {/await}
 
 <style>
@@ -35,7 +42,25 @@
   .spinner {
     position: relative;
   }
-  .spinner img {
+  .failed {
+    position: relative;
+    width: 100px;
+    height: 100px;
+  }
+  .failed img {
+    top: 0;
+    left: 0;
+    position: absolute;
+  }
+  .failed div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    color: darkgrey;
+  }
+  .spinner img, .failed img {
     background-color: #ddd;
     width: 100px;
     height: 100px;
