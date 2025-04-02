@@ -11,6 +11,7 @@
   import ImageContainer from "../JsonValidator/Well/ImageContainer.svelte";
   import RoCrate from "../JsonValidator/RoCrate/index.svelte";
   import OpenWith from "../JsonValidator/OpenWithViewers/index.svelte";
+  import Thumbnail from "../JsonValidator/Thumbnail/index.svelte";
 
   export let source;
   export let rootAttrs;
@@ -125,6 +126,7 @@
         <ul>
           {#each metadataJson.images as image}
             <li class="image">
+              <div>
               /{image.path}
               <a title="Open Image" href="{url}?source={source}/{image.path}/"
                 >{image.name}</a
@@ -132,12 +134,14 @@
 
               <ImageContainer {source} path={image.path} />
 
-              <a title="Open Image" href="{url}?source={source}/{image.path}/"
-                >Open in validator</a
-              >
-
               <div style="margin-top: 10px">
                 <OpenWith source={`${source}/${image.path}`} dtype={"image"} {version} />
+              </div>
+              </div>
+              <div class="thumbnail_wrapper">
+                <a title="Open Image in Validator" href="{url}?source={source}/{image.path}/">
+                <Thumbnail source={`${source}/${image.path}`} targetSize=100 />
+                </a>
               </div>
             </li>
           {/each}
@@ -193,6 +197,8 @@
   }
 
   .image {
+    display: flex;
+    flex-direction: row;
     list-style: none;
     text-align: left;
     margin-top: 10px;
@@ -203,5 +209,18 @@
     font-size: 14px;
     border-radius: 10px;
     font-family: monospace;
+  }
+  .image div {
+    flex: 1 1 auto;
+  }
+
+  .image .thumbnail_wrapper {
+    flex: 0 0 auto;
+  }
+
+  .thumbnail_wrapper :global(.thumbnail) {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 5px;
   }
 </style>

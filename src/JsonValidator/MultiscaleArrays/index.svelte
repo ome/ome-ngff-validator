@@ -13,7 +13,7 @@
 {#each rootAttrs.multiscales as multiscale, idx}
   <article>
     <h2>Multiscale {idx}</h2>
-    <Multiscale {source} {multiscale} /> 
+    <Multiscale {source} {multiscale} version={msVersion}/>
     {#each multiscale.datasets as dataset}
       <ZarrArray {source} path={dataset.path + "/" + zarrAttrsFileName} />
     {/each}

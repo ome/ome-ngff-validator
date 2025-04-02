@@ -12,14 +12,13 @@
   .invalid,
   .valid {
     border-radius: 50%;
-    padding: 10px;
+    padding: 13px;
     margin: 10px auto;
     color: white;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     font-size: 50px;
     text-align: center;
-    padding: 15px;
   }
   .invalid {
     background-color: red;
