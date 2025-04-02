@@ -4,6 +4,7 @@
 
   export let source;
   export let multiscale;
+  export let version;
 
   const WARNING = "warning";
 
@@ -11,7 +12,7 @@
   // shape.length (number of dimensions)
 
   // If multiscale.axes (version > 0.3) check it matches shape
-  const { axes, datasets, version } = multiscale;
+  const { axes, datasets } = multiscale;
 
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
