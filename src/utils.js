@@ -7,11 +7,7 @@ export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
-  if (version == "0.5" || version == "0.5-dev2") {
-    // TEMP: use our branch based on Norman's spec-rfc2 PR at https://github.com/ome/ngff/pull/242
-    return `https://raw.githubusercontent.com/ome/ngff/spec-rfc2/latest/schemas/${schemaName}.schema`;
-  }
-  return `https://raw.githubusercontent.com/ome/ngff/main/${version}/schemas/${schemaName}.schema`;
+  return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
 
 
