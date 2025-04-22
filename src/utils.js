@@ -7,6 +7,9 @@ export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
+  if (version.includes("0.6")) {
+    return `https://raw.githubusercontent.com/joshmoore/ngff/878e15c550b4b71a3b0d7e690ce64dd91d963ca6/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
 
@@ -240,8 +243,6 @@ export async function validate(jsonData) {
     // default to last version pre 0.5 rules.
     version = "0.4";
   }
-  
-  console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
 
@@ -265,8 +266,23 @@ export async function validate(jsonData) {
     // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
     jsonData = jsonData.attributes;
   }
+  if (version.startsWith("0.6")) {
+    const versionSchema = await getSchema(getSchemaUrl("_version", version));
+    refSchemas = [versionSchema];
+    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev1/schemas/image.schema
+    // and contains "$ref": "coordinate_systems.schema" etc
+    // We need to use the same URL prefix for all those $ref schemas
+    const names = ["coordinate_transformation", "coordinate_systems", "axes"];
+    for(const name of names) {
+      const schema = await getSchema(getSchemaUrl(name, version));
+      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev1/schemas/${name}.schema`;
+      refSchemas.push(schema);
+    }
+    jsonData = jsonData.attributes;
+  }
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
+    console.log("validate VERSION", version, jsonData);
     let schema = await getSchema(schemaUrls[s]);
     let errs = validateData(schema, jsonData, refSchemas);
     errors = errors.concat(errs);
