@@ -8,7 +8,7 @@ export const FILE_NOT_FOUND = "File not found";
 
 export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
-    return `https://raw.githubusercontent.com/joshmoore/ngff/878e15c550b4b71a3b0d7e690ce64dd91d963ca6/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/joshmoore/ngff/dev/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
@@ -257,7 +257,7 @@ export async function validate(jsonData) {
 
   let refSchemas = [];
   // TODO: need to know whether to load other schemas...
-  // For now, we can use version check... 
+  // For now, we can use version check...
   if (version === "0.5") {
     const versionSchema = await getSchema(getSchemaUrl("_version", version));
     // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
