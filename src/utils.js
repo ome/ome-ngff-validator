@@ -200,6 +200,16 @@ export function getSchemaNames(ngffData) {
   if (ngffData["image-label"]) {
     names.push("label");
   }
+  // If we don't have any of the above, then we check for
+  // coordinate transformations or systems
+  if (names.length == 0) {
+    if (ngffData.coordinateTransformations) {
+      names.push("coordinate_transformation");
+    }
+    if (ngffData.coordinateSystems) {
+      names.push("coordinate_systems");
+    }
+  }
   return names;
 }
 
@@ -282,14 +292,21 @@ export async function validate(jsonData) {
   }
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
-    console.log("validate VERSION", version, jsonData);
     let schema = await getSchema(schemaUrls[s]);
-    let errs = validateData(schema, jsonData, refSchemas);
+    let toValidate = jsonData;
+    // If we are validating coordinate_transformations or systems
+    // then we need to unwrap the jsonData
+    if (schema["$id"].endsWith("coordinate_transformation.schema")) {
+      toValidate = jsonData.ome?.coordinateTransformations;
+    } else if (schema["$id"].endsWith("coordinate_systems.schema")) {
+      toValidate = jsonData.ome?.coordinateSystems;
+    }
+    console.log("validate VERSION", version, jsonData);
+    let errs = validateData(schema, toValidate, refSchemas);
+    if (errs.length > 0) {
+      console.log("Validation ERRORS", errors, jsonData);
+    }
     errors = errors.concat(errs);
-  }
-
-  if (errors.length > 0) {
-    console.log("Validation errors", errors, jsonData);
   }
   return errors;
 }
