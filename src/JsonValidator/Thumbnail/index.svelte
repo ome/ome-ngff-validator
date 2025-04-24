@@ -46,6 +46,7 @@
     position: relative;
     width: 100px;
     height: 100px;
+    display: inline-block
   }
   .failed img {
     top: 0;
