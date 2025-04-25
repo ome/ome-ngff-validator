@@ -2,11 +2,12 @@
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
   import RoCrate from "./RoCrate/index.svelte";
-  import Well from "./Well/index.svelte"
+  import Well from "./Well/index.svelte";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import OpenWith from "./OpenWithViewers/index.svelte";
+  import Thumbnail from "./Thumbnail/index.svelte";
 
   import {
     CURRENT_VERSION,
@@ -21,7 +22,7 @@
   export let source;
   export let rootAttrs;
 
-  let versionMessage= "";
+  let versionMessage = "";
   let version = null;
   // Initial validation of version
   // Top level 'version' is required "MUST" for v0.5+
@@ -43,14 +44,16 @@
     }
   }
 
-
   // v0.5+ unwrap the attrs under "ome"
   const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
+  // For Plate or Well, we need to get the first image (field '0') for Thumbnail
+  const firstPlateImageUrl = omeAttrs.plate?.wells[0].path ? `${source}/${omeAttrs.plate.wells[0].path}/0` : null;
+  const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
   const schemaUrls = getSchemaUrlsForJson(omeAttrs);
-  console.log("index.svelte schemaUrls", schemaUrls)
+  console.log("index.svelte schemaUrls", schemaUrls);
   const promise = validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
@@ -58,22 +61,23 @@
 
   // check for labels/.zattrs
   const zarrAttrsFileName = getZarrGroupAttrsFileName(version);
-  const labelsPromise = getJson(source + '/labels/' + zarrAttrsFileName);
+  const labelsPromise = getJson(source + "/labels/" + zarrAttrsFileName);
 </script>
 
 <article>
+  <div class="thumbnail_wrapper">
+    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 />
+  </div>
+
   <p>
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
-
   {versionMessage}
-
   Using schema{schemaUrls.length > 1 ? "s" : ""}: 
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
   {/each}
-
   {#await promise}
     <div>loading schema...</div>
   {:then errors}
@@ -91,10 +95,16 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
+
   <OpenWith {source} {dtype} {version} />
 
   <div class="json">
-    <JsonBrowser name="" version={version || CURRENT_VERSION} contents={rootAttrs} expanded />
+    <JsonBrowser
+      name=""
+      version={version || CURRENT_VERSION}
+      contents={rootAttrs}
+      expanded
+    />
   </div>
 
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
@@ -105,7 +115,7 @@
   {#await labelsPromise}
     <p>checking for labels...</p>
   {:then labelsAttrs}
-    <LabelsInfoLink {labelsAttrs} source={source} {zarrAttrsFileName}></LabelsInfoLink>
+    <LabelsInfoLink {labelsAttrs} {source} {zarrAttrsFileName}></LabelsInfoLink>
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
@@ -120,6 +130,10 @@
 {/if}
 
 <style>
+  .thumbnail_wrapper {
+    margin-bottom: 10px;
+  }
+
   a,
   a:visited {
     color: var(--omeLinkBlue);
@@ -134,7 +148,6 @@
     border-radius: 10px;
     font-family: monospace;
   }
-
 
   .error pre {
     margin-top: 10px;

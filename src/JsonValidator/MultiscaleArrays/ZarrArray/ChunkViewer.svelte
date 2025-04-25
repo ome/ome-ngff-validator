@@ -1,6 +1,5 @@
 <script>
   import { onMount, afterUpdate } from "svelte";
-  import { slice, get } from "@zarrita/indexing";
   import ndarray from "ndarray";
 
   export let chunk;
