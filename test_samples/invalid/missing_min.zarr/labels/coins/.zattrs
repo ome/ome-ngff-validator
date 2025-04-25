@@ -1,0 +1,181 @@
+{
+    "image-label": {
+        "colors": [
+            {
+                "label-value": 1,
+                "rgba": [
+                    208,
+                    116,
+                    230,
+                    84
+                ]
+            },
+            {
+                "label-value": 2,
+                "rgba": [
+                    28,
+                    118,
+                    161,
+                    236
+                ]
+            },
+            {
+                "label-value": 3,
+                "rgba": [
+                    24,
+                    19,
+                    210,
+                    73
+                ]
+            },
+            {
+                "label-value": 4,
+                "rgba": [
+                    15,
+                    48,
+                    106,
+                    38
+                ]
+            },
+            {
+                "label-value": 5,
+                "rgba": [
+                    55,
+                    193,
+                    84,
+                    160
+                ]
+            },
+            {
+                "label-value": 6,
+                "rgba": [
+                    220,
+                    80,
+                    184,
+                    19
+                ]
+            },
+            {
+                "label-value": 7,
+                "rgba": [
+                    118,
+                    15,
+                    124,
+                    203
+                ]
+            },
+            {
+                "label-value": 8,
+                "rgba": [
+                    105,
+                    36,
+                    195,
+                    161
+                ]
+            }
+        ],
+        "properties": [
+            {
+                "class": "class 1",
+                "label-value": 1
+            },
+            {
+                "class": "class 2",
+                "label-value": 2
+            },
+            {
+                "class": "class 3",
+                "label-value": 3
+            },
+            {
+                "class": "class 4",
+                "label-value": 4
+            },
+            {
+                "class": "class 5",
+                "label-value": 5
+            },
+            {
+                "class": "class 6",
+                "label-value": 6
+            },
+            {
+                "class": "class 7",
+                "label-value": 7
+            },
+            {
+                "class": "class 8",
+                "label-value": 8
+            }
+        ],
+        "source": {
+            "image": "../../"
+        },
+        "version": "0.4"
+    },
+    "multiscales": [
+        {
+            "axes": [
+                {
+                    "name": "y",
+                    "type": "space"
+                },
+                {
+                    "name": "x",
+                    "type": "space"
+                }
+            ],
+            "datasets": [
+                {
+                    "coordinateTransformations": [
+                        {
+                            "scale": [
+                                1.0,
+                                1.0
+                            ],
+                            "type": "scale"
+                        }
+                    ],
+                    "path": "0"
+                },
+                {
+                    "coordinateTransformations": [
+                        {
+                            "scale": [
+                                2.0,
+                                2.0
+                            ],
+                            "type": "scale"
+                        }
+                    ],
+                    "path": "1"
+                },
+                {
+                    "coordinateTransformations": [
+                        {
+                            "scale": [
+                                4.0,
+                                4.0
+                            ],
+                            "type": "scale"
+                        }
+                    ],
+                    "path": "2"
+                },
+                {
+                    "coordinateTransformations": [
+                        {
+                            "scale": [
+                                8.0,
+                                8.0
+                            ],
+                            "type": "scale"
+                        }
+                    ],
+                    "path": "3"
+                }
+            ],
+            "version": "0.4"
+        }
+    ]
+}
