@@ -65,45 +65,36 @@
 </script>
 
 <article>
-  <div class="thumbnail_row">
-    <div class="thumbnail_wrapper">
-      <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 />
-    </div>
+  <div class="thumbnail_wrapper">
+    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 />
   </div>
-  <div class="validation_row">
-      <p>
-        Validating: <a href="{source}/{zarrAttrsFileName}"
-          >/{zarrName}/{zarrAttrsFileName}</a
-        >
-        <br />
-        {versionMessage}
 
-        Using schema{schemaUrls.length > 1 ? "s" : ""}: <br>
-        {#each schemaUrls as url, i}
-          {i > 0 ? " and " : ""}
-          <a href={url} target="_blank">{url.split("ngff")[1]}</a>
+  <p>
+    Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
+  </p>
+  {versionMessage}
+  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  {#each schemaUrls as url, i}
+    {i > 0 ? " and " : ""}
+    <a href={url} target="_blank">{url.split("ngff")[1]}</a>
+  {/each}
+  {#await promise}
+    <div>loading schema...</div>
+  {:then errors}
+    <CheckMark valid={errors.length == 0} />
+    {#if errors.length > 0}
+      <div class="error">
+        Errors:
+        {#each errors as error}
+          <pre><code>{JSON.stringify(error, null, 2)}</code></pre>
         {/each}
-      </p>
+      </div>
+    {/if}
+  {:catch error}
+    <CheckMark valid={false}/>
+    <p style="color: red">{error.message}</p>
+  {/await}
 
-    <div class="checkmark">
-      {#await promise}
-        <div>loading schema...</div>
-      {:then errors}
-        <CheckMark valid={errors.length == 0} />
-        {#if errors.length > 0}
-          <div class="error">
-            Errors:
-            {#each errors as error}
-              <pre><code>{JSON.stringify(error, null, 2)}</code></pre>
-            {/each}
-          </div>
-        {/if}
-      {:catch error}
-        <CheckMark valid={false} />
-        <p style="color: red">{error.message}</p>
-      {/await}
-    </div>
-  </div>
 
   <OpenWith {source} {dtype} {version} />
 
@@ -139,29 +130,8 @@
 {/if}
 
 <style>
-  .thumbnail_row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-  }
-  .validation_row {
-    max-width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-  }
   .thumbnail_wrapper {
-    flex: 1 1 auto;
-  }
-  .thumbnail_row :global(.thumbnail) {
-    border-radius: 6px;
-    max-width: 200px;
-    max-width: 200px;
-  }
-  .checkmark {
-    flex: 0 0 auto;
+    margin-bottom: 10px;
   }
 
   a,
