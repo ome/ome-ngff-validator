@@ -5,6 +5,7 @@
   export let source;
   // Default target size 0 will get thumbnail from smallest resolution
   export let targetSize = 0;
+  export let maxCssSize = 250;
 
   const store = new zarr.FetchStore(source);
   const promise = omezarr.renderThumbnail(store, targetSize);
@@ -20,7 +21,7 @@
     />
   </div>
 {:then src}
-  <img {src} alt="Thumbnail" class="thumbnail" />
+  <img {src} alt="Thumbnail" class="thumbnail" style="--max-css-size: {maxCssSize}px" />
 {:catch error}
   <div title="Failed to load thumbnail: {error.message}" class="failed">
     <img
@@ -83,7 +84,8 @@
     animation: spinner 1s linear infinite;
   }
   .thumbnail {
-    max-width: 300px;
-    max-height: 300px;
+    border-radius: 5px;
+    max-width: var(--max-css-size);
+    max-height: var(--max-css-size);
   }
 </style>

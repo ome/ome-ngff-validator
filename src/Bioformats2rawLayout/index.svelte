@@ -140,7 +140,7 @@
               </div>
               <div class="thumbnail_wrapper">
                 <a title="Open Image in Validator" href="{url}?source={source}/{image.path}/">
-                <Thumbnail source={`${source}/${image.path}`} targetSize=100 />
+                <Thumbnail source={`${source}/${image.path}`} targetSize=100 maxCssSize=100 />
                 </a>
               </div>
             </li>
@@ -219,8 +219,6 @@
   }
 
   .thumbnail_wrapper :global(.thumbnail) {
-    max-width: 100px;
-    max-height: 100px;
     border-radius: 5px;
   }
 </style>
