@@ -82,4 +82,8 @@
     border-top-color: rgba(0, 0, 0, 0.6);
     animation: spinner 1s linear infinite;
   }
+  .thumbnail {
+    max-width: 300px;
+    max-height: 300px;
+  }
 </style>
