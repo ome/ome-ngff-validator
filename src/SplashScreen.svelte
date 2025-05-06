@@ -1,4 +1,5 @@
 <article>
+  <h1>OME-NGFF Validator</h1>
   <p>To validate an OME-NGFF file, use ?source=URL to open a sample. For example:</p>
 
   <ul>
@@ -29,6 +30,42 @@
       </a>
     </li>
   </ul>
+
+  <hr>
+
+  <h1>Testing invalid OME-NGFF examples</h1>
+  <p>
+    These examples are intentionally invalid. They are used to test the
+    validator's error handling.
+  </p>
+  <ul>
+    <li>
+      Invalid version:
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/invalid_version.zarr/"
+      >
+        invalid_version.zarr
+      </a>
+    </li>
+
+    <li>
+      Schema validation error:
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/missing_min.zarr/"
+      >
+        missing_min.zarr
+      </a>
+    </li>
+
+    <li>
+      Missing version (v0.5+):
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/no_version_v0.5.zarr/"
+      >
+        no_version_v0.5.zarr
+      </a>
+    </li>
+  </ul>
 </article>
 
 <style>
@@ -40,5 +77,12 @@
   li {
     list-style: none;
     margin: 15px;
+  }
+
+  hr {
+    margin: 30px 0;
+    background: #ddd;
+    border: 0;
+    height: 1px;
   }
 </style>
