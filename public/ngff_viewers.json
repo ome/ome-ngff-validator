@@ -17,7 +17,7 @@
       "href": "https://neuroglancer-demo.appspot.com/#!{%22layers%22:[{%22source%22:%22{URL}%22,%22name%22:%22OME-NGFF%22}]}"
     },
     {
-      "name": "Allen Cell 3D viewer",
+      "name": "Vol-E viewer",
       "logo": "/aics_website-3d-cell-viewer.png",
       "href": "https://volumeviewer.allencell.org/viewer?url="
     },
