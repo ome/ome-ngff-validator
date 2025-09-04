@@ -82,10 +82,12 @@ async function getZarrJson(zarr_dir, alternative=".zattrs") {
     zarrJson = await getJson(zarr_dir + "/zarr.json");
   } catch (error) {
     console.log("getZarrJson", error)
-    if (!error.message.includes(FILE_NOT_FOUND)) {
+    // If it's not a CORS or 404 error, then re-throw
+    if (!error.message.includes("CORS") && !error.message.includes(FILE_NOT_FOUND)) {
       throw error;
     }
-    // IF we got a 404 then try other URL
+    // We might have a CORS error just because of 404 (on some servers)
+    // In either case, it's worth trying other URL
     try {
       zarrJson = await getJson(zarr_dir + `/${alternative}`);
     } catch (err2) {
