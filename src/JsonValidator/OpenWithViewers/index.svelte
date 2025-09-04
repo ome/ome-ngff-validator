@@ -25,7 +25,7 @@
 
     if (version == "0.5") {
       // TODO: update when other viewers support zarr v3
-      viewers = viewers.filter((viewer) => viewer.name == "vizarr");
+      viewers = viewers.filter((viewer) => viewer.name != "itk-vtk-viewer");
     }
 
 </script>
