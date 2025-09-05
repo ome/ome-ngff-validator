@@ -4,7 +4,16 @@
 
   <ul>
     <li>
-      A single image:
+      A single image, OME-NGFF v0.5:
+      <a
+        href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr"
+      >
+        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr
+      </a>
+    </li>
+
+    <li>
+      The same image, OME-NGFF v0.4:
       <a
         href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
       >
@@ -33,7 +42,7 @@
 
   <hr>
 
-  <h1>Testing invalid OME-NGFF examples</h1>
+  <h3>Testing invalid OME-NGFF examples</h3>
   <p>
     These examples are intentionally invalid. They are used to test the
     validator's error handling.
@@ -72,6 +81,15 @@
   article {
     width: 90%;
     margin: auto;
+  }
+
+  h1 {
+      font-size: 2.0em;
+      margin-bottom: 15px;
+  }
+
+  h3 {
+    margin-bottom: 10px
   }
 
   li {
