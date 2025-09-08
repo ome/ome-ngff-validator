@@ -51,7 +51,7 @@
     <li>
       Invalid version:
       <a
-        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/invalid_version.zarr/"
+        href="{location}?source=https://raw.githubusercontent.com/ome/ome-ngff-validator/refs/heads/main/test_samples/invalid/invalid_version.zarr/"
       >
         invalid_version.zarr
       </a>
@@ -60,7 +60,7 @@
     <li>
       Schema validation error:
       <a
-        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/missing_min.zarr/"
+        href="{location}?source=https://raw.githubusercontent.com/ome/ome-ngff-validator/refs/heads/main/test_samples/invalid/missing_min.zarr/"
       >
         missing_min.zarr
       </a>
@@ -69,7 +69,7 @@
     <li>
       Missing version (v0.5+):
       <a
-        href="{location}?source=https://raw.githubusercontent.com/will-moore/ome-ngff-validator/refs/heads/test_samples/test_samples/invalid/no_version_v0.5.zarr/"
+        href="{location}?source=https://raw.githubusercontent.com/ome/ome-ngff-validator/refs/heads/main/test_samples/invalid/no_version_v0.5.zarr/"
       >
         no_version_v0.5.zarr
       </a>
