@@ -11,12 +11,19 @@
 
   const searchParams = new URLSearchParams(window.location.search);
   let source = searchParams.get("source");
-  if (source && source.endsWith("/")) {
-    source = source.slice(0, -1);
+  let redirected = false;
+
+  if (source) {
+    if (source.endsWith("/")) {
+      source = source.slice(0, -1);
+    }
+    if (source.endsWith("/.zattrs") || source.endsWith("/zarr.json")) {
+      source = source.replace(/\/(\.zattrs|zarr\.json)$/, "");
+      redirected = true;
+    }
   }
 
   let promise;
-
   if (source) {
     // load JSON to be validated...
     console.log("Loading JSON... " + source);
@@ -40,6 +47,11 @@
           <div>loading...</div>
         {:then data}
           <Title {source} zattrs={data} />
+
+          {#if redirected}
+            <p class="note">Redirected to base path from appended .zattrs or zarr.json</p>
+          {/if}
+
           <div>
             {#if isBioFormats2Raw(data)}
               <Bioformats2rawLayout rootAttrs={data} {source} />
@@ -102,5 +114,13 @@
     text-align: center;
     background: white;
     padding: 10px;
+  }
+
+  .note {
+    color: #8a8a8a;
+    padding: 8px 12px;
+    margin: 10px auto;
+    text-align: center;
+    max-width: 600px;
   }
 </style>
