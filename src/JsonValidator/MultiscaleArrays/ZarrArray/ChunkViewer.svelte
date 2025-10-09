@@ -1,6 +1,5 @@
 <script>
   import { onMount, afterUpdate } from "svelte";
-  import { slice, get } from "@zarrita/indexing";
   import ndarray from "ndarray";
 
   export let chunk;
@@ -24,7 +23,7 @@
     let minV = Infinity;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        let rawValue = chunk2d.get(y, x);
+        let rawValue = Number(chunk2d.get(y, x));
         maxV = Math.max(maxV, rawValue);
         minV = Math.min(minV, rawValue);
       }
@@ -69,7 +68,7 @@
       for (let x = 0; x < width; x++) {
         for (let p = 0; p < ndChunks.length; p++) {
           let range = minMaxValues[p];
-          let rawValue = ndChunks[p].get(y, x);
+          let rawValue = Number(ndChunks[p].get(y, x));
           let fraction = (rawValue - range[0]) / (range[1] - range[0]);
           // for red, green, blue,
           for (let i = 0; i < 3; i++) {

@@ -3,7 +3,7 @@
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
   import * as zarr from "zarrita";
-  import { slice } from "@zarrita/indexing";
+  import { slice } from "zarrita";
 
 
   export let source;
