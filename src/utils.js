@@ -8,7 +8,7 @@ export const FILE_NOT_FOUND = "File not found";
 
 export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
-    return `https://raw.githubusercontent.com/joshmoore/ngff/dev/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/ome/ngff-spec/main/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
