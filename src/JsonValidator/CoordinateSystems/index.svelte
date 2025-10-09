@@ -1,6 +1,7 @@
 <script>
   import { getVersion, getZarrArrayAttrsFileName } from "../../utils";
-  import Thumbnail from "../Thumbnail/index.svelte";
+  import DetailsPrePanel from "../../JsonBrowser/DetailsPrePanel.svelte";
+  import CoordinateTransformation from "./CoordinateTransformation.svelte";
 
   export let source;
   export let rootAttrs;
@@ -44,65 +45,50 @@
       }
     }
   });
-
-  console.log("CoordinateSystems names:", csByNames);
-  console.log("CoordinateTransformations by output:", ctByOutputs);
 </script>
-
-{#each csNames as csName}
-  <article>
-    <h2>Coordinate System: {csName}</h2>
-    <details>
-      <summary>Details</summary>
-      <pre>{JSON.stringify(csByNames[csName], null, 2)}</pre>
-    </details>
-    {#if ctByOutputs[csName]}
-      <p>This Coordinate System has the following Coordinate Transformations:</p>
-      {#each ctByOutputs[csName] as transform, idx}
-        <div class="input_path">
-          <Thumbnail source = {`${source}/${transform.input}`} targetSize=150 maxCssSize=300 /> <br/>
-          Input: {transform.input} <br />
-          Output: {transform.output} <br />
-          Type: {transform.type} <br />
-          Scale: {transform.scale ? transform.scale.join(", ") : "n/a"} <br />
-          Translation: {transform.translation
-            ? transform.translation.join(", ")
-            : "n/a"} <br />
-          Rotation: {transform.rotation ? transform.rotation.join(", ") : "n/a"}
-          <br />
-        </div>
-      {/each}
-    {:else}
-      <p><em>No Coordinate Transformations found with output to this Coordinate System.</em></p>
-    {/if}
-  </article>
-{/each}
 
 {#if warnings.length > 0}
   <article>
     <h2>Warnings</h2>
     <ul>
       {#each warnings as warning}
-        <li>{warning}</li>
+        <li class="warning">{warning}</li>
       {/each}
     </ul>
   </article>
 {/if}
+
+{#each csNames as csName}
+  <article>
+    <h2><span class="grey">Coordinate System:</span> <strong>{csName}</strong></h2>
+    <DetailsPrePanel jsonData={csByNames[csName]} summary={"Axes details"} />
+    {#if ctByOutputs[csName]}
+      <p style="margin-top: 15px;">Coordinate Transformations:</p>
+      {#each ctByOutputs[csName] as transform, idx}
+        <CoordinateTransformation {source} transformAttrs={transform} />
+      {/each}
+    {:else}
+      <p class="warning"><em>No Coordinate Transformations found with output to this Coordinate System.</em></p>
+    {/if}
+  </article>
+{/each}
+
 
 
 <style>
   h2 {
     font-weight: 300;
   }
+  strong {
+    font-weight: 600;
+  }
+  .grey {
+    color: #777;
+  }
   article {
     text-align: left;
   }
-  .input_path {
-    border-radius: 10px;
-    padding: 15px 0;
-    margin: 15px 0;
-    box-shadow: 5px 5px 10px #c3c0c0;
-    background: linear-gradient(to right, #ccc, #aaa);
-    text-align: center;
+  .warning {
+    color: red;
   }
 </style>

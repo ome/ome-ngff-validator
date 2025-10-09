@@ -49,7 +49,9 @@
   const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
   // For Plate or Well, we need to get the first image (field '0') for Thumbnail
-  const firstPlateImageUrl = omeAttrs.plate?.wells[0].path ? `${source}/${omeAttrs.plate.wells[0].path}/0` : null;
+  const firstPlateImageUrl = omeAttrs.plate?.wells[0].path
+    ? `${source}/${omeAttrs.plate.wells[0].path}/0`
+    : null;
   const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
@@ -66,15 +68,23 @@
 </script>
 
 <article>
-  <div class="thumbnail_wrapper">
-    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 maxCssSize=300 />
-  </div>
+  {#if firstPlateImageUrl || firstWellImageUrl || omeAttrs.multiscales}
+    <div class="thumbnail_wrapper">
+      <Thumbnail
+        source={firstPlateImageUrl || firstWellImageUrl || source}
+        targetSize="150"
+        maxCssSize="300"
+      />
+    </div>
+  {/if}
 
   <p>
-    Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
+    Validating: <a href="{source}/{zarrAttrsFileName}"
+      >/{zarrName}/{zarrAttrsFileName}</a
+    >
   </p>
   {versionMessage}
-  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
@@ -92,10 +102,9 @@
       </div>
     {/if}
   {:catch error}
-    <CheckMark valid={false}/>
+    <CheckMark valid={false} />
     <p style="color: red">{error.message}</p>
   {/await}
-
 
   <OpenWith {source} {dtype} {version} />
 
