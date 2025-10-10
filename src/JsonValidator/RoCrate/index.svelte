@@ -9,14 +9,12 @@
 
 
 <div class="rocrate">
-<h1>RO-Crate metadata</h1>
-
-
 
 {#await promise}
   <p>Loading ro-crate-metadata.json...</p>
 {:then jsonData}
   {#if jsonData}
+    <h1>RO-Crate metadata</h1>
     <RoCrateValidator {jsonData} />
     <DetailsPrePanel {jsonData} summary="ro-crate-metadata.json" />
   {/if}
