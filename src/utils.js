@@ -1,6 +1,7 @@
 // import { slice, openArray } from "https://cdn.skypack.dev/zarr";
 
 import Ajv from "ajv";
+// import Ajv from "ajv/dist/2020.js";
 
 export const CURRENT_VERSION = "0.5";
 export const FILE_NOT_FOUND = "File not found";
@@ -8,7 +9,9 @@ export const FILE_NOT_FOUND = "File not found";
 
 export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
-    return `https://raw.githubusercontent.com/ome/ngff-spec/main/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
+    // https://github.com/bogovicj/ngff-rfc5-coordinate-transformation-examples/issues/5
+    // return `https://raw.githubusercontent.com/bogovicj/ngff/6f692498744ad9dc77c50541fe8b78c5886b4c05/schemas/${schemaName}.schema`;
   }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
