@@ -9,7 +9,8 @@ export const FILE_NOT_FOUND = "File not found";
 
 export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
-    return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
+    // return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/RFC5/ngff_spec/schemas/${schemaName}.schema`;
     // https://github.com/bogovicj/ngff-rfc5-coordinate-transformation-examples/issues/5
     // return `https://raw.githubusercontent.com/bogovicj/ngff/6f692498744ad9dc77c50541fe8b78c5886b4c05/schemas/${schemaName}.schema`;
   }
@@ -215,7 +216,7 @@ export function getSchemaNames(ngffData) {
   // coordinate transformations or systems
   if (names.length == 0) {
     if (ngffData.coordinateTransformations) {
-      names.push("coordinate_transformation");
+      names.push("coordinate_transformations");
     }
     if (ngffData.coordinateSystems) {
       names.push("coordinate_systems");
@@ -288,15 +289,17 @@ export async function validate(jsonData) {
     jsonData = jsonData.attributes;
   }
   if (version.startsWith("0.6")) {
-    const versionSchema = await getSchema(getSchemaUrl("_version", version));
-    refSchemas = [versionSchema];
+    // const versionSchema = await getSchema(getSchemaUrl("_version", version));
+    refSchemas = [];
     // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev1/schemas/image.schema
     // and contains "$ref": "coordinate_systems.schema" etc
     // We need to use the same URL prefix for all those $ref schemas
-    const names = ["coordinate_transformation", "coordinate_systems", "axes"];
+    const names = ["coordinate_transformations", "coordinate_systems", "axes"];
     for(const name of names) {
       const schema = await getSchema(getSchemaUrl(name, version));
-      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev1/schemas/${name}.schema`;
+      // schema["$id"] = `https://ngff.openmicroscopy.org/latest/schemas/${name}.schema`;
+      schema["$id"] = `${name}.schema`;
+      console.log("Adding ref schema", schema["$id"]);
       refSchemas.push(schema);
     }
     jsonData = jsonData.attributes;
@@ -307,7 +310,7 @@ export async function validate(jsonData) {
     let toValidate = jsonData;
     // If we are validating coordinate_transformations or systems
     // then we need to unwrap the jsonData
-    if (schema["$id"].endsWith("coordinate_transformation.schema")) {
+    if (schema["$id"].endsWith("coordinate_transformations.schema")) {
       toValidate = jsonData.ome?.coordinateTransformations;
     } else if (schema["$id"].endsWith("coordinate_systems.schema")) {
       toValidate = jsonData.ome?.coordinateSystems;
