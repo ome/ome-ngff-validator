@@ -10,7 +10,8 @@ export const FILE_NOT_FOUND = "File not found";
 export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
     // return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
-    return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/RFC5/ngff_spec/schemas/${schemaName}.schema`;
+    // return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/RFC5/ngff_spec/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/update-rfc5-schemas/ngff_spec/schemas/${schemaName}.schema`;
     // https://github.com/bogovicj/ngff-rfc5-coordinate-transformation-examples/issues/5
     // return `https://raw.githubusercontent.com/bogovicj/ngff/6f692498744ad9dc77c50541fe8b78c5886b4c05/schemas/${schemaName}.schema`;
   }
@@ -291,14 +292,13 @@ export async function validate(jsonData) {
   if (version.startsWith("0.6")) {
     // const versionSchema = await getSchema(getSchemaUrl("_version", version));
     refSchemas = [];
-    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev1/schemas/image.schema
+    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6dev2/schemas/image.schema
     // and contains "$ref": "coordinate_systems.schema" etc
     // We need to use the same URL prefix for all those $ref schemas
-    const names = ["coordinate_transformations", "coordinate_systems", "axes"];
+    const names = ["coordinate_transformations", "coordinate_systems", "axes", "_version"];
     for(const name of names) {
       const schema = await getSchema(getSchemaUrl(name, version));
-      // schema["$id"] = `https://ngff.openmicroscopy.org/latest/schemas/${name}.schema`;
-      schema["$id"] = `${name}.schema`;
+      schema["$id"] = `https://ngff.openmicroscopy.org/0.6dev2/schemas/${name}.schema`;
       console.log("Adding ref schema", schema["$id"]);
       refSchemas.push(schema);
     }
