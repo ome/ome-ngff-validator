@@ -39,7 +39,7 @@
       } else {
         if (!csNames.includes(ct.output)) {
           warnings.push(
-            `CoordinateTransformation 'output' does not match any CoordinateSystem name: ${ct.output}`
+            `CoordinateTransformation 'output': '${ct.output}' does not match any CoordinateSystem 'name': '${ct.output}'`
           );
         } else {
           // add to dictionary of CoordinateTransformations by output name
