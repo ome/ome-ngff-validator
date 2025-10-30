@@ -1,0 +1,81 @@
+{
+  "ome": {
+    "version": "0.x",
+    "type": "collection",
+    "name": "sample IDR collections",
+    "attributes": {
+      "mobie:grid": "true"
+    },
+    "nodes": [
+      {
+        "name": "idr0157",
+        "type": "collection",
+        "nodes": [
+          {
+            "type": "multiscale",
+            "path": "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0157/Asterella gracilis SWE/IMG_1033-1112 Asterella gracilis (Mannia gracilis) stature.ome.zarr"
+          },
+          {
+            "type": "multiscale",
+            "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0157/Riccia gougetiana var. armatissima GER/IMG_3849-3898 Riccia gougetiana var. armatissima thallus cross section (5x).ome.zarr"
+          },
+          {
+            "type": "multiscale",
+            "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0157/Asterella gracilis SWE/IMG_2136-2220 Asterella gracilis (Mannia gracilis) ventral scales (20x).ome.zarr"
+          }
+        ]
+      },
+      {
+        "name": "idr0035",
+        "type": "collection",
+        "nodes": [
+          {
+            "type": "multiscale",
+            "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week10_40115.ome.zarr/B/2/0/",
+            "attributes": {
+              "description": "The images are of MCF-7 breast cancer cells treated for 24 h with a collection of 113 small molecules at eight concentrations. The cells were fixed, labeled for DNA, F-actin, and B-tubulin, and imaged by fluorescent microscopy.",
+              "idr:origin": "https://idr.openmicroscopy.org/webclient/?show=plate-6252",
+              "idr:organismId": "NCBI:txid9606"
+            }
+          },
+          {
+            "type": "multiscale",
+            "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week1_22361.ome.zarr/B/2/0/",
+            "attributes": {
+              "description": "The images are of MCF-7 breast cancer cells treated for 24 h with a collection of 113 small molecules at eight concentrations. The cells were fixed, labeled for DNA, F-actin, and B-tubulin, and imaged by fluorescent microscopy.",
+              "idr:origin": "https://idr.openmicroscopy.org/webclient/?show=plate-6273",
+              "idr:organismId": "NCBI:txid9606"
+            }
+          },
+          {
+            "type": "collection",
+            "name": "Week6_32161.ome.zarr",
+            "attributes": {
+              "plate": {
+                "columns": [
+                  "B"
+                ],
+                "rows": [
+                  "1",
+                  "2"
+                ]
+              }
+            },
+            "nodes": [
+              {
+                "type": "multiscale",
+                "name": "B2",
+                "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week6_32161.ome.zarr/B/2/0/"
+              },
+              {
+                "type": "multiscale",
+                "name": "B3",
+                "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week6_32161.ome.zarr/B/3/0/"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
