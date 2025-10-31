@@ -12,14 +12,17 @@
         "type": "collection",
         "nodes": [
           {
+            "name": "IMG_1033-1112 Asterella gracilis (Mannia gracilis) stature.ome.zarr",
             "type": "multiscale",
             "path": "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0157/Asterella gracilis SWE/IMG_1033-1112 Asterella gracilis (Mannia gracilis) stature.ome.zarr"
           },
           {
+            "name": "IMG_3849-3898 Riccia gougetiana var. armatissima thallus cross section (5x).ome.zarr",
             "type": "multiscale",
             "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0157/Riccia gougetiana var. armatissima GER/IMG_3849-3898 Riccia gougetiana var. armatissima thallus cross section (5x).ome.zarr"
           },
           {
+            "name": "IMG_2136-2220 Asterella gracilis (Mannia gracilis) ventral scales (20x).ome.zarr",
             "type": "multiscale",
             "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0157/Asterella gracilis SWE/IMG_2136-2220 Asterella gracilis (Mannia gracilis) ventral scales (20x).ome.zarr"
           }
@@ -30,6 +33,7 @@
         "type": "collection",
         "nodes": [
           {
+            "name": "Week10_40115.ome.zarr",
             "type": "multiscale",
             "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week10_40115.ome.zarr/B/2/0/",
             "attributes": {
@@ -39,6 +43,7 @@
             }
           },
           {
+            "name": "Week1_22361.ome.zarr",
             "type": "multiscale",
             "path": "https://uk1s3.embassy.ebi.ac.uk/idr/share/ome2024-ngff-challenge/idr0035/Week1_22361.ome.zarr/B/2/0/",
             "attributes": {
