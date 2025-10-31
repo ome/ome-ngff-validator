@@ -3,6 +3,7 @@
   import BsCaretRightFill from "svelte-icons-pack/bs/BsCaretRightFill";
   import { slide } from "svelte/transition";
 
+  import JsonBrowser from "../JsonBrowser/index.svelte";
   import Thumbnail from "../JsonValidator/Thumbnail/index.svelte";
 
   export let name;
@@ -61,6 +62,16 @@
           {/if}
         </li>
 
+        {#if contents.attributes}
+          <div class="json">
+            <JsonBrowser
+              name="attributes"
+              contents={contents.attributes}
+              expanded={false}
+            />
+          </div>
+        {/if}
+
         <!-- either "path" or "nodes" -->
         {#if contents.path}
           <li>
@@ -74,7 +85,7 @@
               {contents.path}
             </a>
             {#if contents.type == "multiscale"}
-            <br />
+              <br />
               <Thumbnail
                 source={`${contents.path}`}
                 targetSize="100"
@@ -138,5 +149,18 @@
 
   :global(.expanded .caret-toggle) {
     transform: rotate(90deg);
+  }
+
+  .json {
+    text-align: left;
+    margin-top: 10px;
+    color: #faebd7;
+    background-color: #263749;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+    font-family: monospace;
+    width: fit-content;
+    min-width: 300px;
   }
 </style>
