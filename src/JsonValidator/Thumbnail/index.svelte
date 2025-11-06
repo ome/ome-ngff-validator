@@ -3,12 +3,10 @@
   import * as omezarr from "ome-zarr.js";
 
   export let source;
-  // Default target size 0 will get thumbnail from smallest resolution
-  export let targetSize = 0;
+  export let targetSize = 200;
   export let maxCssSize = 250;
 
-  const store = new zarr.FetchStore(source);
-  const promise = omezarr.renderThumbnail(store, targetSize);
+  const promise = omezarr.renderThumbnail(source, targetSize);
 </script>
 
 {#await promise}
