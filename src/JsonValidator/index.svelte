@@ -9,6 +9,7 @@
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
   import CoordinateSystems from "./CoordinateSystems/index.svelte";
+  import CoordinateSystemsGraph from "./CoordinateSystems/CoordinateSystemsGraph.svelte";
 
   import {
     CURRENT_VERSION,
@@ -106,7 +107,10 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  <OpenWith {source} {dtype} {version} />
+  {#if !omeAttrs.coordinateSystems}
+    <!-- No viewers support v0.6 coordinateSystems yet -->
+    <OpenWith {source} {dtype} {version} />
+  {/if}
 
   <div class="json">
     <JsonBrowser
@@ -129,6 +133,10 @@
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
+
+  {#if omeAttrs.coordinateSystems}
+    <CoordinateSystemsGraph {omeAttrs} {source} />
+  {/if}
 </article>
 
 {#if omeAttrs.multiscales}

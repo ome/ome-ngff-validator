@@ -299,7 +299,6 @@ export async function validate(jsonData) {
     for(const name of names) {
       const schema = await getSchema(getSchemaUrl(name, version));
       schema["$id"] = `https://ngff.openmicroscopy.org/0.6dev2/schemas/${name}.schema`;
-      console.log("Adding ref schema", schema["$id"]);
       refSchemas.push(schema);
     }
     jsonData = jsonData.attributes;
@@ -315,10 +314,8 @@ export async function validate(jsonData) {
     } else if (schema["$id"].endsWith("coordinate_systems.schema")) {
       toValidate = jsonData.ome?.coordinateSystems;
     }
-    console.log("validate VERSION", version, jsonData);
     let errs = validateData(schema, toValidate, refSchemas);
     if (errs.length > 0) {
-      console.log("Validation ERRORS", errors, jsonData);
     }
     errors = errors.concat(errs);
   }
