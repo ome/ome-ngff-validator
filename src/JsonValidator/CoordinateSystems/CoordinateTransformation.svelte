@@ -1,16 +1,10 @@
 <script>
-  import Thumbnail from "../Thumbnail/index.svelte";
-  import DetailsPrePanel from "../../JsonBrowser/DetailsPrePanel.svelte";
-
-  import { getJson } from "../../utils";
+  import ChildMultiscales from "./ChildMultiscales.svelte";
 
   export let source;
   export let transformAttrs;
 
   const url = window.location.origin + window.location.pathname;
-  let multiscalesUrl = `${source}/${transformAttrs.input}/zarr.json`;
-
-  let msAttrsPromise = getJson(multiscalesUrl);
 </script>
 
 <div class="input_path">
@@ -76,34 +70,7 @@
           href="{url}?source={source}/{transformAttrs.input}/"
         >
           {transformAttrs.input}<br />
-          {#await msAttrsPromise}
-            <p>Loading {transformAttrs.input}/zarr.json...</p>
-          {:then msAttrs}
-            {#if msAttrs?.attributes?.ome?.multiscales}
-              <Thumbnail
-                source={`${source}/${transformAttrs.input}`}
-                targetSize="100"
-                maxCssSize="100"
-              />
-            {:else}
-              <p class="warning">
-                No multiscales found at {transformAttrs.input}
-              </p>
-            {/if}
-          {:catch error}
-            <details>
-              <summary>
-                <span class="warning"
-                  >Could not load multiscales at <strong
-                    >{transformAttrs.input}</strong
-                  ></span
-                ></summary
-              >
-              <p class="warning">
-                {error.message}
-              </p>
-            </details>
-          {/await}
+          <ChildMultiscales multiscalesUrl={`${source}/${transformAttrs.input}`} />
         </a>
       </td>
     </tr>
@@ -121,7 +88,6 @@
   }
   a {
     text-decoration: none;
-    color: inherit;
   }
   a:hover {
     text-decoration: underline;

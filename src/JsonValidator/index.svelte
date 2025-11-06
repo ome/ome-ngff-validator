@@ -107,7 +107,7 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-  {#if !omeAttrs.coordinateSystems}
+  {#if !omeAttrs.coordinateTransformations}
     <!-- No viewers support v0.6 coordinateSystems yet -->
     <OpenWith {source} {dtype} {version} />
   {/if}
@@ -134,7 +134,8 @@
     <!-- <p>No table data</p> -->
   {/await}
 
-  {#if omeAttrs.coordinateSystems}
+  {#if omeAttrs.coordinateTransformations}
+    <!-- coordinateSystems may be missing, so we check for coordinateTransformations instead -->
     <CoordinateSystemsGraph {omeAttrs} {source} />
   {/if}
 </article>

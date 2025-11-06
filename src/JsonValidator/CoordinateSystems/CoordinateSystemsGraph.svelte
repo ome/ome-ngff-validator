@@ -63,10 +63,10 @@
       //   { name: "Enos", parent: "Seth" },
       // ];
 
-      console.log("omeAttrs.coordinateSystems", omeAttrs);
+      console.log("CoordinateSystemsGraph: omeAttrs", omeAttrs);
       let transforms = omeAttrs.coordinateTransformations;
 
-      let systemNames = omeAttrs.coordinateSystems.map((cs) => cs.name);
+      let systemNames = omeAttrs.coordinateSystems?.map((cs) => cs.name) || [];
       let outputs = transforms.map((d) => d.output);
       let inputs = transforms.map((d) => d.input);
       let allSystems = outputs.concat(inputs);

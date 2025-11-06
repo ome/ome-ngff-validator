@@ -2,9 +2,12 @@
   import { getVersion, getZarrArrayAttrsFileName } from "../../utils";
   import DetailsPrePanel from "../../JsonBrowser/DetailsPrePanel.svelte";
   import CoordinateTransformation from "./CoordinateTransformation.svelte";
+  import ChildMultiscales from "./ChildMultiscales.svelte";
 
   export let source;
   export let rootAttrs;
+
+  const url = window.location.origin + window.location.pathname;
 
   const msVersion = getVersion(rootAttrs);
   const zarrAttrsFileName = getZarrArrayAttrsFileName(msVersion);
@@ -13,14 +16,17 @@
   // have 'output' -> coordinateSystem
 
   //TODO: show WARNING if:
-  // any coordinateTransformation has 'output' that does not match a CoordinateSystem name
-  // OR is a path to image...
+  // - any coordinateTransformation has 'output' that does not match a CoordinateSystem name
+  //   OR is a path to image...
+  // - any coordinateSystem is not listed as 'output' in any coordinateTransformation
 
   const csByNames = {};
   rootAttrs.coordinateSystems?.forEach((cs) => {
     csByNames[cs.name] = cs;
   });
-  const csNames = Object.keys(csByNames);
+
+  // Every transform.output is a CoordinateSystem name (even if the CoordinateSystem is not defined)
+  const csNames = rootAttrs.coordinateTransformations?.map((ct) => ct.output) || [];
 
   const warnings = [];
 
@@ -77,7 +83,22 @@
         >i</span
       >
     </h2>
-    <DetailsPrePanel jsonData={csByNames[csName]} summary={"Axes details"} />
+
+    <!-- If we have a coordinateSystem in hand, show axes... -->
+    {#if csByNames[csName]}
+      <DetailsPrePanel jsonData={csByNames[csName]} summary={"Axes details"} />
+    {:else}
+      <!-- Try to load child image for this path. -->
+       Child multiscales Image: <a
+          title="Open multiscales image"
+          href="{url}?source={source}/{csName}/"
+        >
+          {csName}<br />
+      <ChildMultiscales multiscalesUrl={`${source}/${csName}`} />
+      </a>
+    {/if}
+
+
     {#if ctByOutputs[csName]}
       <p style="margin-top: 15px;">
         Coordinate Transformations:
@@ -88,13 +109,6 @@
       {#each ctByOutputs[csName] as transform, idx}
         <CoordinateTransformation {source} transformAttrs={transform} />
       {/each}
-    {:else}
-      <p class="warning">
-        <em
-          >No Coordinate Transformations found with output to this Coordinate
-          System.</em
-        >
-      </p>
     {/if}
   </article>
 {/each}
@@ -129,5 +143,12 @@
     text-align: center;
     font-weight: bold;
     font-style: italic;
+  }
+
+  a {
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
   }
 </style>
