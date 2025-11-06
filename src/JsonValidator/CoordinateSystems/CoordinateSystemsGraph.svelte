@@ -14,13 +14,13 @@
   function getImageNodes(omeAttrs, path, inputOnly = true) {
     console.log("getImageNodes", omeAttrs, path);
     let multiscales = omeAttrs.multiscales[0];
-    // FIRST coordinateSystem is the parent - WARN if not!
-    const nodes = [];
+    // Gather all transforms from multiscales...
     const transforms = multiscales.coordinateTransformations || [];
     const systemNames = multiscales.coordinateSystems.map((cs) => cs.name);
 
     console.log("systemNames", systemNames, path);
 
+    const nodes = [];
     // The "authoritative" coordinate system is the FIRST one listed
     // so we start our traversal from there
     let previous = systemNames[0];
@@ -59,6 +59,16 @@
           });
         });
       }
+    }
+
+    // Finally, add all datasets transforms...
+    for (let ds of multiscales.datasets) {
+      let tr = ds.coordinateTransformations[0];
+      // transforms.push(tr);
+      nodes.push({
+        name: `${path}/${tr.input}`,
+        parent: `${path}/${tr.output}`,
+      });
     }
     console.log("getImageNodes", nodes);
 
@@ -146,7 +156,7 @@
           parent: "",
         });
       });
-      // console.log("table", table);
+      console.log("table", table);
 
       try {
         const tableRoot = d3
