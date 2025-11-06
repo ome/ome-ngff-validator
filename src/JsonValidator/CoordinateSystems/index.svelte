@@ -9,9 +9,6 @@
 
   const url = window.location.origin + window.location.pathname;
 
-  const msVersion = getVersion(rootAttrs);
-  const zarrAttrsFileName = getZarrArrayAttrsFileName(msVersion);
-
   // We want to show CoordinateSystems with 'child' coordinateTransformations that
   // have 'output' -> coordinateSystem
 
@@ -26,7 +23,7 @@
   });
 
   // Every transform.output is a CoordinateSystem name (even if the CoordinateSystem is not defined)
-  const csNames = rootAttrs.coordinateTransformations?.map((ct) => ct.output) || [];
+  const csNames = Array.from(new Set(rootAttrs.coordinateTransformations?.map((ct) => ct.output) || []));
 
   const warnings = [];
 
