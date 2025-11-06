@@ -11,7 +11,7 @@
 
   let el;
 
-  function getImageNodes(omeAttrs, path) {
+  function getImageNodes(omeAttrs, path, inputOnly = true) {
     console.log("getImageNodes", omeAttrs, path);
     let multiscales = omeAttrs.multiscales[0];
     // FIRST coordinateSystem is the parent - WARN if not!
@@ -20,27 +20,45 @@
     const systemNames = multiscales.coordinateSystems.map((cs) => cs.name);
 
     console.log("systemNames", systemNames, path);
-    let parent = systemNames[0];
-    while (parent) {
-      // nodes.push({ name: parent, parent: "" });
+
+    // The "authoritative" coordinate system is the FIRST one listed
+    // so we start our traversal from there
+    let previous = systemNames[0];
+    while (previous) {
       let found = false;
+      // IF the image is an input to parent-group, we want to look for transforms where,
+      // the output is the parent
       for (let ct of transforms) {
-        if (ct.output === parent) {
+        if (ct.output === previous) {
           nodes.push({
             name: `${path}/${ct.input}`,
             parent: `${path}/${ct.output}`,
           });
-          parent = ct.input;
+          previous = ct.input;
           found = true;
           break;
         }
       }
       if (!found) {
-        parent = null;
+        previous = null;
       }
     }
+    
+    // Check for any transforms NOT included in the chain above
     if (nodes.length < transforms.length) {
-      alert("Warning: Some coordinate systems are not connected for image");
+      let nodeNames = nodes.map((n) => n.name.split("/").pop());
+      let missing = transforms.filter((ct) => !nodeNames.includes(ct.output));
+      if (inputOnly) {
+        let missingNames = missing.map((m) => m.output).join(", ");
+        alert(`Warning: Some coordinate systems are not connected for image ${path}: ${missingNames}`);
+      } else {
+        missing.forEach((ct) => {
+          nodes.push({
+            name: `${path}/${ct.input}`,
+            parent: `${path}/${ct.output}`,
+          });
+        });
+      }
     }
     console.log("getImageNodes", nodes);
 
@@ -48,13 +66,10 @@
   }
 
   onMount(() => {
-    console.log("ON MOUNT CoordinateSystemsGraph", el);
-
     // Here we dynamically import d3 to avoid loading it unless this component is used
-    import("d3").then(async (module) => {
-      const d3 = module;
+    import("d3").then(async (d3) => {
+      // const d3 = module;
 
-      let Tree = getTree(d3);
 
       // const table = [
       //   { name: "Eve", parent: "" },
@@ -63,87 +78,83 @@
       //   { name: "Enos", parent: "Seth" },
       // ];
 
-      console.log("CoordinateSystemsGraph: omeAttrs", omeAttrs);
       let transforms = omeAttrs.coordinateTransformations;
-
       let systemNames = omeAttrs.coordinateSystems?.map((cs) => cs.name) || [];
-      let outputs = transforms.map((d) => d.output);
-      let inputs = transforms.map((d) => d.input);
-      let allSystems = outputs.concat(inputs);
-      console.log("allSystems", allSystems);
-      // Find any names that are not in coordinateSystems
-      let imagesToLoad = allSystems.filter(
-        (name) => !systemNames.includes(name)
-      );
-      console.log("imagesToLoad", imagesToLoad);
+      // Find any inputs/outputs that are not in coordinateSystems
+      let outputs = transforms.map((d) => d.output).filter(name => !systemNames.includes(name));
+      let inputs = transforms.map((d) => d.input).filter(name => !systemNames.includes(name));
+      let imagesToLoad = Array.from(new Set(outputs.concat(inputs)));
 
+      // LOAD all images that are inputs/outputs
       const promises = imagesToLoad.map((name) => {
         return getJson(`${source}/${name}/zarr.json`)
           .then((json) => [name, json])
           .catch((error) => [name, null]);
       });
       let results = await Promise.all(promises);
-
       const imagesByPath = {};
-
-      console.log("loaded coordinate system image zarr.json results", results);
       results.forEach(([name, attrs]) => {
         if (attrs?.attributes?.ome) {
-          imagesByPath[name] = getImageNodes(attrs.attributes.ome, name);
+          imagesByPath[name] = attrs.attributes.ome;
         } else {
-          console.warn(
-            `Coordinate system image ${name} is missing 'ome' attributes.`
-          );
+          console.warn(`Coordinate system image ${name} is missing 'ome' attributes.`);
         }
       });
 
-      // Go through parent transforms to build table (graph edges)
-      const outputNames = new Set(outputs);
-      const inputNames = new Set(inputs);
-      inputNames.forEach((inputName) => {
-        outputNames.delete(inputName);
-      });
-      // TODO: Handle multiple root coordinate systems better
-      if (outputNames.size > 1) {
-        alert(
-          `Warning: Multiple root coordinate systems found: ${Array.from(
-            outputNames
-          ).join(", ")}`
-        );
-      }
+      // BUILD TABLE of all edges
+      let visited = new Set();
       const table = transforms.flatMap((ct) => {
         // If coordinateSystem is an Image with it's own transforms, parent is the top of that tree
-        if (imagesByPath[ct.input] && imagesByPath[ct.input].length > 0) {
-          let imgNode = {
-            parent: ct.output,
-            name: imagesByPath[ct.input][0].parent,
-          };
-          return [imgNode, ...imagesByPath[ct.input]];
+        let nodesToAdd = [];
+        let parentName = ct.output;
+        let nodeName = ct.input;
+        // If the input is an image...
+        if (imagesByPath[ct.input]) {
+          let imgNodes = getImageNodes(imagesByPath[ct.input], ct.input, true);
+          if (imgNodes.length > 0) {
+            nodeName = imgNodes[0].parent;
+            nodesToAdd = nodesToAdd.concat(imgNodes);
+          }
         }
+        // If the output is an image...
+        if (imagesByPath[ct.output]) {
+          let imgNodes = getImageNodes(imagesByPath[ct.output], ct.output, false);
+          if (imgNodes.length > 0) {
+            parentName = imgNodes[0].name;
+            // only add parent nodes ONCE
+            if (!visited.has(parentName)) {
+              nodesToAdd = nodesToAdd.concat(imgNodes);
+              visited.add(parentName);
+            }
+          }
+        }
+        
         return [
-          // This could be an image without transforms or a coordinate system
           {
-            name: ct.input,
-            parent: ct.output,
-          },
+            name: nodeName,
+            parent: parentName,
+          }, ...nodesToAdd
         ];
       });
-      // Find any coordinate systems that are not listed as input in any transformation
-      outputNames.forEach((csName) => {
+      // Find any "orphan" parents that are not nodes yet
+      let parents = new Set(table.map((d) => d.parent));
+      let children = new Set(table.map((d) => d.name));
+      let orphans = Array.from(parents).filter((p) => !children.has(p));
+      orphans.forEach((orphan) => {
         table.push({
-          name: csName,
+          name: orphan,
           parent: "",
         });
       });
-      console.log("table", table);
+      // console.log("table", table);
 
       try {
         const tableRoot = d3
           .stratify()
           .id((d) => d.name)
           .parentId((d) => d.parent)(table);
-        console.log("tableRoot", tableRoot);
 
+        let Tree = getTree(d3);
         const treeSvg = Tree(tableRoot, {
           label: (d) =>
             d.data.name.slice(
@@ -162,7 +173,6 @@
           fontSize: 14,
         });
 
-        console.log("treeSvg", treeSvg);
         el.appendChild(treeSvg);
       } catch (error) {
         console.error("Error creating tableRoot:", error);
