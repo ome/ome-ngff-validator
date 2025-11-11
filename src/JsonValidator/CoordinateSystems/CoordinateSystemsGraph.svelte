@@ -50,7 +50,7 @@
       let missing = transforms.filter((ct) => !nodeNames.includes(ct.output));
       if (inputOnly) {
         let missingNames = missing.map((m) => m.output).join(", ");
-        alert(`Warning: Some coordinate systems are not connected for image ${path}: ${missingNames}`);
+        console.warn(`Warning: Some coordinate systems are not connected for image ${path}: ${missingNames}`);
       } else {
         missing.forEach((ct) => {
           nodes.push({
@@ -172,7 +172,7 @@
               d.data.name.length
             ),
           width: 500,
-          height: 400,
+          height: 1000,
           w: 120,
           h: 35,
           fill: "lightsteelblue",
@@ -186,7 +186,6 @@
         el.appendChild(treeSvg);
       } catch (error) {
         console.error("Error creating tableRoot:", error);
-        alert(error);
       }
     });
   });
