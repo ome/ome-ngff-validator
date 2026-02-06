@@ -7,6 +7,9 @@ export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
+  if (version.includes("0.6")) {
+    return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/update-RFC5/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
 
@@ -273,6 +276,21 @@ export async function validate(jsonData) {
     // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
     jsonData = jsonData.attributes;
   }
+
+  if (version.startsWith("0.6")) {
+    refSchemas = [];
+    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev3/schemas/image.schema
+    // and contains "$ref": "coordinate_systems.schema" etc
+    // We need to use the same URL prefix for all those $ref schemas
+    const names = ["coordinate_transformations", "coordinate_systems", "axes", "_version"];
+    for(const name of names) {
+      const schema = await getSchema(getSchemaUrl(name, version));
+      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev3/schemas/${name}.schema`;
+      refSchemas.push(schema);
+    }
+    jsonData = jsonData.attributes;
+  }
+
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
     let schema = await getSchema(schemaUrls[s]);
