@@ -10,7 +10,7 @@ export function getSchemaUrl(schemaName, version) {
   if (version.includes("0.6")) {
     return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/update-RFC5/schemas/${schemaName}.schema`;
   }
-  return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
+  return `https://ngff.openmicroscopy.org/${version}/schemas/${schemaName}.schema`;
 }
 
 
