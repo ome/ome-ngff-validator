@@ -208,6 +208,9 @@ export function getSchemaNames(ngffData) {
   if (ngffData["image-label"]) {
     names.push("label");
   }
+  if (ngffData["scene"]) {
+    names.push("scene");
+  }
   return names;
 }
 
