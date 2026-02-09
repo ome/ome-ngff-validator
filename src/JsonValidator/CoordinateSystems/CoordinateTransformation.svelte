@@ -64,18 +64,32 @@
     {/if}
     <tr>
       <td><strong>output:</strong></td>
-      <td>{pathName(transformAttrs.output)}</td>
+      <td>
+        {#if transformAttrs.output.name}name: {transformAttrs.output.name}{/if}
+        {#if transformAttrs.output.path}
+          <br/>
+          path:
+          <a title="Open multiscales image" href={`${url}?source=${source}/${transformAttrs.output.path}`}>
+            {transformAttrs.output.path}<br>
+            <br />
+            <ChildMultiscales multiscalesUrl={`${source}/${transformAttrs.output.path}`} />
+          </a>
+        {/if}
+      </td>
     </tr>
     <tr>
       <td><strong>input:</strong></td>
       <td>
-        <a
-          title="Open multiscales image"
-          href={`${url}?source=${source}/${transformAttrs.input.path}`}
-        >
-          {transformAttrs.input.path}<br />
-          <ChildMultiscales multiscalesUrl={`${source}/${transformAttrs.input.path}`} />
-        </a>
+        {#if transformAttrs.input.name}name: {transformAttrs.input.name}{/if}
+        {#if transformAttrs.input.path}
+          <br/>
+          path:
+          <a title="Open multiscales image" href={`${url}?source=${source}/${transformAttrs.input.path}`}>
+            {transformAttrs.input.path}<br>
+            <br />
+            <ChildMultiscales multiscalesUrl={`${source}/${transformAttrs.input.path}`} />
+          </a>
+        {/if}
       </td>
     </tr>
   </table>
