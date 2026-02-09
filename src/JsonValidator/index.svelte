@@ -65,9 +65,15 @@
 </script>
 
 <article>
-  <div class="thumbnail_wrapper">
-    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 maxCssSize=300 />
-  </div>
+  {#if firstPlateImageUrl || firstWellImageUrl || omeAttrs.multiscales}
+    <div class="thumbnail_wrapper">
+      <Thumbnail
+        source={firstPlateImageUrl || firstWellImageUrl || source}
+        targetSize="150"
+        maxCssSize="300"
+      />
+    </div>
+  {/if}
 
   <p>
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
