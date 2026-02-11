@@ -102,8 +102,10 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-
-  <OpenWith {source} {dtype} {version} />
+  <!-- No viewers yet support "scene" -->
+  {#if !omeAttrs.scene }
+    <OpenWith {source} {dtype} {version} />
+  {/if}
 
   <div class="json">
     <JsonBrowser
