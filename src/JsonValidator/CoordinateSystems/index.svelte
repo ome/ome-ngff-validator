@@ -90,12 +90,13 @@
       <DetailsPrePanel jsonData={csByNames[csName]} summary={"Axes details"} />
     {:else}
       <!-- Try to load child image for this path. -->
-       Child multiscales Image: <a
-          title="Open multiscales image"
-          href="{url}?source={source}/{csName}/"
-        >
-          {csName}<br />
-      <ChildMultiscales multiscalesUrl={`${source}/${csName}`} />
+      Child multiscales Image:
+      <a
+        title="Open multiscales image"
+        href="{url}?source={source}/"
+      >
+        {csName}<br />
+        <ChildMultiscales multiscalesUrl={`${source}/${csName.split("/")[0]}`} />
       </a>
     {/if}
 
