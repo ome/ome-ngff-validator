@@ -8,7 +8,7 @@
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
-  import CoordinateSystems from "./CoordinateSystems/index.svelte";
+  import SceneGraph from "./SceneGraph/index.svelte";
 
   import {
     CURRENT_VERSION,
@@ -137,9 +137,7 @@
 {:else if omeAttrs.well}
   <Well {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.scene}
-  <!-- We have a list of CoordinateSystems containing coordinateTransformations
-   with 'input' path to child multiscales -->
-  <CoordinateSystems {source} rootAttrs={omeAttrs.scene} />
+  <SceneGraph {source} rootAttrs={omeAttrs} />
 {/if}
 
 <style>
