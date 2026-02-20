@@ -22,7 +22,7 @@
     if (transform.transformations) {
       html += `<div><strong>transformations:</strong></div>`;
       transform.transformations.forEach((t) => {
-        html += `<div style="border: 1px solid #ccc; margin-top: 5px; padding: 5px;">
+        html += `<div style="border: 1px solid #ccc; margin-top: 5px; padding: 5px; border-radius: 5px;">
           <div><strong>type:</strong> ${t.type}</div>`;
         if (t.name) {
           html += `<div><strong>name:</strong> ${t.name}</div>`;
@@ -82,8 +82,8 @@
     bg.setAttribute("height", bounds.height + padding_top + padding_bottom)
     bg.setAttribute("fill", "white")
     bg.setAttribute("rx", "5")
-    bg.setAttribute("stroke-width", "1")
-    bg.setAttribute("stroke", "#bbd")
+    bg.setAttribute("stroke-width", "0.5")
+    bg.setAttribute("stroke", "#1d8dcd")
     if (elem.hasAttribute("transform")) {
       bg.setAttribute("transform", elem.getAttribute("transform"))
     }
@@ -143,7 +143,7 @@
       path.setAttribute("class", "arrow-path");
       path.setAttribute("d", d);
       path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "blue");
+      path.setAttribute("stroke", "#1d8dcd");
       path.setAttribute("stroke-width", "1.8");
       path.setAttribute("marker-end", "url(#arrowhead)");
       el.appendChild(path);
@@ -202,7 +202,7 @@
       refY="4"
       orient="auto"
       markerUnits="strokeWidth"
-      ><path d="M 0 0 L 8 4 L 0 8 z" fill="#2c5fd5"></path></marker
+      ><path d="M 0 0 L 8 4 L 0 8 z" fill="#1d8dcd"></path></marker
     ></defs
   >
 </svg>
@@ -220,7 +220,7 @@
     color: black;
     background: white;
     border-radius: 5px;
-    border: 1px solid rgb(204, 204, 247);
+    border: 1px solid var(--omeLinkBlue);
     padding: 7px;
     cursor: default;
     pointer-events: all;

@@ -1,6 +1,7 @@
 <script>
   import { getJson } from "../../utils";
   import GraphSvgArrows from "./GraphSvgArrows.svelte";
+  import Thumbnail from "../Thumbnail/index.svelte";
 
   export let source;
   export let rootAttrs;
@@ -18,6 +19,7 @@
       errors: [],
       multiscales: {},
       scene: sceneAttrs,
+      topSystems: [],    // coordinate systems that are only outputs, never inputs
     };
 
     let childUrls = new Set();
@@ -93,8 +95,17 @@
       }
     }
 
-    // We have graph links!
+    // We have graph links. These are rendered by the GraphSvgArrows component
+    // but we use them here to find which coordinateSystems are "top" (aren't input to any transforms)
 
+    let targetSystems = new Set(graphData.links.map(link => link.target));
+    graphData.links.forEach(link => {
+      if (targetSystems.has(link.source)) {
+        targetSystems.delete(link.source);
+      }
+    });
+    graphData.topSystems = Array.from(targetSystems);
+    
     console.log("graphData", graphData);
 
     return graphData;
@@ -120,7 +131,8 @@
           <section class="multiscale">
           <div class="ms-title">scene</div>
           {#each graphData.scene.coordinateSystems as cs}
-            <div id="{cs.name}" class="coordinateSystem">
+            <div id="{cs.name}" class="coordinateSystem"
+              class:topSystem={graphData.topSystems.includes(cs.name)}>
               {cs.name}
             </div>
           {/each}
@@ -140,7 +152,8 @@
               {#each multiscales as ms}
                 <div>
                   {#each ms.coordinateSystems as cs}
-                    <div id="{path}/{cs.name}" class="coordinateSystem">
+                    <div id="{path}/{cs.name}" class="coordinateSystem"
+                      class:topSystem={graphData.topSystems.includes(`${path}/${cs.name}`)}>
                       {cs.name}
                     </div>
                   {/each}
@@ -148,6 +161,9 @@
                 <!-- first multiscale dataset -->
                 <div id="{path}/{ms.datasets[0].path}" class="coordinateSystem">
                   {(ms.datasets.map(d => d.path).join(", "))}
+                  <div class="thumbWrapper">
+                    <Thumbnail source="{source}/{path}" targetSize="40" maxCssSize="30" />
+                  </div>
                 </div>
               {/each}
             </section> 
@@ -217,6 +233,13 @@
     background: #fff;
     font-size: 0.92rem;
     width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .topSystem {
+    border-color: #fa7;
+    background: #fff8e1;
   }
   a {
     text-decoration: none;
@@ -224,5 +247,10 @@
   }
   a:hover {
     text-decoration: underline;
+  }
+  .thumbWrapper {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
   }
 </style>
