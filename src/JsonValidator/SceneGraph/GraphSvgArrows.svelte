@@ -6,6 +6,8 @@
   let el;
   let popoverEl;
 
+  let popoverTimeout;
+
   function coordinateTransformToHtml(transform) {
     let html = "";
     // Show known fields first in a consistent order, then show any additional fields
@@ -180,7 +182,9 @@
       });
       text.addEventListener("mouseout", () => {
         // text.setAttribute("text-", "#666");
-        popoverEl.hidePopover();
+        popoverTimeout = setTimeout(() => {
+          popoverEl.hidePopover();
+        }, 300);
       });
 
       makeBG(text);
@@ -188,8 +192,10 @@
   });
 </script>
 
-<div class="popover" popover bind:this={popoverEl}>
-  Coordinate Transform
+<div class="popover" popover bind:this={popoverEl}
+  on:mouseout={() => popoverEl.hidePopover()}
+  on:mouseover={() => clearTimeout(popoverTimeout)}>
+  <div>Coordinate Transform</div>
 </div>
 <svg bind:this={el}>
   <!-- Arrowhead definition -->
@@ -234,5 +240,9 @@
     font-size: 14px;
     max-width: 300px;
     text-align: left;
+  }
+  :global(.popover div) {
+    /* avoid popover mouseout when hovering over child elements */
+    pointer-events: none;
   }
 </style>
