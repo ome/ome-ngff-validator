@@ -78,10 +78,10 @@
     var padding_left = parseInt(style["padding-left"])
     var padding_right = parseInt(style["padding-right"])
     var padding_bottom = parseInt(style["padding-bottom"])
-    bg.setAttribute("x", parseInt(bounds.x) - padding_left)
-    bg.setAttribute("y", bounds.y - padding_top)
-    bg.setAttribute("width", bounds.width + padding_left + padding_right)
-    bg.setAttribute("height", bounds.height + padding_top + padding_bottom)
+    bg.setAttribute("x", String(bounds.x - padding_left))
+    bg.setAttribute("y", String(bounds.y - padding_top))
+    bg.setAttribute("width", String(bounds.width + padding_left + padding_right))
+    bg.setAttribute("height", String(bounds.height + padding_top + padding_bottom))
     bg.setAttribute("fill", "white")
     bg.setAttribute("rx", "5")
     bg.setAttribute("stroke-width", "0.5")
@@ -163,8 +163,8 @@
       text.textContent = label;
       const dy = Math.abs(targetPt.y - sourcePt.y);
       const dx = linkSceneToImage ? 0 : 2 * dy;
-      text.setAttribute("x", ((sourcePt.x + targetPt.x) / 2) + dx);
-      text.setAttribute("y", (sourcePt.y + targetPt.y) / 2);
+      text.setAttribute("x", String((sourcePt.x + targetPt.x) / 2) + dx);
+      text.setAttribute("y", String((sourcePt.y + targetPt.y) / 2));
       text.setAttribute("fill", "#666");
       el.appendChild(text);
 
@@ -194,7 +194,9 @@
 
 <div class="popover" popover bind:this={popoverEl}
   on:mouseout={() => popoverEl.hidePopover()}
-  on:mouseover={() => clearTimeout(popoverTimeout)}>
+  on:blur={() => popoverEl.hidePopover()}
+  on:mouseover={() => clearTimeout(popoverTimeout)}
+  on:focus={() => clearTimeout(popoverTimeout)}>
   <div>Coordinate Transform</div>
 </div>
 <svg bind:this={el}>
