@@ -6,36 +6,36 @@
     <li>
       A single image, OME-NGFF v0.5:
       <a
-        href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr"
+        href="{location}?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr"
       >
-        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr
+        ?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.5/idr0062A/6001240_labels.zarr
       </a>
     </li>
 
     <li>
       The same image, OME-NGFF v0.4:
       <a
-        href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
+        href="{location}?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr"
       >
-        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr
+        ?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0062A/6001240.zarr
       </a>
     </li>
 
     <li>
       A bioformats2raw.layout collection:
       <a
-        href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.2/idr0070A/9838562.zarr"
+        href="{location}?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.2/idr0070A/9838562.zarr"
       >
-        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.2/idr0070A/9838562.zarr
+        ?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.2/idr0070A/9838562.zarr
       </a>
     </li>
 
     <li>
       A plate:
       <a
-        href="{location}?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0001A/2551.zarr"
+        href="{location}?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0001A/2551.zarr"
       >
-        ?source=https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0001A/2551.zarr
+        ?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0001A/2551.zarr
       </a>
     </li>
   </ul>
