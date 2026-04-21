@@ -8,6 +8,7 @@
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
+  import CoordinateSystems from "./CoordinateSystems/index.svelte";
 
   import {
     CURRENT_VERSION,
@@ -65,9 +66,15 @@
 </script>
 
 <article>
-  <div class="thumbnail_wrapper">
-    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 maxCssSize=300 />
-  </div>
+  {#if firstPlateImageUrl || firstWellImageUrl || omeAttrs.multiscales}
+    <div class="thumbnail_wrapper">
+      <Thumbnail
+        source={firstPlateImageUrl || firstWellImageUrl || source}
+        targetSize="150"
+        maxCssSize="300"
+      />
+    </div>
+  {/if}
 
   <p>
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
@@ -95,8 +102,10 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-
-  <OpenWith {source} {dtype} {version} />
+  <!-- No viewers yet support "scene" -->
+  {#if !omeAttrs.scene }
+    <OpenWith {source} {dtype} {version} />
+  {/if}
 
   <div class="json">
     <JsonBrowser
@@ -127,6 +136,10 @@
   <Plate {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.well}
   <Well {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.scene}
+  <!-- We have a list of CoordinateSystems containing coordinateTransformations
+   with 'input' path to child multiscales -->
+  <CoordinateSystems {source} rootAttrs={omeAttrs.scene} />
 {/if}
 
 <style>
