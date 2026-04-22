@@ -8,6 +8,8 @@
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
+  import CoordinateSystems from "./CoordinateSystems/index.svelte";
+  import CoordinateSystemsGraph from "./CoordinateSystems/CoordinateSystemsGraph.svelte";
 
   import {
     CURRENT_VERSION,
@@ -48,7 +50,9 @@
   const omeAttrs = rootAttrs?.attributes?.ome || rootAttrs;
 
   // For Plate or Well, we need to get the first image (field '0') for Thumbnail
-  const firstPlateImageUrl = omeAttrs.plate?.wells[0].path ? `${source}/${omeAttrs.plate.wells[0].path}/0` : null;
+  const firstPlateImageUrl = omeAttrs.plate?.wells[0].path
+    ? `${source}/${omeAttrs.plate.wells[0].path}/0`
+    : null;
   const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
@@ -65,15 +69,23 @@
 </script>
 
 <article>
-  <div class="thumbnail_wrapper">
-    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 maxCssSize=300 />
-  </div>
+  {#if firstPlateImageUrl || firstWellImageUrl || omeAttrs.multiscales}
+    <div class="thumbnail_wrapper">
+      <Thumbnail
+        source={firstPlateImageUrl || firstWellImageUrl || source}
+        targetSize="150"
+        maxCssSize="300"
+      />
+    </div>
+  {/if}
 
   <p>
-    Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
+    Validating: <a href="{source}/{zarrAttrsFileName}"
+      >/{zarrName}/{zarrAttrsFileName}</a
+    >
   </p>
   {versionMessage}
-  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
@@ -91,12 +103,14 @@
       </div>
     {/if}
   {:catch error}
-    <CheckMark valid={false}/>
+    <CheckMark valid={false} />
     <p style="color: red">{error.message}</p>
   {/await}
 
-
-  <OpenWith {source} {dtype} {version} />
+  {#if !omeAttrs.coordinateTransformations}
+    <!-- No viewers support v0.6 coordinateSystems yet -->
+    <OpenWith {source} {dtype} {version} />
+  {/if}
 
   <div class="json">
     <JsonBrowser
@@ -119,6 +133,11 @@
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
+
+  {#if omeAttrs.coordinateTransformations}
+    <!-- coordinateSystems may be missing, so we check for coordinateTransformations instead -->
+    <CoordinateSystemsGraph {omeAttrs} {source} />
+  {/if}
 </article>
 
 {#if omeAttrs.multiscales}
@@ -127,6 +146,10 @@
   <Plate {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.well}
   <Well {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.coordinateTransformations}
+  <!-- We have a list of CoordinateSystems containing coordinateTransformations
+   with 'input' path to child multiscales -->
+  <CoordinateSystems {source} rootAttrs={omeAttrs} />
 {/if}
 
 <style>

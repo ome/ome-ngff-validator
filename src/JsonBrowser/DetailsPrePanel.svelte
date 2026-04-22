@@ -13,6 +13,10 @@
 
 <style>
 
+  summary {
+    cursor: pointer;
+    font-size: 90%;
+  }
 details {
     font-size: 1.1em;
     text-align: left;

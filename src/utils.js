@@ -1,12 +1,21 @@
 // import { slice, openArray } from "https://cdn.skypack.dev/zarr";
 
 import Ajv from "ajv";
+// import Ajv from "ajv/dist/2020.js";
 
 export const CURRENT_VERSION = "0.5";
 export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
+  if (version.includes("0.6")) {
+    // return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
+    return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/update-RFC5/schemas/${schemaName}.schema`;
+    // return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/ngff_spec/schemas/${schemaName}.schema`;
+    // return `https://raw.githubusercontent.com/jo-mueller/ngff-spec/refs/heads/update-rfc5-schemas/ngff_spec/schemas/${schemaName}.schema`;
+    // https://github.com/bogovicj/ngff-rfc5-coordinate-transformation-examples/issues/5
+    // return `https://raw.githubusercontent.com/bogovicj/ngff/6f692498744ad9dc77c50541fe8b78c5886b4c05/schemas/${schemaName}.schema`;
+  }
   return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
 }
 
@@ -205,6 +214,16 @@ export function getSchemaNames(ngffData) {
   if (ngffData["image-label"]) {
     names.push("label");
   }
+  // If we don't have any of the above, then we check for
+  // coordinate transformations or systems
+  if (names.length == 0) {
+    if (ngffData.coordinateTransformations) {
+      names.push("coordinate_transformations");
+    }
+    if (ngffData.coordinateSystems) {
+      names.push("coordinate_systems");
+    }
+  }
   return names;
 }
 
@@ -248,8 +267,6 @@ export async function validate(jsonData) {
     // default to last version pre 0.5 rules.
     version = "0.4";
   }
-  
-  console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
 
@@ -264,7 +281,7 @@ export async function validate(jsonData) {
 
   let refSchemas = [];
   // TODO: need to know whether to load other schemas...
-  // For now, we can use version check... 
+  // For now, we can use version check...
   if (version === "0.5") {
     const versionSchema = await getSchema(getSchemaUrl("_version", version));
     // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
@@ -273,15 +290,35 @@ export async function validate(jsonData) {
     // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
     jsonData = jsonData.attributes;
   }
+  if (version.startsWith("0.6")) {
+    // const versionSchema = await getSchema(getSchemaUrl("_version", version));
+    refSchemas = [];
+    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6dev2/schemas/image.schema
+    // and contains "$ref": "coordinate_systems.schema" etc
+    // We need to use the same URL prefix for all those $ref schemas
+    const names = ["coordinate_transformations", "coordinate_systems", "axes", "_version"];
+    for(const name of names) {
+      const schema = await getSchema(getSchemaUrl(name, version));
+      schema["$id"] = `https://ngff.openmicroscopy.org/0.6dev2/schemas/${name}.schema`;
+      refSchemas.push(schema);
+    }
+    jsonData = jsonData.attributes;
+  }
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
     let schema = await getSchema(schemaUrls[s]);
-    let errs = validateData(schema, jsonData, refSchemas);
+    let toValidate = jsonData;
+    // If we are validating coordinate_transformations or systems
+    // then we need to unwrap the jsonData
+    if (schema["$id"].endsWith("coordinate_transformations.schema")) {
+      toValidate = jsonData.ome?.coordinateTransformations;
+    } else if (schema["$id"].endsWith("coordinate_systems.schema")) {
+      toValidate = jsonData.ome?.coordinateSystems;
+    }
+    let errs = validateData(schema, toValidate, refSchemas);
+    if (errs.length > 0) {
+    }
     errors = errors.concat(errs);
-  }
-
-  if (errors.length > 0) {
-    console.log("Validation errors", errors, jsonData);
   }
   return errors;
 }
