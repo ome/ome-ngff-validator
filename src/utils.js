@@ -2,6 +2,9 @@
 
 import Ajv from "ajv";
 
+import * as zarrita from "zarrita";
+import { ZipFileStore } from "@zarrita/storage";
+
 export const CURRENT_VERSION = "0.5";
 export const FILE_NOT_FOUND = "File not found";
 
@@ -16,20 +19,29 @@ async function fetchHandleError(url) {
   let msg = `Error Loading ${url}:`;
   let rsp;
   try {
-    rsp = await fetch(url).then(function (response) {
-      if (!response.ok) {
-        // make the promise be rejected if we didn't get a 2xx response
-        // NB. statusText could be "Not Found" or "File not found" depending on server
-        // Standardise based on response.status
-        if (response.status == 404) {
-          msg += ` ${FILE_NOT_FOUND}`;
-        } else {
-          msg += ` ${response.statusText}`;
-        }
-      } else {
-        return response;
-      }
-    });
+    console.log("fetchHandleError url", url);
+
+    const store = ZipFileStore.fromUrl(url);
+    console.log("ZipFileStore", store);
+    const group = await zarrita.open(store, { kind: "group" });
+    console.log("ZipFileStore group", group);
+    return group.attrs;
+    // const metadata = JSON.stringify(group.attrs, null, 2);
+
+    // rsp = await fetch(url).then(function (response) {
+    //   if (!response.ok) {
+    //     // make the promise be rejected if we didn't get a 2xx response
+    //     // NB. statusText could be "Not Found" or "File not found" depending on server
+    //     // Standardise based on response.status
+    //     if (response.status == 404) {
+    //       msg += ` ${FILE_NOT_FOUND}`;
+    //     } else {
+    //       msg += ` ${response.statusText}`;
+    //     }
+    //   } else {
+    //     return response;
+    //   }
+    // });
   } catch (error) {
     console.log("check for CORS...");
     console.log(error);
