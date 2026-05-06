@@ -26,7 +26,6 @@
 
     // First find any child multiscales load multiscales...
     for (const ct of sceneAttrs.coordinateTransformations || []) {
-      console.log("ct", ct);
       if (ct.output?.path) {
         childUrls.add(ct.output.path);
       }
@@ -50,9 +49,17 @@
     });
 
     function systemId(coordSystem, parent) {
-      let path = parent ?? coordSystem.path;
-      let name = coordSystem.name ?? coordSystem;  // if coordSystem is a string, use it as the name and assume no path
-      return `${path ? `${path}/` : ""}${name}`;
+      let tokens = [];
+      if (parent) {
+        tokens.push(parent);
+      }
+      if (coordSystem.path) {
+        tokens.push(coordSystem.path);
+      }
+      if (coordSystem.name) {
+        tokens.push(coordSystem.name);
+      }
+      return tokens.join("/");
     }
 
     // ...now we can build the graph links with the multiscales metadata available
@@ -65,14 +72,6 @@
 
       for (let io of ["input", "output"]) {
         let obj = ct[io];
-        if (obj?.path) {
-          let multiscales = graphData.multiscales[obj.path];
-          // if (!multiscales) {
-          //   graphData.errors.push(`Coordinate transformation ${ct.name} ${io} references path ${obj.path} which failed to load as a multiscales image.`);
-          // } else if (!multiscales.multiscales) {
-          //   graphData.errors.push(`Coordinate transformation ${ct.name} ${io} references path ${obj.path} which does not have 'multiscales' metadata.`);
-          // }
-        }
         for (const msAttrs of graphData.multiscales[obj.path] || []) {
           // handle top-level transforms...
           for (const msCt of msAttrs.coordinateTransformations || []) {
@@ -82,7 +81,7 @@
               transform: msCt
             });
           }
-          // handle datasets transforms... - just first one
+          // handle datasets transforms... - Only show the first dataset in the pyramid...
           for (const ds of msAttrs.datasets.slice(0, 1) || []) {
             let tr = ds.coordinateTransformations[0];
             graphData.links.push({

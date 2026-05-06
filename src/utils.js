@@ -282,13 +282,13 @@ export async function validate(jsonData) {
 
   if (version.startsWith("0.6")) {
     refSchemas = [];
-    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev3/schemas/image.schema
+    // Since the image.schema has $id: https://ngff.openmicroscopy.org/0.6.dev4/schemas/image.schema
     // and contains "$ref": "coordinate_systems.schema" etc
     // We need to use the same URL prefix for all those $ref schemas
     const names = ["coordinate_transformations", "coordinate_systems", "axes", "_version"];
     for(const name of names) {
       const schema = await getSchema(getSchemaUrl(name, version));
-      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev3/schemas/${name}.schema`;
+      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev4/schemas/${name}.schema`;
       refSchemas.push(schema);
     }
     jsonData = jsonData.attributes;
