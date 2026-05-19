@@ -129,7 +129,7 @@
           </div>
           <section class="multiscale">
           <div class="ms-title">scene</div>
-          {#each graphData.scene.coordinateSystems as cs}
+          {#each graphData.scene.coordinateSystems ?? [] as cs}
             <div id="{cs.name}" class="coordinateSystem"
               class:topSystem={graphData.topSystems.includes(cs.name)}>
               {cs.name}
