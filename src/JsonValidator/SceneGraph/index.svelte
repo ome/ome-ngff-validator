@@ -196,7 +196,6 @@
   .diagram {
     position: relative;
     padding: 0px;
-    overflow: auto;
   }
   .columns {
     position: relative;
