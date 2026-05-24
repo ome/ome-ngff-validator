@@ -325,3 +325,45 @@ export function getSearchParam(key) {
 export function range(length) {
   return Array.from({ length }, (_, i) => i);
 }
+
+/**
+ * Select the best thumbnail from the thumbnails convention.
+ * Prefers largest edge up to maxEdge (512), preferring JPEG over PNG.
+ * @param {Array} thumbnails - Array of thumbnail objects with width, height, media_type, path/url
+ * @param {number} maxEdge - Maximum edge size (default 512)
+ * @returns {Object|null} - Best thumbnail object or null
+ */
+export function selectBestThumbnail(thumbnails, maxEdge = 512) {
+  if (!thumbnails || !Array.isArray(thumbnails) || thumbnails.length === 0) {
+    return null;
+  }
+  
+  // Filter to thumbnails with largest edge <= maxEdge
+  const candidates = thumbnails.filter(t => 
+    Math.max(t.width, t.height) <= maxEdge
+  );
+  
+  // If none fit, fall back to smallest available
+  const pool = candidates.length > 0 ? candidates : thumbnails;
+  
+  // Sort by: largest edge descending, then prefer JPEG over PNG
+  return pool.sort((a, b) => {
+    const aEdge = Math.max(a.width, a.height);
+    const bEdge = Math.max(b.width, b.height);
+    
+    // If we have candidates (fit under maxEdge), prefer larger
+    // If using fallback (all too big), prefer smaller
+    if (candidates.length > 0) {
+      if (bEdge !== aEdge) return bEdge - aEdge;
+    } else {
+      if (aEdge !== bEdge) return aEdge - bEdge;
+    }
+    
+    // Same size: prefer JPEG
+    const aJpeg = a.media_type === 'image/jpeg';
+    const bJpeg = b.media_type === 'image/jpeg';
+    if (aJpeg && !bJpeg) return -1;
+    if (!aJpeg && bJpeg) return 1;
+    return 0;
+  })[0];
+}
