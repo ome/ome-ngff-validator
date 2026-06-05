@@ -72,6 +72,13 @@
       });
     }
     if (axes) {
+      axes.forEach((axis) => {
+        if (Object.prototype.hasOwnProperty.call(axis, "units")) {
+          checks.push({
+            msg: `Axis "${axis.name}" has property "units" — did you mean "unit"?`,
+          });
+        }
+      });
       shapes.forEach((shape) => {
         if (shape.length != axes.length) {
           checks.push({
