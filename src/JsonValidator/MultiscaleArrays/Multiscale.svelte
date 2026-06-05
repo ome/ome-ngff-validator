@@ -73,11 +73,43 @@
     }
     if (axes) {
       axes.forEach((axis) => {
+         // https://ngff.openmicroscopy.org/0.5/#axes-md
+
         if (Object.prototype.hasOwnProperty.call(axis, "units")) {
           checks.push({
             msg: `Axis "${axis.name}" has property "units" — did you mean "unit"?`,
+            status: "warning",
           });
         }
+
+        if (Object.prototype.hasOwnProperty.call(axis, "type") && axis.type == "space" && axis.unit) {
+            // UDUNITS-2
+            const validUnits = ["angstrom", "attometer", "centimeter", "decimeter", "exameter",
+            "femtometer", "foot", "gigameter", "hectometer", "inch", "kilometer", "megameter",
+            "meter", "micrometer", "mile", "millimeter", "nanometer", "parsec", "petameter",
+            "picometer", "terameter", "yard", "yoctometer", "yottameter", "zeptometer", "zettameter"];
+            if (!validUnits.includes(axis.unit)) {
+              checks.push({
+                msg: `Axis "${axis.name}" has type space but unit "${axis.unit}" is not a recommended UDUNITS-2 unit`,
+                status: WARNING,
+              });
+            }
+          }
+
+        if (Object.prototype.hasOwnProperty.call(axis, "type") && axis.type == "time" && axis.unit) {
+            // UDUNITS-2
+            const validUnits = ["attosecond", "centisecond", "day", "decisecond", "exasecond",
+            "femtosecond", "gigasecond", "hectosecond", "hour", "kilosecond", "megasecond",
+            "microsecond", "millisecond", "minute", "nanosecond", "petasecond", "picosecond",
+            "second", "terasecond", "yoctosecond", "yottasecond", "zeptosecond", "zettasecond"];
+            if (!validUnits.includes(axis.unit)) {
+              checks.push({
+                msg: `Axis "${axis.name}" has type time but unit "${axis.unit}" is not a recommended UDUNITS-2 unit`,
+                status: WARNING,
+              });
+            }
+        }
+
       });
       shapes.forEach((shape) => {
         if (shape.length != axes.length) {
