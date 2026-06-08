@@ -1,6 +1,7 @@
 <script>
   import { getJson } from "../../utils";
   import GraphSvgArrows from "./GraphSvgArrows.svelte";
+  import MemberImagesList from "./MemberImagesList.svelte";
   import Thumbnail from "../Thumbnail/index.svelte";
 
   export let source;
@@ -119,6 +120,8 @@
 {#await graphDataPromise}
   <div>Loading scene graph...</div>
 {:then graphData}
+
+  <MemberImagesList {source} {sceneAttrs} />
 
   <div id="diagram" class="diagram">
     <GraphSvgArrows {graphData} />
