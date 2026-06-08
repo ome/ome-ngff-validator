@@ -59,13 +59,12 @@
   function pathForLink(sourcePt, targetPt, sameBox) {
     if (sameBox) {
       const dy = Math.abs(targetPt.y - sourcePt.y);
-      const dx = 3 * dy;
+      const dx = Math.min(3 * dy, 400);
       return `M ${sourcePt.x} ${sourcePt.y} C ${sourcePt.x + dx} ${sourcePt.y}, ${targetPt.x + dx} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
     }
 
-    const horizontal = Math.abs(targetPt.x - sourcePt.x);
-    const span = Math.max(40, horizontal * 0.4);
-    return `M ${sourcePt.x} ${sourcePt.y} C ${(sourcePt.x + targetPt.x) / 2} ${sourcePt.y}, ${(sourcePt.x + targetPt.x) / 2} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
+    let avgX = (sourcePt.x + targetPt.x) / 2;
+    return `M ${sourcePt.x} ${sourcePt.y} C ${avgX} ${sourcePt.y}, ${avgX} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
   }
 
   function makeBG(elem) {
@@ -162,8 +161,8 @@
       }
       text.textContent = label;
       const dy = Math.abs(targetPt.y - sourcePt.y);
-      const dx = linkSceneToImage ? 0 : 2 * dy;
-      text.setAttribute("x", String((sourcePt.x + targetPt.x) / 2) + dx);
+      const dx = linkSceneToImage ? 0 : Math.min(180, 2 * dy);
+      text.setAttribute("x", String(((sourcePt.x + targetPt.x) / 2) + dx));
       text.setAttribute("y", String((sourcePt.y + targetPt.y) / 2));
       text.setAttribute("fill", "#666");
       el.appendChild(text);
