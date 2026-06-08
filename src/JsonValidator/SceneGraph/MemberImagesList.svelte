@@ -1,5 +1,5 @@
 <script>
-  import { getJson, getZarrGroupAttrs, validate } from "../../utils";
+  import { getZarrGroupAttrs, validate } from "../../utils";
   import Icon from "svelte-icons-pack/Icon.svelte";
   import BsCheckCircleFill from "svelte-icons-pack/bs/BsCheckCircleFill";
 
@@ -8,39 +8,20 @@
 
   const url = window.location.origin + window.location.pathname;
 
-  // Extract member images from scene coordinateTransformations
+  // Extract member image paths from scene coordinateTransformations
   function getMemberImages() {
-    const members = new Map();
+    const paths = new Set();
     
     for (const ct of sceneAttrs?.coordinateTransformations || []) {
-      // Check input path (image reference)
       if (ct.input?.path) {
-        const path = ct.input.path;
-        if (!members.has(path)) {
-          members.set(path, {
-            path,
-            name: ct.input.name || path,
-            coordinateSystem: ct.input.name || "—",
-            targetSystem: ct.output?.name || ct.output || "—"
-          });
-        }
+        paths.add(ct.input.path);
       }
-      
-      // Check output path (image reference)
       if (ct.output?.path) {
-        const path = ct.output.path;
-        if (!members.has(path)) {
-          members.set(path, {
-            path,
-            name: ct.output.name || path,
-            coordinateSystem: ct.output.name || "—",
-            targetSystem: ct.input?.name || ct.input || "—"
-          });
-        }
+        paths.add(ct.output.path);
       }
     }
     
-    return Array.from(members.values());
+    return Array.from(paths).sort();
   }
 
   const memberImages = getMemberImages();
@@ -72,23 +53,15 @@
       <thead>
         <tr>
           <th>Path</th>
-          <th>Coordinate System</th>
-          <th>Target</th>
           <th>Validate</th>
         </tr>
       </thead>
       <tbody>
-        {#each memberImages as image}
-          {@const validationPromise = checkValidation(image.path)}
+        {#each memberImages as path}
+          {@const validationPromise = checkValidation(path)}
           <tr>
             <td class="path-cell">
-              <code>{image.path}</code>
-            </td>
-            <td class="cs-cell">
-              {image.coordinateSystem}
-            </td>
-            <td class="target-cell">
-              {image.targetSystem}
+              <code>{path}</code>
             </td>
             <td class="action-cell">
               {#await validationPromise}
@@ -97,19 +70,19 @@
                 </span>
               {:then isValid}
                 <a 
-                  href={getValidatorUrl(image.path)} 
+                  href={getValidatorUrl(path)} 
                   class="validate-icon"
                   class:valid={isValid}
                   class:invalid={!isValid}
-                  title="Validate {image.path}"
+                  title="Validate {path}"
                 >
                   <Icon src={BsCheckCircleFill} />
                 </a>
               {:catch}
                 <a 
-                  href={getValidatorUrl(image.path)} 
+                  href={getValidatorUrl(path)} 
                   class="validate-icon invalid"
-                  title="Validate {image.path}"
+                  title="Validate {path}"
                 >
                   <Icon src={BsCheckCircleFill} />
                 </a>
@@ -128,7 +101,7 @@
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 15px;
-    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   h4 {
@@ -179,13 +152,9 @@
     color: #334155;
   }
 
-  .cs-cell, .target-cell {
-    color: #64748b;
-  }
-
   .action-cell {
     text-align: center;
-    width: 60px;
+    width: 80px;
   }
 
   .validate-icon {
