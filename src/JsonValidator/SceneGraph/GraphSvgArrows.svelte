@@ -89,6 +89,7 @@
       bg.setAttribute("transform", elem.getAttribute("transform"))
     }
     elem.parentNode.insertBefore(bg, elem);
+    return bg;
   }
 
   onMount(() => {
@@ -167,26 +168,40 @@
       text.setAttribute("fill", "#666");
       el.appendChild(text);
 
-      text.addEventListener("mouseover", () => {
-        console.log("mouseover", link);
-        // text.setAttribute("fill", "red");
+      let rect = makeBG(text);
+
+      // on mouseover of the path - make it red and show the same popover as the text
+      let mouseover = (event) => {
+        console.log("mouseover path", link);
+        // can't seem to update marker-end color
+        path.setAttribute("stroke", "#013857");
+        rect.setAttribute("stroke", "#013857");
+        path.setAttribute("stroke-width", "3");
         popoverEl.innerHTML = coordinateTransformToHtml(link.transform);
         popoverEl.showPopover();
-        popoverEl.style.left = `${text.getBoundingClientRect().left - (popoverEl.offsetWidth / 2)}px`;
-        let top = text.getBoundingClientRect().top - popoverEl.offsetHeight;
+        // position above current mouse position...
+        let mouseX = event.clientX;
+        let mouseY = event.clientY;
+        popoverEl.style.left = `${mouseX - (popoverEl.offsetWidth / 2)}px`;
+        let top = mouseY - popoverEl.offsetHeight - 10;
         if (top < 0) {
-          top = text.getBoundingClientRect().bottom;
+          top = mouseY + 10;
         }
         popoverEl.style.top = `${top}px`;
-      });
-      text.addEventListener("mouseout", () => {
-        // text.setAttribute("text-", "#666");
+      };
+      let mouseout = () => {
+        path.setAttribute("stroke", "#1D8DCD");
+        path.setAttribute("stroke-width", "1.8");
+        rect.setAttribute("stroke", "#1D8DCD");
         popoverTimeout = setTimeout(() => {
           popoverEl.hidePopover();
         }, 300);
-      });
-
-      makeBG(text);
+      };
+    
+      path.addEventListener("mouseover", mouseover);
+      path.addEventListener("mouseout", mouseout);
+      text.addEventListener("mouseover", mouseover);
+      text.addEventListener("mouseout", mouseout);
     }
   });
 </script>
@@ -220,7 +235,7 @@
     inset: 0;
     overflow: visible;
     z-index: 10;
-    pointer-events: none;
+    /* pointer-events: none; */
   }
   :global(text) {
     font-size: 10px;
