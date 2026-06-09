@@ -94,6 +94,23 @@
 
   onMount(() => {
     console.log("svg mounted");
+    setupLinks();
+  });
+
+  // on window resize, we need to recalculate the link paths
+  window.addEventListener("resize", () => {
+    setupLinks();
+  });
+
+  function setupLinks() {
+    // first clear element, add the marker definition back in, then re-add all the paths and labels
+    el.innerHTML = `
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+          <path d="M 0 0 L 8 4 L 0 8 z" fill="#1d8dcd"></path>
+        </marker>
+      </defs>
+    `;
 
     const diagram = document.getElementById("diagram");
     // const svgLinks = document.querySelector("svg");
@@ -203,7 +220,7 @@
       text.addEventListener("mouseover", mouseover);
       text.addEventListener("mouseout", mouseout);
     }
-  });
+  };
 </script>
 
 <div class="popover" popover bind:this={popoverEl}
@@ -211,22 +228,9 @@
   on:blur={() => popoverEl.hidePopover()}
   on:mouseover={() => clearTimeout(popoverTimeout)}
   on:focus={() => clearTimeout(popoverTimeout)}>
-  <div>Coordinate Transform</div>
+  <strong>Coordinate Transform</strong>
 </div>
 <svg bind:this={el}>
-  <!-- Arrowhead definition -->
-  <defs
-    ><marker
-      id="arrowhead"
-      markerWidth="8"
-      markerHeight="8"
-      refX="7"
-      refY="4"
-      orient="auto"
-      markerUnits="strokeWidth"
-      ><path d="M 0 0 L 8 4 L 0 8 z" fill="#1d8dcd"></path></marker
-    ></defs
-  >
 </svg>
 
 <style>
