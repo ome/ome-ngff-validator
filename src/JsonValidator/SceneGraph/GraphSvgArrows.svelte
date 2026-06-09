@@ -11,9 +11,15 @@
   function coordinateTransformToHtml(transform) {
     let html = "";
     // Show known fields first in a consistent order, then show any additional fields
-    for (const key of ["type", "name", "input", "output"]) {
+    for (const key of ["type", "name"]) {
       if (transform[key]) {
-        html += `<div><strong>${key}:</strong> ${JSON.stringify(transform[key])}</div>`;
+        html += `<div><strong>${key}:</strong> ${transform[key]}</div>`;
+      }
+    }
+    for (const key of ["input", "output"]) {
+      if (transform[key]) {
+        html += `<div><strong>${key}:</strong> (path/name) <br>
+          ${transform[key].path ?? ""}/${transform[key].name}</div>`;
       }
     }
     for (const key of Object.keys(transform)) {
@@ -24,7 +30,7 @@
     if (transform.transformations) {
       html += `<div><strong>transformations:</strong></div>`;
       transform.transformations.forEach((t) => {
-        html += `<div style="border: 1px solid #ccc; margin-top: 5px; padding: 5px; border-radius: 5px;">
+        html += `<div style="margin-top: 5px; padding: 5px; border-radius: 5px; background: #37506a;">
           <div><strong>type:</strong> ${t.type}</div>`;
         if (t.name) {
           html += `<div><strong>name:</strong> ${t.name}</div>`;
@@ -191,8 +197,8 @@
       let mouseover = (event) => {
         console.log("mouseover path", link);
         // can't seem to update marker-end color
-        path.setAttribute("stroke", "#013857");
-        rect.setAttribute("stroke", "#013857");
+        path.setAttribute("stroke", "#263749");
+        rect.setAttribute("stroke", "#263749");
         path.setAttribute("stroke-width", "3");
         popoverEl.innerHTML = coordinateTransformToHtml(link.transform);
         popoverEl.showPopover();
@@ -252,14 +258,21 @@
     pointer-events: all;
   }
   .popover {
-    border: solid 1px #ccc;
+    border: solid 1px transparent;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 3px 3px 7px #c3c0c0;
-    background: white;
+    background: #263749;
     font-size: 14px;
-    max-width: 300px;
+    font-weight: 200;
+    max-width: 400px;
     text-align: left;
+    color: #faebd7;
+    line-height: 1.4;
+  }
+  :global(.popover strong) {
+    color: rgb(154, 217, 254);
+    font-weight: 400;;
   }
   :global(.popover div) {
     /* avoid popover mouseout when hovering over child elements */
