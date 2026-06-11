@@ -137,6 +137,7 @@
         continue;
       }
 
+      // Add arrow (path)....
       const linkSceneToImage =
         link.source.includes("/") !== link.target.includes("/");
       console.log(
@@ -164,15 +165,16 @@
         "http://www.w3.org/2000/svg",
         "path",
       );
-      // path.setAttribute("id", link.id);
       path.setAttribute("class", "arrow-path");
       path.setAttribute("d", d);
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", "#1d8dcd");
       path.setAttribute("stroke-width", "1.8");
       path.setAttribute("marker-end", "url(#arrowhead)");
-      el.appendChild(path);
+      // we prepend to add arrows under labels
+      el.prepend(path);
 
+      // Add the label (text and rect background)
       // link is coordinateTransformation 
       const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
