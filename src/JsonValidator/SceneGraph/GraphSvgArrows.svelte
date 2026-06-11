@@ -195,9 +195,8 @@
 
       let rect = makeBG(text);
 
-      // on mouseover of the path - make it red and show the same popover as the text
+      // on mouseover of the path - highlight it and show the same popover as the text
       let mouseover = (event) => {
-        console.log("mouseover path", link);
         // can't seem to update marker-end color
         path.setAttribute("stroke", "#263749");
         rect.setAttribute("stroke", "#263749");
