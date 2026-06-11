@@ -49,49 +49,43 @@
   {#if memberImages.length === 0}
     <p class="no-images">No member images found in scene metadata.</p>
   {:else}
-    <table>
-      <thead>
-        <tr>
-          <th>Path</th>
-          <th>Validate</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each memberImages as path}
-          {@const validationPromise = checkValidation(path)}
-          <tr>
-            <td class="path-cell">
-              <code>{path}</code>
-            </td>
-            <td class="action-cell">
-              {#await validationPromise}
-                <span class="validate-icon checking">
-                  <Icon src={BsCheckCircleFill} />
-                </span>
-              {:then isValid}
-                <a 
-                  href={getValidatorUrl(path)} 
-                  class="validate-icon"
-                  class:valid={isValid}
-                  class:invalid={!isValid}
-                  title="Validate {path}"
-                >
-                  <Icon src={BsCheckCircleFill} />
-                </a>
-              {:catch}
-                <a 
-                  href={getValidatorUrl(path)} 
-                  class="validate-icon invalid"
-                  title="Validate {path}"
-                >
-                  <Icon src={BsCheckCircleFill} />
-                </a>
-              {/await}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
+  <div class="list-container">
+    <div class="list-header">
+      <div class="list-col col-path">Path</div>
+      <div class="list-col col-validate">Valid</div>
+    </div>
+    {#each memberImages as path}
+      {@const validationPromise = checkValidation(path)}
+      <a href={getValidatorUrl(path)} class="member-row">
+        <div class="list-col col-path">
+          <code>{path}</code>
+        </div>
+        <div class="list-col col-validate">
+          {#await validationPromise}
+            <span class="validate-icon checking">
+              <Icon src={BsCheckCircleFill} />
+            </span>
+          {:then isValid}
+            <span 
+              class="validate-icon"
+              class:valid={isValid}
+              class:invalid={!isValid}
+              title="Validate {path}"
+            >
+              <Icon src={BsCheckCircleFill} />
+            </span>
+          {:catch}
+            <span 
+              class="validate-icon invalid"
+              title="Validate {path}"
+            >
+              <Icon src={BsCheckCircleFill} />
+            </span>
+          {/await}
+        </div>
+      </a>
+    {/each}
+  </div>
   {/if}
 </div>
 
@@ -116,35 +110,46 @@
     font-style: italic;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
+  .list-container {
+    display: flex;
+    flex-direction: column;
     font-size: 14px;
   }
 
-  thead {
+  .list-header {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 12px;
     background-color: #f1f5f9;
-  }
-
-  th {
-    text-align: left;
     padding: 10px 12px;
+    border-radius: 6px 6px 0 0;
     font-weight: 600;
     color: #334155;
     border-bottom: 2px solid #e2e8f0;
   }
 
-  td {
+  .member-row {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 12px;
     padding: 10px 12px;
     border-bottom: 1px solid #e2e8f0;
-    vertical-align: middle;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.15s;
   }
 
-  tr:hover {
+  .member-row:hover {
     background-color: #f8fafc;
   }
 
-  .path-cell code {
+  .list-col {
+    display: flex;
+    align-items: center;
+  }
+
+  .col-path code {
     background: #e2e8f0;
     padding: 2px 6px;
     border-radius: 4px;
@@ -152,9 +157,8 @@
     color: #334155;
   }
 
-  .action-cell {
-    text-align: center;
-    width: 80px;
+  .col-validate {
+    justify-content: center;
   }
 
   .validate-icon {
