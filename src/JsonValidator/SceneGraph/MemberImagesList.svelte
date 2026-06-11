@@ -177,16 +177,17 @@
   }
 
   .validate-icon.valid {
-    color: #22c55e;
+    color: rgb(0, 128, 0);
   }
 
   .validate-icon.invalid {
-    color: #ef4444;
+    color: rgb(255, 0, 0);
   }
 
   .validate-icon :global(svg) {
     width: 20px;
     height: 20px;
+    fill: currentColor;
   }
 
   .validate-icon:hover {
