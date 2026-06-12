@@ -1,0 +1,45 @@
+{
+  "attributes": {
+    "ome": {
+      "version": "0.?dev",
+      "type": "collection",
+      "name": "jrc_hela-1",
+      "nodes": [
+        {
+          "name": "ExpD_chicken_embryo_MIP.ome.zarr",
+          "type": "multiscale",
+          "path": "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.5/idr0066/ExpD_chicken_embryo_MIP.ome.zarr",
+          "attributes": {
+            "example-viewer:settings": {
+              "isDisabled": true
+            },
+            "other-viewer:voxelType": "intensities"
+          }
+        },
+        {
+          "name": "Whole Mouse Brain",
+          "type": "multiscale",
+          "path": "https://uk1s3.embassy.ebi.ac.uk/idr/zarr/v0.4/idr0048A/9846152.zarr",
+          "attributes": {
+            "omero:keyValuePairs": {
+              "strain": "SWR/J",
+              "Reporter": "CAG-Cytbow",
+              "Genotype": "Tg/+",
+              "Mouse Age": "P29"
+            }
+          }
+        },
+        {
+          "name": "IDR images 2024 NGFF challenge",
+          "type": "collection",
+          "path": "./nested_collection.json"
+        }
+      ],
+      "attributes": {
+        "foo": "bar"
+      }
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}
