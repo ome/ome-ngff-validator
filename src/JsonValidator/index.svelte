@@ -9,6 +9,7 @@
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
   import SceneGraph from "./SceneGraph/index.svelte";
+  import MemberImagesList from "./SceneGraph/MemberImagesList.svelte";
 
   import {
     CURRENT_VERSION,
@@ -128,6 +129,10 @@
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
+
+  {#if omeAttrs.scene}
+    <MemberImagesList {source} sceneAttrs={omeAttrs.scene} />
+  {/if}
 </article>
 
 {#if omeAttrs.multiscales}
