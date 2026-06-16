@@ -11,9 +11,15 @@
   function coordinateTransformToHtml(transform) {
     let html = "";
     // Show known fields first in a consistent order, then show any additional fields
-    for (const key of ["type", "name", "input", "output"]) {
+    for (const key of ["type", "name"]) {
       if (transform[key]) {
-        html += `<div><strong>${key}:</strong> ${JSON.stringify(transform[key])}</div>`;
+        html += `<div><strong>${key}:</strong> ${transform[key]}</div>`;
+      }
+    }
+    for (const key of ["input", "output"]) {
+      if (transform[key]) {
+        html += `<div><strong>${key}:</strong> (path/name) <br>
+          ${transform[key].path ?? ""}/${transform[key].name}</div>`;
       }
     }
     for (const key of Object.keys(transform)) {
@@ -24,7 +30,7 @@
     if (transform.transformations) {
       html += `<div><strong>transformations:</strong></div>`;
       transform.transformations.forEach((t) => {
-        html += `<div style="border: 1px solid #ccc; margin-top: 5px; padding: 5px; border-radius: 5px;">
+        html += `<div style="margin-top: 5px; padding: 5px; border-radius: 5px; background: #37506a;">
           <div><strong>type:</strong> ${t.type}</div>`;
         if (t.name) {
           html += `<div><strong>name:</strong> ${t.name}</div>`;
@@ -59,13 +65,12 @@
   function pathForLink(sourcePt, targetPt, sameBox) {
     if (sameBox) {
       const dy = Math.abs(targetPt.y - sourcePt.y);
-      const dx = 3 * dy;
+      const dx = Math.min(3 * dy, 400);
       return `M ${sourcePt.x} ${sourcePt.y} C ${sourcePt.x + dx} ${sourcePt.y}, ${targetPt.x + dx} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
     }
 
-    const horizontal = Math.abs(targetPt.x - sourcePt.x);
-    const span = Math.max(40, horizontal * 0.4);
-    return `M ${sourcePt.x} ${sourcePt.y} C ${(sourcePt.x + targetPt.x) / 2} ${sourcePt.y}, ${(sourcePt.x + targetPt.x) / 2} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
+    let avgX = (sourcePt.x + targetPt.x) / 2;
+    return `M ${sourcePt.x} ${sourcePt.y} C ${avgX} ${sourcePt.y}, ${avgX} ${targetPt.y}, ${targetPt.x} ${targetPt.y}`;
   }
 
   function makeBG(elem) {
@@ -90,10 +95,28 @@
       bg.setAttribute("transform", elem.getAttribute("transform"))
     }
     elem.parentNode.insertBefore(bg, elem);
+    return bg;
   }
 
   onMount(() => {
     console.log("svg mounted");
+    setupLinks();
+  });
+
+  // on window resize, we need to recalculate the link paths
+  window.addEventListener("resize", () => {
+    setupLinks();
+  });
+
+  function setupLinks() {
+    // first clear element, add the marker definition back in, then re-add all the paths and labels
+    el.innerHTML = `
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+          <path d="M 0 0 L 8 4 L 0 8 z" fill="#1d8dcd"></path>
+        </marker>
+      </defs>
+    `;
 
     const diagram = document.getElementById("diagram");
     // const svgLinks = document.querySelector("svg");
@@ -114,6 +137,7 @@
         continue;
       }
 
+      // Add arrow (path)....
       const linkSceneToImage =
         link.source.includes("/") !== link.target.includes("/");
       console.log(
@@ -141,15 +165,16 @@
         "http://www.w3.org/2000/svg",
         "path",
       );
-      // path.setAttribute("id", link.id);
       path.setAttribute("class", "arrow-path");
       path.setAttribute("d", d);
       path.setAttribute("fill", "none");
       path.setAttribute("stroke", "#1d8dcd");
       path.setAttribute("stroke-width", "1.8");
       path.setAttribute("marker-end", "url(#arrowhead)");
-      el.appendChild(path);
+      // we prepend to add arrows under labels
+      el.prepend(path);
 
+      // Add the label (text and rect background)
       // link is coordinateTransformation 
       const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -162,34 +187,47 @@
       }
       text.textContent = label;
       const dy = Math.abs(targetPt.y - sourcePt.y);
-      const dx = linkSceneToImage ? 0 : 2 * dy;
-      text.setAttribute("x", String((sourcePt.x + targetPt.x) / 2) + dx);
+      const dx = linkSceneToImage ? 0 : Math.min(180, 2 * dy);
+      text.setAttribute("x", String(((sourcePt.x + targetPt.x) / 2) + dx));
       text.setAttribute("y", String((sourcePt.y + targetPt.y) / 2));
       text.setAttribute("fill", "#666");
       el.appendChild(text);
 
-      text.addEventListener("mouseover", () => {
-        console.log("mouseover", link);
-        // text.setAttribute("fill", "red");
+      let rect = makeBG(text);
+
+      // on mouseover of the path - highlight it and show the same popover as the text
+      let mouseover = (event) => {
+        // can't seem to update marker-end color
+        path.setAttribute("stroke", "#263749");
+        rect.setAttribute("stroke", "#263749");
+        path.setAttribute("stroke-width", "3");
         popoverEl.innerHTML = coordinateTransformToHtml(link.transform);
         popoverEl.showPopover();
-        popoverEl.style.left = `${text.getBoundingClientRect().left - (popoverEl.offsetWidth / 2)}px`;
-        let top = text.getBoundingClientRect().top - popoverEl.offsetHeight;
+        // position above current mouse position...
+        let mouseX = event.clientX;
+        let mouseY = event.clientY;
+        popoverEl.style.left = `${mouseX - (popoverEl.offsetWidth / 2)}px`;
+        let top = mouseY - popoverEl.offsetHeight - 10;
         if (top < 0) {
-          top = text.getBoundingClientRect().bottom;
+          top = mouseY + 10;
         }
         popoverEl.style.top = `${top}px`;
-      });
-      text.addEventListener("mouseout", () => {
-        // text.setAttribute("text-", "#666");
+      };
+      let mouseout = () => {
+        path.setAttribute("stroke", "#1D8DCD");
+        path.setAttribute("stroke-width", "1.8");
+        rect.setAttribute("stroke", "#1D8DCD");
         popoverTimeout = setTimeout(() => {
           popoverEl.hidePopover();
         }, 300);
-      });
-
-      makeBG(text);
+      };
+    
+      path.addEventListener("mouseover", mouseover);
+      path.addEventListener("mouseout", mouseout);
+      text.addEventListener("mouseover", mouseover);
+      text.addEventListener("mouseout", mouseout);
     }
-  });
+  };
 </script>
 
 <div class="popover" popover bind:this={popoverEl}
@@ -197,22 +235,9 @@
   on:blur={() => popoverEl.hidePopover()}
   on:mouseover={() => clearTimeout(popoverTimeout)}
   on:focus={() => clearTimeout(popoverTimeout)}>
-  <div>Coordinate Transform</div>
+  <strong>Coordinate Transform</strong>
 </div>
 <svg bind:this={el}>
-  <!-- Arrowhead definition -->
-  <defs
-    ><marker
-      id="arrowhead"
-      markerWidth="8"
-      markerHeight="8"
-      refX="7"
-      refY="4"
-      orient="auto"
-      markerUnits="strokeWidth"
-      ><path d="M 0 0 L 8 4 L 0 8 z" fill="#1d8dcd"></path></marker
-    ></defs
-  >
 </svg>
 
 <style>
@@ -221,7 +246,7 @@
     inset: 0;
     overflow: visible;
     z-index: 10;
-    pointer-events: none;
+    /* pointer-events: none; */
   }
   :global(text) {
     font-size: 10px;
@@ -234,14 +259,21 @@
     pointer-events: all;
   }
   .popover {
-    border: solid 1px #ccc;
+    border: solid 1px transparent;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 3px 3px 7px #c3c0c0;
-    background: white;
+    background: #263749;
     font-size: 14px;
-    max-width: 300px;
+    font-weight: 200;
+    max-width: 400px;
     text-align: left;
+    color: #faebd7;
+    line-height: 1.4;
+  }
+  :global(.popover strong) {
+    color: rgb(154, 217, 254);
+    font-weight: 400;;
   }
   :global(.popover div) {
     /* avoid popover mouseout when hovering over child elements */
