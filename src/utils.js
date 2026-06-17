@@ -7,10 +7,18 @@ export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
-  if (version.includes("0.6")) {
-    return `https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/schemas/${schemaName}.schema`;
+  // check for query param override
+  const schemas_url = getSearchParam("schemas");
+  let baseUrl = `https://ngff.openmicroscopy.org/${version}/schemas`;
+  if (schemas_url) {
+    baseUrl = schemas_url;
+  } else if (version.includes("0.6")) {
+    baseUrl = "https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/schemas";
   }
-  return `https://ngff.openmicroscopy.org/${version}/schemas/${schemaName}.schema`;
+  if (baseUrl.endsWith("/")) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  return `${baseUrl}/${schemaName}.schema`;
 }
 
 
