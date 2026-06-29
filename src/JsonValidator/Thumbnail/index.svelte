@@ -8,7 +8,7 @@
   export let maxCssSize = 250;
 
   const store = new zarr.FetchStore(source);
-  const promise = omezarr.renderThumbnail(store, targetSize);
+  const promise = omezarr.render(store, targetSize);
 </script>
 
 {#await promise}
