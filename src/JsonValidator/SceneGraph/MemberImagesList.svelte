@@ -2,6 +2,7 @@
   import { getZarrGroupAttrs, validate } from "../../utils";
   import Icon from "svelte-icons-pack/Icon.svelte";
   import BsCheckCircleFill from "svelte-icons-pack/bs/BsCheckCircleFill";
+  import BsXCircleFill from "svelte-icons-pack/bs/BsXCircleFill";
 
   export let source;
   export let sceneAttrs;
@@ -72,14 +73,14 @@
               class:invalid={!isValid}
               title="Validate {path}"
             >
-              <Icon src={BsCheckCircleFill} />
+              <Icon src={isValid ? BsCheckCircleFill : BsXCircleFill} />
             </span>
           {:catch}
             <span 
               class="validate-icon invalid"
               title="Validate {path}"
             >
-              <Icon src={BsCheckCircleFill} />
+              <Icon src={BsXCircleFill} />
             </span>
           {/await}
         </div>
