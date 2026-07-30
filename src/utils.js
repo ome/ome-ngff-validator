@@ -288,7 +288,7 @@ export async function validate(jsonData) {
     const names = ["coordinate_transformations", "coordinate_systems", "axes", "_version"];
     for(const name of names) {
       const schema = await getSchema(getSchemaUrl(name, version));
-      schema["$id"] = `https://ngff.openmicroscopy.org/0.6.dev4/schemas/${name}.schema`;
+      schema["$id"] = `https://ngff.openmicroscopy.org/dev/schemas/${name}.schema`;
       refSchemas.push(schema);
     }
     jsonData = jsonData.attributes;
