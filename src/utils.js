@@ -12,7 +12,7 @@ export function getSchemaUrl(schemaName, version) {
   let baseUrl = `https://ngff.openmicroscopy.org/${version}/schemas`;
   if (schemas_url) {
     baseUrl = schemas_url;
-  } else if (version.includes("0.6")) {
+  } else if (version.startsWith("0.6")) {
     baseUrl = "https://raw.githubusercontent.com/ome/ngff-spec/refs/heads/main/schemas";
   }
   if (baseUrl.endsWith("/")) {
