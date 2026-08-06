@@ -74,7 +74,7 @@
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
   {versionMessage}
-  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
@@ -107,8 +107,11 @@
       expanded
     />
   </div>
+  <!-- for v0.5+ we also check for Zarr Conventions -->
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
+    <ZarrConventions {source} {rootAttrs} />
+  {/if}
 
-  <ZarrConventions {source} {rootAttrs} />
 
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
   {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
