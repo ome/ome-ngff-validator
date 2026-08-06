@@ -2,6 +2,7 @@
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
   import RoCrate from "./RoCrate/index.svelte";
+  import ZarrConventions from "./ZarrConventions/index.svelte";
   import Well from "./Well/index.svelte";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -106,6 +107,8 @@
       expanded
     />
   </div>
+
+  <ZarrConventions {source} {rootAttrs} />
 
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
   {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
