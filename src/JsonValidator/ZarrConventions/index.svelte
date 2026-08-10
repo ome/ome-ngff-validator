@@ -31,30 +31,72 @@ const unusedConventions = conventions.filter(
     Zarr Conventions found: {conventions.length}
     <ZarrConventionsTooltip></ZarrConventionsTooltip>
     </h3>
-    <div class="json">
-    <JsonBrowser
-    name=""
-    contents={{ "zarr_conventions": conventions }}
-    expanded={false}
-    />
-    </div>
 
-{#each conventions as convention}
+{#each conventions as convention, index}
+    <!--
+        Each Convention Metadata Object MUST contain at least one of the following fields:
+        uuid, schema_url, or spec_url.
+    -->
 
-        {#if convention.name}
-            <p>Convention name: <code>{convention.name}</code></p>
+<!-- The zarr_conventions attribute MUST be an array of Convention Metadata Objects (CMO).
+Each CMO:
+https://github.com/zarr-conventions/zarr-conventions-spec
+
+At least one of schema_url, spec_url, or uuid MUST be present.
+If uuid is present, it serves as the primary unique identifier for the Convention.
+If uuid is not present and both schema_url and spec_url are present, the schema_url serves as the identifier.
+If only spec_url is present (and no uuid), it serves as the identifier.
+If the Convention uses versioning, the schema_url
+SHOULD include a reference to the specific version (e.g., v1)
+and the spec_url MAY include a reference to the specific version.
+The Convention SHOULD provide a convenient way to find the specification associated with each version.
+
+Additionally, a Convention Metadata Object SHOULD contain the following fields:
+
+    name - a short human-readable name
+    schema_url and spec_url - when using uuid as the primary identifier, they are RECOMMENDED
+ -->
+
+ <!-- Each Convention Metadata Object MUST contain at least one of the following fields: -->
+
+          {#if convention.name}
+            <h4>Convention {index + 1}: <code>{convention.name}</code></h4 >
+          {:else}
+            <h4>Convention {index + 1}</h4>
+          {/if}
+         {#if !(convention.uuid || convention.schema_url || convention.spec_url)}
+            <p class="warning">
+                Convention must have at least one of uuid, schema_url, or spec_url
+            </p>
+        {:else}
+            <p>
+                {#if convention.uuid}
+                    UUID: <code>{convention.uuid}</code>
+                {/if}
+                {#if convention.schema_url}
+                    <a href={convention.schema_url} target="_blank">Schema URL</a>
+                {/if}
+                {#if convention.spec_url}
+                    <a href={convention.spec_url} target="_blank">Spec URL</a>
+                {/if}
+            </p>
+        {/if}
+
+    <!-- Spec says:
+
+         If the Convention isolates metadata using a namespace prefix or a key for nesting,
+         the name SHOULD match the namespace prefix (e.g., proj:)
+         or the key used to nest attributes (e.g., ome), depending on which method is used.
+        -->
+
+          {#if convention.name}
+            <!-- TODO: check for namespace prefixes (e.g. ome:)-->
             {#if !(convention.name in zarrAttrs)}
                 <p class="warning">
-                  <code>{convention.name}</code> not found in root attributes
+                  <code>{convention.name}</code> not found in the attributes
                 </p>
-                <p>Attributes:
-                    <div class="json">
-    <JsonBrowser
-    name=""
-    contents={attrKeys}
-    expanded
-    />
-    </div>
+                <p>Found: <code>{attrKeys.filter((k) => k !== "zarr_conventions")}</code></p>
+
             {/if}
         {:else}
             <p>(No name provided for convention)</p>
