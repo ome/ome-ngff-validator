@@ -2,6 +2,7 @@
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
   import RoCrate from "./RoCrate/index.svelte";
+  import ZarrConventions from "./ZarrConventions/index.svelte";
   import Well from "./Well/index.svelte";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -81,7 +82,7 @@
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
   {versionMessage}
-  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
@@ -116,6 +117,11 @@
       expanded
     />
   </div>
+  <!-- for v0.5+ we also check for Zarr Conventions -->
+  {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
+    <ZarrConventions {source} {rootAttrs} />
+  {/if}
+
 
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
   {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}

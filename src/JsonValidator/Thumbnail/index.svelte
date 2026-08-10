@@ -1,14 +1,59 @@
 <script>
   import * as zarr from "zarrita";
   import * as omezarr from "ome-zarr.js";
+  import { selectBestThumbnail, getZarrGroupAttrs } from "../../utils";
 
   export let source;
   // Default target size 0 will get thumbnail from smallest resolution
   export let targetSize = 0;
   export let maxCssSize = 250;
+  // Optional: pass rootAttrs to avoid re-fetching
+  export let rootAttrs = null;
 
-  const store = new zarr.FetchStore(source);
-  const promise = omezarr.renderThumbnail(store, targetSize);
+  // Convention identifiers
+  const THUMBNAILS_UUID = "49326c01-1180-4743-b15f-f7157038a6ab";
+  const THUMBNAILS_NAME = "thumbnails";
+
+  // Per zarr-conventions spec, a convention can be identified by uuid, name,
+  // schema_url, or spec_url. We check all since only one is required.
+  function hasThumbnailsConvention(conventions) {
+    return conventions?.some(
+      (c) =>
+        c.uuid === THUMBNAILS_UUID ||
+        c.name === THUMBNAILS_NAME ||
+        c.schema_url?.includes("/thumbnails/") ||
+        c.spec_url?.includes("/thumbnails/"),
+    );
+  }
+
+  async function loadThumbnail() {
+    // Get attrs (use passed or fetch)
+    const attrs = rootAttrs || (await getZarrGroupAttrs(source));
+    const zarrAttrs = attrs?.attributes || attrs;
+
+    // Check for thumbnails convention
+    const conventions = zarrAttrs?.zarr_conventions || [];
+
+    if (
+      hasThumbnailsConvention(conventions) &&
+      zarrAttrs?.thumbnails?.length > 0
+    ) {
+      const best = selectBestThumbnail(zarrAttrs.thumbnails, 512);
+      if (best) {
+        if (best.path) {
+          return `${source}/${best.path}`;
+        } else if (best.url) {
+          return best.url;
+        }
+      }
+    }
+
+    // Fallback to ome-zarr rendering
+    const store = new zarr.FetchStore(source);
+    return omezarr.renderThumbnail(store, targetSize);
+  }
+
+  const promise = loadThumbnail();
 </script>
 
 {#await promise}
@@ -21,7 +66,12 @@
     />
   </div>
 {:then src}
-  <img {src} alt="Thumbnail" class="thumbnail" style="--max-css-size: {maxCssSize}px" />
+  <img
+    {src}
+    alt="Thumbnail"
+    class="thumbnail"
+    style="--max-css-size: {maxCssSize}px"
+  />
 {:catch error}
   <div title="Failed to load thumbnail: {error.message}" class="failed">
     <img
@@ -47,7 +97,7 @@
     position: relative;
     width: 100px;
     height: 100px;
-    display: inline-block
+    display: inline-block;
   }
   .failed img {
     top: 0;
@@ -62,7 +112,8 @@
     font-size: 3em;
     color: darkgrey;
   }
-  .spinner img, .failed img {
+  .spinner img,
+  .failed img {
     background-color: #ddd;
     width: 100px;
     height: 100px;
