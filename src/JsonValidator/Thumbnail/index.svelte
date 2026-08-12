@@ -8,6 +8,7 @@
   export let maxCssSize = 250;
 
   const store = new zarr.FetchStore(source);
+  // render returns a promise that resolves to a data URL of the thumbnail image
   const promise = omezarr.render(store, targetSize);
 </script>
 
