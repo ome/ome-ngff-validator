@@ -8,11 +8,30 @@
 
   const WARNING = "warning";
 
+  const SPACE_UNITS = ["angstrom", "attometer", "centimeter", "decimeter", "exameter",
+    "femtometer", "foot", "gigameter", "hectometer", "inch", "kilometer", "megameter",
+    "meter", "micrometer", "mile", "millimeter", "nanometer", "parsec", "petameter",
+    "picometer", "terameter", "yard", "yoctometer", "yottameter", "zeptometer", "zettameter"];
+
+  const TIME_UNITS = ["attosecond", "centisecond", "day", "decisecond", "exasecond",
+    "femtosecond", "gigasecond", "hectosecond", "hour", "kilosecond", "megasecond",
+    "microsecond", "millisecond", "minute", "nanosecond", "petasecond", "picosecond",
+    "second", "terasecond", "yoctosecond", "yottasecond", "zeptosecond", "zettasecond"];
+
+  const AXIS_TYPES_PRE_06 = ["space", "time", "channel"];
+  const AXIS_TYPES_06 = ["array", "space", "time", "channel", "coordinate", "displacement"];
+
   // We check that all multiscale Datasets have same dtype and
   // shape.length (number of dimensions)
 
-  // If multiscale.axes (version > 0.3) check it matches shape
-  const { axes, datasets } = multiscale;
+  // If multiscale.axes (version > 0.3) check it matches shape.
+
+  // In v0.6+ axes are no longer on multiscale.axes but on the coordinateSystems,
+  // Checking the first coordinate system as a fallback
+  const { datasets } = multiscale;
+  const axes = multiscale.axes || multiscale.coordinateSystems?.[0]?.axes;
+
+  const isV06plus = !["0.1", "0.2", "0.3", "0.4", "0.5"].includes(version);
 
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
@@ -28,6 +47,62 @@
 
   function containsError(checks) {
     return checks.some((check) => check.status != WARNING);
+  }
+
+  // Validate a single axis object, returning a list of checks.
+  // https://ngff.openmicroscopy.org/0.5/#axes-md
+  function validateAxis(axis) {
+    const checks = [];
+    const hasProp = (prop) => Object.prototype.hasOwnProperty.call(axis, prop);
+
+    // Checks shared by OME-Zarr 0.5 and 0.6:
+    if (hasProp("units")) {
+      checks.push({
+        msg: `Axis "${axis.name}" has property "units" — did you mean "unit"?`,
+        status: WARNING,
+      });
+    }
+    if (hasProp("type") && axis.type == "space" && axis.unit && !SPACE_UNITS.includes(axis.unit)) {
+      checks.push({
+        msg: `Axis "${axis.name}" has type space but unit "${axis.unit}" is not a recommended UDUNITS-2 unit`,
+        status: WARNING,
+      });
+    }
+    if (hasProp("type") && axis.type == "time" && axis.unit && !TIME_UNITS.includes(axis.unit)) {
+      checks.push({
+        msg: `Axis "${axis.name}" has type time but unit "${axis.unit}" is not a recommended UDUNITS-2 unit`,
+        status: WARNING,
+      });
+    }
+
+    if (isV06plus) {
+      // Checks implementing changes in 0.6dev4
+      if (typeof axis.name != "string" || axis.name.length == 0) {
+        checks.push({ msg: `Axis name must be a non-empty string` });
+      }
+      if (hasProp("type") && !AXIS_TYPES_06.includes(axis.type)) {
+        checks.push({
+          msg: `Axis "${axis.name}" has type "${axis.type}" which is not one of ${AXIS_TYPES_06.join(", ")}`,
+          status: WARNING,
+        });
+      }
+      if (hasProp("discrete") && typeof axis.discrete != "boolean") {
+        checks.push({ msg: `Axis "${axis.name}" has "discrete" with a value that is not a boolean` });
+      }
+      if (hasProp("longName") && typeof axis.longName != "string") {
+        checks.push({ msg: `Axis "${axis.name}" has "longName" with a value that is not a string` });
+      }
+    } else {
+      // Checks invalid types in versions 0.5 or earlier:
+      if (hasProp("type") && !AXIS_TYPES_PRE_06.includes(axis.type)) {
+        checks.push({
+          msg: `Axis "${axis.name}" has type "${axis.type}" which is not one of ${AXIS_TYPES_PRE_06.join(", ")}`,
+          status: WARNING,
+        });
+      }
+    }
+
+    return checks;
   }
 
   async function loadAndValidate() {
@@ -72,6 +147,19 @@
       });
     }
     if (axes) {
+      axes.forEach((axis) => checks.push(...validateAxis(axis)));
+
+      // v0.6+: axis names must be unique within the coordinate system.
+      if (isV06plus) {
+        const names = axes.map((a) => a.name);
+        const dupes = names.filter((n, i) => names.indexOf(n) !== i);
+        if (dupes.length) {
+          checks.push({
+            msg: `Duplicate axis name(s): ${[...new Set(dupes)].join(", ")}`,
+          });
+        }
+      }
+
       shapes.forEach((shape) => {
         if (shape.length != axes.length) {
           checks.push({
@@ -81,6 +169,7 @@
           });
         }
       });
+
 
       if (!allowMissingDimNames) {
         let axesNames = JSON.stringify(axes.map(axis => axis.name));
