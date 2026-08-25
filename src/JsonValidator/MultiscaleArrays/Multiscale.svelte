@@ -26,19 +26,22 @@
 
   // If multiscale.axes (version > 0.3) check it matches shape.
 
-  // In v0.6+ axes are no longer on multiscale.axes but on the coordinateSystems,
-  // Checking the first coordinate system as a fallback
+  // In v0.6+ axes are no longer on multiscale.axes but on the coordinateSystems.
   const { datasets } = multiscale;
-  const axes = multiscale.axes || multiscale.coordinateSystems?.[0]?.axes;
+  const axesList = multiscale.axes
+    ? [multiscale.axes]
+    : (multiscale.coordinateSystems?.map((cs) => cs.axes).filter(Boolean) ?? []);
+  const firstAxes = axesList[0];
 
   const isV06plus = !["0.1", "0.2", "0.3", "0.4", "0.5"].includes(version);
 
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
-  const allowMissingDimNames = ["0.1", "0.2", "0.3", "0.4"].includes(version);
+  // dimension_names was a MUST in v0.5 only - removed again in v0.6
+  const versionToCheckDimNames = version === "0.5";
 
   let successMsg = "dtypes match and shapes are consistent";
-  if (!allowMissingDimNames) {
+  if (versionToCheckDimNames) {
     successMsg = "dimension_names checked, " + successMsg;
   }
 
@@ -142,7 +145,10 @@
         msg: `number of dimensions mismatch: ${dimCounts.join(", ")}`,
       });
     }
-    if (axes) {
+
+    // Per-axis checks for every coordinate system in v0.6.
+    // In v0.5 and earlier, there is only one "axes"
+    axesList.forEach((axes) => {
       axes.forEach((axis) => checks.push(...validateAxis(axis)));
 
       // v0.6+: axis names must be unique within the coordinate system.
@@ -155,20 +161,24 @@
           });
         }
       }
+    });
 
+    // Checks shapes using only the first coordinate system axes.
+    // TODO: Check the axes dimensions depending on the present transforms.
+    // (e.g. a project transform may change the number of dimensions)
+    if (firstAxes) {
       shapes.forEach((shape) => {
-        if (shape.length != axes.length) {
+        if (shape.length != firstAxes.length) {
           checks.push({
             msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
-              axes.length
+              firstAxes.length
             }`,
           });
         }
       });
 
-
-      if (!allowMissingDimNames) {
-        let axesNames = JSON.stringify(axes.map(axis => axis.name));
+      if (versionToCheckDimNames) {
+        let axesNames = JSON.stringify(firstAxes.map((axis) => axis.name));
         zarrayJsonList.forEach((arrData, i) => {
           let msg;
           if (!arrData.dimension_names) {
@@ -180,11 +190,12 @@
             }
           }
           if (msg) {
-            checks.push({msg});
+            checks.push({ msg });
           }
         });
       }
     }
+
     if (checkDimSeparator) {
       dimSeparators.forEach((sep) => {
         if (sep != "/") {
