@@ -32,6 +32,7 @@
     ? [multiscale.axes]
     : (multiscale.coordinateSystems?.map((cs) => cs.axes));
 
+
   const isV06plus = !["0.1", "0.2", "0.3", "0.4", "0.5"].includes(version);
 
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
@@ -147,12 +148,11 @@
 
     // Per-axis checks for every coordinate system in v0.6.
     // In v0.5 and earlier, there is only one "axes"
-    axesList.forEach((axes) => {
+
+    axesList.forEach((axes, index) => {
       axes.forEach((axis) => checks.push(...validateAxis(axis)));
 
       // v0.6+: axis names must be unique within the coordinate system.
-          // In v0.6+, some axes may have different dimensions than the array
-
       if (isV06plus) {
         const names = axes.map((a) => a.name);
         const dupes = names.filter((n, i) => names.indexOf(n) !== i);
@@ -162,9 +162,8 @@
           });
         }
       }
-      // In v0.6+, some axes may have different dimensions than the array
-    if (!isV06plus) {
 
+      if (!isV06plus) {
     shapes.forEach((shape) => {
         if (shape.length != axes.length) {
         checks.push({
@@ -179,20 +178,23 @@
     // Add warning, but don't fail if some projectAxis transform is present
     const coordinateTransforms = multiscale.coordinateTransformations || [];
     const coordinateTransformTypes = coordinateTransforms.map((ct) => ct.type);
+
+    const coordName = multiscale.coordinateSystems?.[index]?.name || `#${index}`;
+
     shapes.forEach((shape) => {
         if (shape.length != axes.length ) {
         if (!coordinateTransformTypes.includes("projectAxis")){
             checks.push({
-            msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
+            msg: `Length of shape (${shape.join(", ")}) doesn't match "${coordName}" coordinateSystem axes (${
                 axes.length
-            } and no projectAxis transform found`,
+            }) and no projectAxis transform found`,
             });
         }
         else {
             checks.push({
-            msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
+            msg: `Length of shape (${shape.join(", ")}) doesn't match "${coordName}" coordinateSystem axes (${
                 axes.length
-            }`,
+            }), but a projectAxis transform is present`,
             status: WARNING,
             });
         }
