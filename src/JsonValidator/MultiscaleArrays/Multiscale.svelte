@@ -36,6 +36,7 @@
   const permitDtypeMismatch = ["0.1", "0.2", "0.3", "0.4"].includes(version);
   const checkDimSeparator = ["0.2", "0.3", "0.4"].includes(version);
   const allowMissingDimNames = ["0.1", "0.2", "0.3", "0.4"].includes(version);
+
   let successMsg = "dtypes match and shapes are consistent";
   if (!allowMissingDimNames) {
     successMsg = "dimension_names checked, " + successMsg;
@@ -86,12 +87,7 @@
           status: WARNING,
         });
       }
-      if (hasProp("discrete") && typeof axis.discrete != "boolean") {
-        checks.push({ msg: `Axis "${axis.name}" has "discrete" with a value that is not a boolean` });
-      }
-      if (hasProp("longName") && typeof axis.longName != "string") {
-        checks.push({ msg: `Axis "${axis.name}" has "longName" with a value that is not a string` });
-      }
+
     } else {
       // Checks invalid types in versions 0.5 or earlier:
       if (hasProp("type") && !AXIS_TYPES_PRE_06.includes(axis.type)) {
