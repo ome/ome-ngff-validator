@@ -30,8 +30,7 @@
   const { datasets } = multiscale;
   const axesList = multiscale.axes
     ? [multiscale.axes]
-    : (multiscale.coordinateSystems?.map((cs) => cs.axes).filter(Boolean) ?? []);
-  const firstAxes = axesList[0];
+    : (multiscale.coordinateSystems?.map((cs) => cs.axes));
 
   const isV06plus = !["0.1", "0.2", "0.3", "0.4", "0.5"].includes(version);
 
@@ -152,6 +151,8 @@
       axes.forEach((axis) => checks.push(...validateAxis(axis)));
 
       // v0.6+: axis names must be unique within the coordinate system.
+          // In v0.6+, some axes may have different dimensions than the array
+
       if (isV06plus) {
         const names = axes.map((a) => a.name);
         const dupes = names.filter((n, i) => names.indexOf(n) !== i);
@@ -161,21 +162,44 @@
           });
         }
       }
+      // In v0.6+, some axes may have different dimensions than the array
+    if (!isV06plus) {
+
+    shapes.forEach((shape) => {
+        if (shape.length != axes.length) {
+        checks.push({
+            msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
+            axes.length
+            }`,
+        });
+        }
     });
 
-    // Checks shapes using only the first coordinate system axes.
-    // TODO: Check the axes dimensions depending on the present transforms.
-    // (e.g. a project transform may change the number of dimensions)
-    if (firstAxes) {
-      shapes.forEach((shape) => {
-        if (shape.length != firstAxes.length) {
-          checks.push({
+    } else {
+    // Add warning, but don't fail if some projectAxis transform is present
+    const coordinateTransforms = multiscale.coordinateTransformations || [];
+    const coordinateTransformTypes = coordinateTransforms.map((ct) => ct.type);
+    shapes.forEach((shape) => {
+        if (shape.length != axes.length ) {
+        if (!coordinateTransformTypes.includes("projectAxis")){
+            checks.push({
             msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
-              firstAxes.length
+                axes.length
+            } and no projectAxis transform found`,
+            });
+        }
+        else {
+            checks.push({
+            msg: `Shape (${shape.join(", ")}) doesn't match axes length: ${
+                axes.length
             }`,
-          });
+            status: WARNING,
+            });
+        }
         }
       });
+
+
 
       if (versionToCheckDimNames) {
         let axesNames = JSON.stringify(firstAxes.map((axis) => axis.name));
@@ -195,6 +219,7 @@
         });
       }
     }
+});
 
     if (checkDimSeparator) {
       dimSeparators.forEach((sep) => {
