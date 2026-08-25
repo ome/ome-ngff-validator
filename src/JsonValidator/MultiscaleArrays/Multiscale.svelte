@@ -218,9 +218,18 @@
     <!-- only show X if not valid - no tick if valid -->
     <CheckMark valid={false} />
   {:else}
+   <!-- If V06+, show number of validated axes too -->
+
+
     <p title="{successMsg}">
       {datasets.length} Datasets checked <span style="color:green">✓</span>
     </p>
+    {#if isV06plus}
+      <p title="{successMsg}">
+        {axesList.length} CoordinateSystems checked <span style="color:green">✓</span>
+      </p>
+    {/if}
+
   {/if}
   {#each checks as check}
     {#if check.status == "warning"}
