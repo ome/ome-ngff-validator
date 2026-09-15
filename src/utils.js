@@ -317,6 +317,13 @@ export async function validate(jsonData) {
   while (refIndex < refs.length) {
     let ref = refs[refIndex];
     refIndex++;
+    // https://github.com/ome/ngff-spec/blob/main/schemas/scene.schema has refs
+    if (ref == "coordinate_systems.schema") {
+      ref = "https://ngff.openmicroscopy.org/0.6/schemas/coordinate_systems.schema"
+    }
+    if (ref == "coordinate_transformations.schema") {
+      ref = "https://ngff.openmicroscopy.org/0.6/schemas/coordinate_transformations.schema"
+    }
     const match = ref.match(/schemas\/([a-z_]+)\.schema/);
     if (match) {
       const name = match[1];
