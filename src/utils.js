@@ -249,11 +249,22 @@ export function validateData(schema, jsonData, extraSchemas) {
 function getRefs(jsonSchema) {
   // Return an array of $ref values found in the JSON schema.
   let refs = [];
+  let baseId = jsonSchema.$id;
+  if (!baseId) {
+    throw new Error("JSON schema does not have a $id");
+  }
+  baseId = baseId.substring(0, baseId.lastIndexOf("/") + 1);
   function findRefs(obj) {
     if (typeof obj !== "object" || obj === null) return;
     for (const key in obj) {
-      if (key === "$ref" && !refs.includes(obj[key])) {
-        refs.push(obj[key]);
+      if (key === "$ref" && !refs.includes(obj["$ref"])) {
+        let ref = obj["$ref"];
+        // If the $ref is not an absolute URL, prepend the baseId to make it absolute.
+        // e.g. https://github.com/ome/ngff-spec/blob/main/schemas/scene.schema
+        if (!ref.startsWith("http")) {
+          ref = baseId + ref;
+        }
+        refs.push(ref);
       } else {
         findRefs(obj[key]);
       }
@@ -317,13 +328,6 @@ export async function validate(jsonData) {
   while (refIndex < refs.length) {
     let ref = refs[refIndex];
     refIndex++;
-    // https://github.com/ome/ngff-spec/blob/main/schemas/scene.schema has refs
-    if (ref == "coordinate_systems.schema") {
-      ref = "https://ngff.openmicroscopy.org/0.6/schemas/coordinate_systems.schema"
-    }
-    if (ref == "coordinate_transformations.schema") {
-      ref = "https://ngff.openmicroscopy.org/0.6/schemas/coordinate_transformations.schema"
-    }
     const match = ref.match(/schemas\/([a-z_]+)\.schema/);
     if (match) {
       const name = match[1];
@@ -338,10 +342,6 @@ export async function validate(jsonData) {
         // keep adding any new refs to the list
         for (let newRef of getRefs(refSchema)) {
           if (!newRef.startsWith("#") && !refs.includes(newRef.split("#")[0])) {
-            // handle e.g. $ref: "axes.schema"
-            if (!newRef.startsWith("http")) {
-              newRef = ref.split("schemas")[0] + "schemas/" + newRef;
-            }
             refs.push(newRef.split("#")[0]);
           }
         }
