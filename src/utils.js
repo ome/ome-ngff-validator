@@ -10,8 +10,7 @@ export function getSchemaUrl(schemaName, version) {
   // check for query param override
   const schemas_url = getSearchParam("schemas");
   // Use raw github URL since the link will also display in the browser
-  // let baseUrl = `https://raw.githubusercontent.com/ome/ngff-spec/${version}/schemas`;
-  let baseUrl = `https://ngff--581.org.readthedocs.build/${version}/schemas`;
+  let baseUrl = `https://raw.githubusercontent.com/ome/ngff-spec/${version}/schemas`;
   if (schemas_url) {
     baseUrl = schemas_url;
   }
