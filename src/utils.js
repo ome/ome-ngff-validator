@@ -173,7 +173,6 @@ export function getVersion(ngffData) {
       ? ngffData.well.version
       : undefined;
   }
-  console.log("version", version);
   // for 0.4 and earlier, version wasn't MUST and we defaulted
   // to using v0.4 for validation. To preserve that behaviour
   // return "0.4" if no version found.
@@ -289,8 +288,6 @@ export async function validate(jsonData) {
     // default to last version pre 0.5 rules.
     version = "0.4";
   }
-  
-  console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
 
