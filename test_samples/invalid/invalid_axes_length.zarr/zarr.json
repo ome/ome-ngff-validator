@@ -1,0 +1,92 @@
+{
+  "attributes": {
+    "ome": {
+      "version": "0.6",
+      "multiscales": [
+        {
+          "coordinateSystems": [
+            {
+              "name": "physical",
+              "axes": [
+                {
+                  "name": "y",
+                  "type": "space"
+                },
+                {
+                  "name": "x",
+                  "type": "space"
+                }
+              ]
+            },
+            {
+              "name": "world",
+              "axes": [
+                {
+                  "name": "y",
+                  "type": "space"
+                }
+              ]
+            }
+          ],
+          "datasets": [
+            {
+              "path": "s0",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "input": {
+                    "path": "s0"
+                  },
+                  "output": {
+                    "name": "physical"
+                  },
+                  "scale": [
+                    1.0,
+                    1.0
+                  ]
+                }
+              ]
+            },
+            {
+              "path": "s1",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "input": {
+                    "path": "s1"
+                  },
+                  "output": {
+                    "name": "physical"
+                  },
+                  "scale": [
+                    2.0,
+                    2.0
+                  ]
+                }
+              ]
+            }
+          ],
+          "coordinateTransformations": [
+            {
+              "type": "translation",
+              "input": {
+                "name": "physical"
+              },
+              "output": {
+                "name": "world"
+              },
+              "name": "translation_y",
+              "translation": [
+                50.0,
+                0.0
+              ]
+            }
+          ],
+          "name": "Logan-Shepp Phantom"
+        }
+      ]
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}
