@@ -1,12 +1,13 @@
 <script>
   import Nav from "./Nav.svelte";
   import Bioformats2rawLayout from "./Bioformats2rawLayout/index.svelte";
+  import Collection from "./Collection/index.svelte";
   import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
   import SplashScreen from "./SplashScreen.svelte";
 
-  import { getZarrGroupAttrs } from "./utils";
+  import { getZarrGroupAttrs, getJson } from "./utils";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -25,14 +26,25 @@
 
   let promise;
   if (source) {
-    // load JSON to be validated...
-    console.log("Loading JSON... " + source);
-    promise = getZarrGroupAttrs(source);
+    console.log("Loading Zarr... " + source);
+    if (source.endsWith(".json")) {
+      // For collections, load the JSON directly
+      promise = getJson(source);
+    } else {
+      // load JSON to be validated...
+      promise = getZarrGroupAttrs(source);
+    }
   }
 
   function isBioFormats2Raw(data) {
     let omeAttrs = data?.attributes?.ome || data;
     return omeAttrs["bioformats2raw.layout"] === 3 && !omeAttrs.plate;
+  }
+
+  function isCollection(data) {
+    // Only support Zarr v3
+    let omeAttrs = data?.attributes?.ome || data?.ome;
+    return omeAttrs?.type === "collection";
   }
 </script>
 
@@ -55,6 +67,8 @@
           <div>
             {#if isBioFormats2Raw(data)}
               <Bioformats2rawLayout rootAttrs={data} {source} />
+            {:else if isCollection(data)}
+              <Collection rootAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />
             {/if}
