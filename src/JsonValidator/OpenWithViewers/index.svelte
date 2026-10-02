@@ -12,10 +12,12 @@
   let viewers = viewers_json.viewers.map((viewer_data) => {
       let href = viewer_data.href;
       if (href) {
+        // fiji-links decodes p= once and then needs a valid URI, so encode twice
+        const url = viewer_data.name == "Fiji" ? encodeURI(source).replaceAll("%", "%25") : source;
         if (href.includes("{URL}")) {
-          href = href.replace("{URL}", source);
+          href = href.replace("{URL}", url);
         } else {
-          href += source;
+          href += url;
         }
       }
       // use static import of vizarr_logo.png to get base URL for other logos
@@ -26,6 +28,11 @@
     if (version == "0.5") {
       // TODO: update when other viewers support zarr v3
       viewers = viewers.filter((viewer) => viewer.name != "itk-vtk-viewer");
+    }
+
+    if (dtype.toLowerCase() != "image" || !["0.4", "0.5"].includes(version)) {
+      // Fiji opens v0.4/v0.5 images only, not plates, wells or bioformats2raw containers
+      viewers = viewers.filter((viewer) => viewer.name != "Fiji");
     }
 
 </script>
