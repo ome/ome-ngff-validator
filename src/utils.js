@@ -7,7 +7,17 @@ export const FILE_NOT_FOUND = "File not found";
 
 
 export function getSchemaUrl(schemaName, version) {
-  return `https://raw.githubusercontent.com/ome/ngff/v${version}/schemas/${schemaName}.schema`;
+  // check for query param override
+  const schemas_url = getSearchParam("schemas");
+  // Use raw github URL since the link will also display in the browser
+  let baseUrl = `https://raw.githubusercontent.com/ome/ngff-spec/${version}/schemas`;
+  if (schemas_url) {
+    baseUrl = schemas_url;
+  }
+  if (baseUrl.endsWith("/")) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  return `${baseUrl}/${schemaName}.schema`;
 }
 
 
@@ -163,7 +173,6 @@ export function getVersion(ngffData) {
       ? ngffData.well.version
       : undefined;
   }
-  console.log("version", version);
   // for 0.4 and earlier, version wasn't MUST and we defaulted
   // to using v0.4 for validation. To preserve that behaviour
   // return "0.4" if no version found.
@@ -205,6 +214,9 @@ export function getSchemaNames(ngffData) {
   if (ngffData["image-label"]) {
     names.push("label");
   }
+  if (ngffData["scene"]) {
+    names.push("scene");
+  }
   return names;
 }
 
@@ -233,6 +245,34 @@ export function validateData(schema, jsonData, extraSchemas) {
   return errors;
 }
 
+function getRefs(jsonSchema) {
+  // Return an array of $ref values found in the JSON schema.
+  let refs = [];
+  let baseId = jsonSchema.$id;
+  if (!baseId) {
+    throw new Error("JSON schema does not have a $id");
+  }
+  baseId = baseId.substring(0, baseId.lastIndexOf("/") + 1);
+  function findRefs(obj) {
+    if (typeof obj !== "object" || obj === null) return;
+    for (const key in obj) {
+      if (key === "$ref" && !refs.includes(obj["$ref"])) {
+        let ref = obj["$ref"];
+        // If the $ref is not an absolute URL, prepend the baseId to make it absolute.
+        // e.g. https://github.com/ome/ngff-spec/blob/main/schemas/scene.schema
+        if (!ref.startsWith("http")) {
+          ref = baseId + ref;
+        }
+        refs.push(ref);
+      } else {
+        findRefs(obj[key]);
+      }
+    }
+  }
+  findRefs(jsonSchema);
+  return refs;
+}
+
 export async function validate(jsonData) {
   // get version, lookup schema, do validation...
   // v0.5+ unwrap the attrs under "attributes.ome"
@@ -248,8 +288,6 @@ export async function validate(jsonData) {
     // default to last version pre 0.5 rules.
     version = "0.4";
   }
-  
-  console.log("validate VERSION", version, jsonData);
 
   const schemaUrls = getSchemaUrlsForJson(jsonData);
 
@@ -263,16 +301,51 @@ export async function validate(jsonData) {
   }
 
   let refSchemas = [];
-  // TODO: need to know whether to load other schemas...
-  // For now, we can use version check... 
-  if (version === "0.5") {
-    const versionSchema = await getSchema(getSchemaUrl("_version", version));
-    // const schemaSchema = await getSchema(getSchemaUrl("_schema_url", version));
-    refSchemas = [versionSchema];
-    // For version 0.5+, we validate the "attributes" content.
-    // If no "attributes" exist, then it will be assumed this is v0.4 data (see above)
+
+  if (jsonData.attributes) {
     jsonData = jsonData.attributes;
   }
+
+  // Before we validate, need to load any additional schemas
+  // found under $refs...
+  let refs = [];
+  for (let s=0; s<schemaUrls.length; s++) {
+    let schema = await getSchema(schemaUrls[s]);
+    for (let ref of getRefs(schema)) {
+      // ignore local references within the same schema
+      if (!ref.startsWith("#") && !refs.includes(ref)) {
+        refs.push(ref.split("#")[0]);
+      }
+    }
+  }
+
+  let loadedNames = [];
+  let refIndex = 0;
+  // We process the refs list, while also adding to it...
+  while (refIndex < refs.length) {
+    let ref = refs[refIndex];
+    refIndex++;
+    const match = ref.match(/schemas\/([a-z_]+)\.schema/);
+    if (match) {
+      const name = match[1];
+      if (!loadedNames.includes(name)) {
+        // load the schema and populate refSchemas
+        const refSchemaUrl = getSchemaUrl(name, version);
+        const refSchema = await getSchema(refSchemaUrl);
+        refSchema["$id"] = ref;
+        refSchemas.push(refSchema);
+        loadedNames.push(name);
+
+        // keep adding any new refs to the list
+        for (let newRef of getRefs(refSchema)) {
+          if (!newRef.startsWith("#") && !refs.includes(newRef.split("#")[0])) {
+            refs.push(newRef.split("#")[0]);
+          }
+        }
+      }
+    }
+  }
+
   let errors = [];
   for (let s=0; s<schemaUrls.length; s++) {
     let schema = await getSchema(schemaUrls[s]);

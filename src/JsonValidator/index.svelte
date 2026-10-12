@@ -8,6 +8,8 @@
   import LabelsInfoLink from "./Labels/LabelsInfoLink.svelte";
   import OpenWith from "./OpenWithViewers/index.svelte";
   import Thumbnail from "./Thumbnail/index.svelte";
+  import SceneGraph from "./SceneGraph/index.svelte";
+  import MemberImagesList from "./SceneGraph/MemberImagesList.svelte";
 
   import {
     CURRENT_VERSION,
@@ -65,9 +67,15 @@
 </script>
 
 <article>
-  <div class="thumbnail_wrapper">
-    <Thumbnail source = {firstPlateImageUrl || firstWellImageUrl || source} targetSize=150 maxCssSize=300 />
-  </div>
+  {#if firstPlateImageUrl || firstWellImageUrl || omeAttrs.multiscales}
+    <div class="thumbnail_wrapper">
+      <Thumbnail
+        source={firstPlateImageUrl || firstWellImageUrl || source}
+        targetSize="150"
+        maxCssSize="300"
+      />
+    </div>
+  {/if}
 
   <p>
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
@@ -95,8 +103,10 @@
     <p style="color: red">{error.message}</p>
   {/await}
 
-
-  <OpenWith {source} {dtype} {version} />
+  <!-- No viewers yet support "scene" -->
+  {#if !omeAttrs.scene }
+    <OpenWith {source} {dtype} {version} />
+  {/if}
 
   <div class="json">
     <JsonBrowser
@@ -119,6 +129,10 @@
   {:catch error}
     <!-- <p>No table data</p> -->
   {/await}
+
+  {#if omeAttrs.scene}
+    <MemberImagesList {source} sceneAttrs={omeAttrs.scene} />
+  {/if}
 </article>
 
 {#if omeAttrs.multiscales}
@@ -127,6 +141,8 @@
   <Plate {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.well}
   <Well {source} rootAttrs={omeAttrs} />
+{:else if omeAttrs.scene}
+  <SceneGraph {source} rootAttrs={omeAttrs} />
 {/if}
 
 <style>
