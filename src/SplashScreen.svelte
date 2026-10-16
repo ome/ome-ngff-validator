@@ -1,6 +1,25 @@
 <article>
   <h1>OME-NGFF Validator</h1>
-  <p>To validate an OME-NGFF file, use ?source=URL to open a sample. For example:</p>
+
+  <h3>Validate your data</h3>
+  <p>Paste the URL of an OME-Zarr file to validate it:</p>
+  <form method="get">
+    <input
+      type="url"
+      name="source"
+      placeholder="https://example.com/path/to/image.zarr"
+      required
+    />
+    <button type="submit">Validate</button>
+  </form>
+
+  <hr>
+
+  <h3>Examples</h3>
+  <p>
+    Or try one of these samples. You can also link directly to any file with
+    <code>?source=URL</code>.
+  </p>
 
   <ul>
     <li>
@@ -95,6 +114,42 @@
   li {
     list-style: none;
     margin: 15px;
+  }
+
+  form {
+    display: flex;
+    gap: 10px;
+    max-width: 700px;
+    margin: 15px auto;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    font-size: 1.2em;
+    padding: 12px 15px;
+    border: solid #ddd 1px;
+    border-radius: 10px;
+    color: #343a40;
+  }
+
+  input:focus {
+    outline: 2px solid var(--omeLinkBlue);
+    border-color: var(--omeLinkBlue);
+  }
+
+  button {
+    font-size: 1.2em;
+    padding: 12px 25px;
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--omeLinkBlue);
+    color: white;
+    cursor: pointer;
+  }
+
+  button:hover {
+    filter: brightness(0.9);
   }
 
   hr {
