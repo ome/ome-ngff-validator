@@ -30,6 +30,12 @@
       "name": "MoBIE",
       "logo": "/MoBIE.jpeg",
       "html": "<p><a href='https://github.com/mobie/mobie-viewer-fiji/'>MoBIE</a> plugin for ImageJ/Fiji. See <a href='https://omero-guides.readthedocs.io/en/latest/fiji/docs/view_mobie_zarr.html'>MoBIE guide</a> for installation. Plugins > BigDataViewer > OME ZARR > <br> Open OME ZARR from S3…. <code>{URL}</code>"
+    },
+    {
+      "name": "Fiji",
+      "logo": "/fiji_zarr_logo.png",
+      "href": "fiji://open/url?p=",
+      "html": "<p>Opens the image in the Fiji registered for <code>fiji://</code> links. Needs <a href='https://fiji.sc'>Fiji-Latest</a> with the <a href='https://github.com/BioImageTools/ome-zarr-fiji-java#fiji-update-site'>OME-Zarr update site</a>. <a href='https://github.com/BioImageTools/ome-zarr-fiji-java#fiji-links-fiji'>More info...</a></p>"
     }
   ]
 }
