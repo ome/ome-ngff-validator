@@ -93,6 +93,35 @@
         no_version_v0.5.zarr
       </a>
     </li>
+
+    <li>
+      Invalid unit:
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/lubianat/ome-ngff-validator/refs/heads/main/test_samples/invalid/invalid_unit.zarr/"
+      >
+        invalid_unit.zarr
+      </a>
+    </li>
+
+    <li>
+      Invalid axes length:
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/lubianat/ome-ngff-validator/refs/heads/main/test_samples/invalid/invalid_axes_length.zarr/"
+      >
+        invalid_axes_length.zarr
+      </a>
+    </li>
+
+    <li>
+      Misleading "units" name:
+      <a
+        href="{location}?source=https://raw.githubusercontent.com/lubianat/ome-ngff-validator/refs/heads/main/test_samples/invalid/invalid_units_name.zarr/"
+      >
+        invalid_units_name.zarr
+      </a>
+    </li>
+
+
   </ul>
 </article>
 
