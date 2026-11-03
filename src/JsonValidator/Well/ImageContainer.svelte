@@ -5,9 +5,10 @@
   export let path;
 
   // const promise = getJson(source + path + "/.zattrs");
+  const fullPath = path.startsWith("http") ? path : source + "/" + path;
 
   async function loadAndValidate() {
-    let imgAttrs = await getZarrGroupAttrs(source + "/" + path);
+    let imgAttrs = await getZarrGroupAttrs(fullPath);
     let errs = await validate(imgAttrs);
     return errs;
   }
@@ -17,7 +18,7 @@
   const url = window.location.origin + window.location.pathname;
 </script>
 
-<a title="{path}: Open Image" href="{url}?source={source + "/" + path}/">
+<a title="{path}: Open Image" href="{url}?source={fullPath}">
 {#await promise}
   <span>{path}.</span>
 {:then errs}
