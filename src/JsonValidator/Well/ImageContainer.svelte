@@ -1,5 +1,5 @@
 <script>
-  import { getZarrGroupAttrs, validate } from "../../utils";
+  import { getZarrGroupAttrs, validate, basename } from "../../utils";
 
   export let source;
   export let path;
@@ -25,7 +25,7 @@
   {#if errs.length > 0}
     <span class="error"> ⨯ Error! </span>
   {:else}
-    <span class="valid">{path}: ✓ </span>
+    <span class="valid">{basename(path)}: ✓ </span>
   {/if}
 {:catch error}
   <span class="error">{error.message}</span>
