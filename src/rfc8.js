@@ -146,3 +146,14 @@ export function rfc8Warnings(ome) {
     .filter(([type]) => typeof type === "string" && !type.includes("://") && !KNOWN_TRAITS.includes(type))
     .map(([type, i]) => `ome.traits[${i}]: unknown built-in trait "${type}"; extension traits should use a URI type declared in extension_manifest`);
 }
+
+// Adapt an RFC-8 multiscale node to the 0.5-style shape MultiscaleArrays renders.
+// ponytail: relative hrefs only; absolute/http paths are a sub-RFC, add when needed.
+export function toLegacyMultiscales(ome) {
+  return { multiscales: [{
+    version: ome.version,
+    name: ome.name,
+    axes: ome.coordinate_systems?.[0]?.axes,
+    datasets: (ome.scales || []).map((s) => ({ path: s.path?.href?.replace(/^\.\//, "") })),
+  }] };
+}

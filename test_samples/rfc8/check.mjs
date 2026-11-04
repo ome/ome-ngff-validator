@@ -23,3 +23,7 @@ import { rfc8Warnings } from "../../src/rfc8.js";
 const w = rfc8Warnings(sample.attributes.ome);
 assert(w.length === 1 && w[0].includes('"omero"'), w);
 console.log("warnings ok");
+import { toLegacyMultiscales } from "../../src/rfc8.js";
+const ms = toLegacyMultiscales(sample.attributes.ome).multiscales[0];
+assert(ms.datasets.length === 5 && ms.datasets[0].path === "0" && ms.axes.length === 4);
+console.log("adapter ok");

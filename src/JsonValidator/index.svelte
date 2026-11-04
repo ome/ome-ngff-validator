@@ -18,7 +18,7 @@
     getDataType,
     getZarrGroupAttrsFileName,
   } from "../utils";
-  import { isRfc8Multiscale, validateRfc8Multiscale, rfc8Warnings } from "../rfc8";
+  import { isRfc8Multiscale, validateRfc8Multiscale, rfc8Warnings, toLegacyMultiscales } from "../rfc8";
 
   export let source;
   export let rootAttrs;
@@ -136,7 +136,9 @@
   {/await}
 </article>
 
-{#if omeAttrs.multiscales}
+{#if isRfc8}
+  <MultiscaleArrays {source} rootAttrs={toLegacyMultiscales(omeAttrs)} />
+{:else if omeAttrs.multiscales}
   <MultiscaleArrays {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.plate}
   <Plate {source} rootAttrs={omeAttrs} />
