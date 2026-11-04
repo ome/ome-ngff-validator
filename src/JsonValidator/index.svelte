@@ -18,7 +18,7 @@
     getDataType,
     getZarrGroupAttrsFileName,
   } from "../utils";
-  import { isRfc8Multiscale, validateRfc8Multiscale } from "../rfc8";
+  import { isRfc8Multiscale, validateRfc8Multiscale, rfc8Warnings } from "../rfc8";
 
   export let source;
   export let rootAttrs;
@@ -56,6 +56,7 @@
   const isRfc8 = isRfc8Multiscale(omeAttrs);
   const schemaUrls = isRfc8 ? [] : getSchemaUrlsForJson(omeAttrs);
   console.log("index.svelte schemaUrls", schemaUrls);
+  const warnings = isRfc8 ? rfc8Warnings(omeAttrs) : [];
   const promise = isRfc8 ? Promise.resolve(validateRfc8Multiscale(omeAttrs)) : validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
@@ -93,6 +94,14 @@
         Errors:
         {#each errors as error}
           <pre><code>{JSON.stringify(error, null, 2)}</code></pre>
+        {/each}
+      </div>
+    {/if}
+    {#if warnings.length > 0}
+      <div class="error">
+        Warnings:
+        {#each warnings as w}
+          <pre><code>{w}</code></pre>
         {/each}
       </div>
     {/if}

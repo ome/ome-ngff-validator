@@ -136,3 +136,13 @@ export function validateRfc8Multiscale(ome) {
 
   return errors;
 }
+
+// Built-in trait keywords from the RFC-8 revision (§5); anything else should be a declared URI.
+const KNOWN_TRAITS = ["plate", "well", "labels", "bioformats2raw", "scene"];
+
+export function rfc8Warnings(ome) {
+  return (Array.isArray(ome?.traits) ? ome.traits : [])
+    .map((t, i) => [t?.type, i])
+    .filter(([type]) => typeof type === "string" && !type.includes("://") && !KNOWN_TRAITS.includes(type))
+    .map(([type, i]) => `ome.traits[${i}]: unknown built-in trait "${type}"; extension traits should use a URI type declared in extension_manifest`);
+}

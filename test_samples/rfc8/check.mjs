@@ -19,3 +19,7 @@ import { readFileSync } from "node:fs";
 const sample = JSON.parse(readFileSync(new URL("./valid_multiscale.zarr/zarr.json", import.meta.url)));
 assert.deepStrictEqual(v(sample.attributes.ome), []);
 console.log("sample ok");
+import { rfc8Warnings } from "../../src/rfc8.js";
+const w = rfc8Warnings(sample.attributes.ome);
+assert(w.length === 1 && w[0].includes('"omero"'), w);
+console.log("warnings ok");
