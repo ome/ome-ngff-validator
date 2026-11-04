@@ -18,6 +18,7 @@
     getDataType,
     getZarrGroupAttrsFileName,
   } from "../utils";
+  import { isRfc8Multiscale, validateRfc8Multiscale } from "../rfc8";
 
   export let source;
   export let rootAttrs;
@@ -52,9 +53,10 @@
   const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
-  const schemaUrls = getSchemaUrlsForJson(omeAttrs);
+  const isRfc8 = isRfc8Multiscale(omeAttrs);
+  const schemaUrls = isRfc8 ? [] : getSchemaUrlsForJson(omeAttrs);
   console.log("index.svelte schemaUrls", schemaUrls);
-  const promise = validate(rootAttrs);
+  const promise = isRfc8 ? Promise.resolve(validateRfc8Multiscale(omeAttrs)) : validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
@@ -73,11 +75,15 @@
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
   {versionMessage}
+  {#if isRfc8}
+    Validating as RFC-8 (v2) <code>multiscale</code> node.
+  {:else}
   Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
   {/each}
+  {/if}
   {#await promise}
     <div>loading schema...</div>
   {:then errors}
