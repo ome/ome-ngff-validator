@@ -1,6 +1,7 @@
 <script>
   import Nav from "./Nav.svelte";
   import Bioformats2rawLayout from "./Bioformats2rawLayout/index.svelte";
+  import CsvViewer from "./CsvViewer/index.svelte";
   import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
   import Modal from "svelte-simple-modal";
@@ -21,13 +22,31 @@
       source = source.replace(/\/(\.zattrs|zarr\.json)$/, "");
       redirected = true;
     }
+    // Handle Google Sheets URLs
+    if (source.startsWith("https://docs.google.com/spreadsheets/")) {
+      source = source.replace(/\/edit.*$/, "/export?format=csv");
+    }
+  }
+
+  function isCSV(source) {
+    return source.endsWith("csv");
   }
 
   let promise;
   if (source) {
-    // load JSON to be validated...
-    console.log("Loading JSON... " + source);
-    promise = getZarrGroupAttrs(source);
+    if (isCSV(source)) {
+      console.log("Loading CSV... " + source);
+      promise = fetch(source).then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch CSV");
+        }
+        return response.text();
+      });
+    } else {
+      // load JSON to be validated...
+      console.log("Loading JSON... " + source);
+      promise = getZarrGroupAttrs(source);
+    }
   }
 
   function isBioFormats2Raw(data) {
@@ -46,14 +65,18 @@
         {#await promise}
           <div>loading...</div>
         {:then data}
-          <Title {source} zattrs={data} />
+          {#if !isCSV(source)}
+            <Title {source} zattrs={data} />
+          {/if}
 
           {#if redirected}
             <p class="note">Redirected to base path from appended .zattrs or zarr.json</p>
           {/if}
 
           <div>
-            {#if isBioFormats2Raw(data)}
+            {#if isCSV(source)}
+              <CsvViewer csvData={data} {source} />
+            {:else if isBioFormats2Raw(data)}
               <Bioformats2rawLayout rootAttrs={data} {source} />
             {:else}
               <JsonValidator rootAttrs={data} {source} />

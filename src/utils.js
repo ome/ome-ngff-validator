@@ -398,3 +398,9 @@ export function getSearchParam(key) {
 export function range(length) {
   return Array.from({ length }, (_, i) => i);
 }
+
+export function basename(path) {
+  if (!path) return "";
+  const slashIndex = path.lastIndexOf("/");
+  return slashIndex === -1 ? path : path.slice(slashIndex + 1);
+}
