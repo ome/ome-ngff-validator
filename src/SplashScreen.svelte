@@ -57,6 +57,14 @@
         ?source=https://livingobjects.ebi.ac.uk/idr/zarr/v0.4/idr0001A/2551.zarr
       </a>
     </li>
+    <li>
+      A v0.6 scene:
+      <a
+        href="{location}?source=https://livingobjects.ebi.ac.uk/idr/mobie/clem-scene.ome.zarr"
+      >
+        ?source=https://livingobjects.ebi.ac.uk/idr/mobie/clem-scene.ome.zarr
+      </a>
+    </li>
   </ul>
 
   <hr>
