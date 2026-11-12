@@ -2,6 +2,7 @@
   import MultiscaleArrays from "./MultiscaleArrays/index.svelte";
   import Plate from "./Plate/index.svelte";
   import RoCrate from "./RoCrate/index.svelte";
+  import MetadataAssets from "./MetadataAssets/index.svelte";
   import Well from "./Well/index.svelte";
   import JsonBrowser from "../JsonBrowser/index.svelte";
   import CheckMark from "../CheckMark.svelte";
@@ -20,6 +21,7 @@
     getDataType,
     getZarrGroupAttrsFileName,
   } from "../utils";
+  import { isRfc8Multiscale, validateRfc8Multiscale, rfc8Warnings, toLegacyMultiscales } from "../rfc8";
 
   export let source;
   export let rootAttrs;
@@ -54,9 +56,11 @@
   const firstWellImageUrl = omeAttrs.well ? `${source}/0` : null;
 
   const dtype = getDataType(omeAttrs);
-  const schemaUrls = getSchemaUrlsForJson(omeAttrs);
+  const isRfc8 = isRfc8Multiscale(omeAttrs);
+  const schemaUrls = isRfc8 ? [] : getSchemaUrlsForJson(omeAttrs);
   console.log("index.svelte schemaUrls", schemaUrls);
-  const promise = validate(rootAttrs);
+  const warnings = isRfc8 ? rfc8Warnings(omeAttrs) : [];
+  const promise = isRfc8 ? Promise.resolve(validateRfc8Multiscale(omeAttrs)) : validate(rootAttrs);
 
   const dirs = source.split("/").filter(Boolean);
   const zarrName = dirs[dirs.length - 1];
@@ -81,11 +85,15 @@
     Validating: <a href={source}/{zarrAttrsFileName}>/{zarrName}/{zarrAttrsFileName}</a>
   </p>
   {versionMessage}
-  Using schema{schemaUrls.length > 1 ? "s" : ""}: 
+  {#if isRfc8}
+    Validating as RFC-8 (v2) <code>multiscale</code> node.
+  {:else}
+  Using schema{schemaUrls.length > 1 ? "s" : ""}:
   {#each schemaUrls as url, i}
     {i > 0 ? " and " : ""}
     <a href={url} target="_blank">{url.split("ngff")[1]}</a>
   {/each}
+  {/if}
   {#await promise}
     <div>loading schema...</div>
   {:then errors}
@@ -95,6 +103,14 @@
         Errors:
         {#each errors as error}
           <pre><code>{JSON.stringify(error, null, 2)}</code></pre>
+        {/each}
+      </div>
+    {/if}
+    {#if warnings.length > 0}
+      <div class="error">
+        Warnings:
+        {#each warnings as w}
+          <pre><code>{w}</code></pre>
         {/each}
       </div>
     {/if}
@@ -117,6 +133,10 @@
     />
   </div>
 
+  {#if isRfc8}
+    <MetadataAssets {source} traits={omeAttrs.traits || []} />
+  {/if}
+
   <!-- for v0.5+ we check for ro-crate-metadata.json -->
   {#if !["0.1", "0.2", "0.3", "0.4"].includes(version)}
     <RoCrate {source}></RoCrate>
@@ -135,7 +155,9 @@
   {/if}
 </article>
 
-{#if omeAttrs.multiscales}
+{#if isRfc8}
+  <MultiscaleArrays {source} rootAttrs={toLegacyMultiscales(omeAttrs)} />
+{:else if omeAttrs.multiscales}
   <MultiscaleArrays {source} rootAttrs={omeAttrs} />
 {:else if omeAttrs.plate}
   <Plate {source} rootAttrs={omeAttrs} />
