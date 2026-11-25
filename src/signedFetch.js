@@ -18,7 +18,20 @@ function promptForCredentials() {
         <p>Access denied. Enter S3 credentials to retry (kept for this browser tab only).</p>
         <p><label>Access key <input name="key" autocomplete="off" required></label></p>
         <p><label>Secret key <input name="secret" type="password" autocomplete="off" required></label></p>
-        <p><label>Region <input name="region" value="us-east-1" required></label></p>
+        <p><label>Region <input name="region" value="us-east-1" list="aws-regions"></label></p>
+        <datalist id="aws-regions">
+          <option value="us-east-1">
+          <option value="us-east-2">
+          <option value="us-west-1">
+          <option value="us-west-2">
+          <option value="eu-west-1">
+          <option value="eu-west-2">
+          <option value="eu-west-3">
+          <option value="eu-central-1">
+          <option value="ap-southeast-1">
+          <option value="ap-southeast-2">
+          <option value="ap-northeast-1">
+        </datalist>
         <button value="ok">Sign requests</button>
         <button value="cancel" formnovalidate>Cancel</button>
       </form>`;
@@ -28,7 +41,7 @@ function promptForCredentials() {
         const creds = {
           accessKeyId: f.key.value.trim(),
           secretAccessKey: f.secret.value.trim(),
-          region: f.region.value.trim(),
+          region: f.region.value.trim() || "us-east-1",
           service: "s3",
         };
         sessionStorage.setItem(KEY, JSON.stringify(creds));
