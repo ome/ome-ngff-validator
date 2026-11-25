@@ -1,73 +1,62 @@
 import { AwsClient } from "aws4fetch";
 
-// Credentials survive refresh via sessionStorage (per-tab, cleared when the tab closes).
+// Opt-in persistence: sessionStorage is per-tab, but readable by any script on the page.
 const KEY = "ngff-validator-s3-creds";
-const saved = sessionStorage.getItem(KEY);
-// Pending/settled credentials prompt, shared so parallel requests ask once.
-// Resolves to an AwsClient, or null if the user cancelled.
-let clientPromise = saved ? Promise.resolve(new AwsClient(JSON.parse(saved))) : undefined;
-// Only sign requests to the origin that denied us; never leak the key id elsewhere.
-/** @type {string | undefined} */
-let deniedOrigin;
 
-function promptForCredentials() {
+/** @type {{ aws: AwsClient, origin: string } | null} */
+let creds = null;
+try {
+  const saved = JSON.parse(sessionStorage.getItem(KEY));
+  if (saved) creds = { aws: new AwsClient(saved), origin: saved.origin };
+} catch {}
+
+export const hasCredentials = () => creds !== null;
+
+// Plain fetch; a 401/403 from the origin the user entered keys for is retried with SigV4.
+// Never prompts: the UI offers a "Use credentials" button instead.
+export async function signedFetch(input, init) {
+  const request = new Request(input, init);
+  const res = await fetch(request.clone());
+  if (!creds || (res.status !== 401 && res.status !== 403)) return res;
+  if (new URL(request.url).origin !== creds.origin) return res;
+  return creds.aws.fetch(request);
+}
+
+/** Resolves true if credentials were entered for `origin`, false if cancelled. */
+export function promptForCredentials(origin) {
   return new Promise((resolve) => {
     const dlg = document.createElement("dialog");
     dlg.innerHTML = `
       <form method="dialog">
-        <p>Access denied. Enter S3 credentials to retry (kept for this browser tab only).</p>
+        <p>S3 credentials for <code></code></p>
         <p><label>Access key <input name="key" autocomplete="off" required></label></p>
         <p><label>Secret key <input name="secret" type="password" autocomplete="off" required></label></p>
-        <p><label>Region <input name="region" value="us-east-1" list="aws-regions"></label></p>
-        <datalist id="aws-regions">
-          <option value="us-east-1">
-          <option value="us-east-2">
-          <option value="us-west-1">
-          <option value="us-west-2">
-          <option value="eu-west-1">
-          <option value="eu-west-2">
-          <option value="eu-west-3">
-          <option value="eu-central-1">
-          <option value="ap-southeast-1">
-          <option value="ap-southeast-2">
-          <option value="ap-northeast-1">
-        </datalist>
+        <p><label>Region <input name="region" value="us-east-1"></label></p>
+        <p><label><input name="remember" type="checkbox"> Remember for this tab</label></p>
         <button value="ok">Sign requests</button>
         <button value="cancel" formnovalidate>Cancel</button>
       </form>`;
+    dlg.querySelector("code").textContent = origin;
     dlg.addEventListener("close", () => {
       const f = dlg.querySelector("form").elements;
       if (dlg.returnValue === "ok") {
-        const creds = {
+        const c = {
           accessKeyId: f.key.value.trim(),
           secretAccessKey: f.secret.value.trim(),
           region: f.region.value.trim() || "us-east-1",
           service: "s3",
+          origin,
         };
-        sessionStorage.setItem(KEY, JSON.stringify(creds));
-        resolve(new AwsClient(creds));
-      } else {
-        resolve(null);
+        creds = { aws: new AwsClient(c), origin };
+        try {
+          if (f.remember.checked) sessionStorage.setItem(KEY, JSON.stringify(c));
+          else sessionStorage.removeItem(KEY);
+        } catch {}
       }
+      resolve(dlg.returnValue === "ok");
       dlg.remove();
     });
     document.body.appendChild(dlg);
     dlg.showModal();
   });
 }
-
-const baseFetch = window.fetch.bind(window);
-
-// Replaces window.fetch: retries 401/403 responses with SigV4 signing.
-window.fetch = async (input, init) => {
-  const request = new Request(input, init);
-  const res = await baseFetch(request.clone());
-  const origin = new URL(request.url).origin;
-  if ((res.status !== 401 && res.status !== 403) || (deniedOrigin && deniedOrigin !== origin)) {
-    return res;
-  }
-  deniedOrigin = origin;
-  clientPromise ??= promptForCredentials();
-  const aws = await clientPromise;
-  return aws ? aws.fetch(request) : res;
-};

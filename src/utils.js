@@ -1,3 +1,4 @@
+import { signedFetch, hasCredentials } from "./signedFetch.js";
 // import { slice, openArray } from "https://cdn.skypack.dev/zarr";
 
 import Ajv from "ajv";
@@ -26,7 +27,7 @@ async function fetchHandleError(url) {
   let msg = `Error Loading ${url}:`;
   let rsp;
   try {
-    rsp = await fetch(url).then(function (response) {
+    rsp = await signedFetch(url).then(function (response) {
       if (!response.ok) {
         // make the promise be rejected if we didn't get a 2xx response
         // NB. statusText could be "Not Found" or "File not found" depending on server
@@ -49,6 +50,7 @@ async function fetchHandleError(url) {
       // If the 'no-cors' mode allows this to return, then we
       // likely failed due to CORS in the original request
       msg += " Failed due to CORS issues.";
+      if (hasCredentials()) msg += " Signed requests need the bucket CORS policy to allow the authorization, x-amz-date and x-amz-content-sha256 headers.";
     } catch (anotherError) {
       console.log("Even `no-cors` request failed!", anotherError);
       // return the original error (same as anotherError?)

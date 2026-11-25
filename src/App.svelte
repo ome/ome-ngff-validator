@@ -7,6 +7,7 @@
   import SplashScreen from "./SplashScreen.svelte";
 
   import { getZarrGroupAttrs } from "./utils";
+  import { promptForCredentials } from "./signedFetch.js";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -33,6 +34,12 @@
   function isBioFormats2Raw(data) {
     let omeAttrs = data?.attributes?.ome || data;
     return omeAttrs["bioformats2raw.layout"] === 3 && !omeAttrs.plate;
+  }
+
+  async function useCredentials() {
+    if (await promptForCredentials(new URL(source).origin)) {
+      promise = getZarrGroupAttrs(source);
+    }
   }
 </script>
 
@@ -62,6 +69,7 @@
         {:catch error}
           <CheckMark valid={false}/>
           <p class="error">{error.message}</p>
+          <p>Private store? <button on:click={useCredentials}>Use credentials</button></p>
         {/await}
       {:else}
         <SplashScreen />
