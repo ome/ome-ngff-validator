@@ -3,10 +3,12 @@
   import Bioformats2rawLayout from "./Bioformats2rawLayout/index.svelte";
   import JsonValidator from "./JsonValidator/index.svelte";
   import Title from "./Title.svelte"
-  import Modal from "svelte-simple-modal";
   import SplashScreen from "./SplashScreen.svelte";
 
   import { getZarrGroupAttrs } from "./utils";
+  import Modal, { bind } from "svelte-simple-modal";
+  import { writable } from "svelte/store";
+  import CredentialsDialog from "./Dialogs/CredentialsDialog.svelte";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -34,9 +36,16 @@
     let omeAttrs = data?.attributes?.ome || data;
     return omeAttrs["bioformats2raw.layout"] === 3 && !omeAttrs.plate;
   }
+
+  const modal = writable(null);
+  const useCredentials = () =>
+    modal.set(bind(CredentialsDialog, {
+      origin: new URL(source).origin,
+      onSigned: () => (promise = getZarrGroupAttrs(source)),
+    }));
 </script>
 
-<Modal>
+<Modal show={$modal}>
   <main>
     <nav>
       <Nav />
@@ -62,6 +71,7 @@
         {:catch error}
           <CheckMark valid={false}/>
           <p class="error">{error.message}</p>
+          <p class="creds">Private store? <button on:click={useCredentials}>Use credentials</button></p>
         {/await}
       {:else}
         <SplashScreen />
@@ -114,6 +124,21 @@
     text-align: center;
     background: white;
     padding: 10px;
+  }
+
+  .creds {
+    text-align: center;
+    color: #8a8a8a;
+  }
+
+  .creds button {
+    margin-left: 6px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #343a40;
+    color: white;
+    cursor: pointer;
   }
 
   .note {

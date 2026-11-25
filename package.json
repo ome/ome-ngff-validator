@@ -20,6 +20,6 @@
     "ome-zarr.js": "^0.0.21",
     "svelte-icons-pack": "^1.4.6",
     "svelte-simple-modal": "^1.4.1",
-    "zarrita": "^0.5.0"
+    "zarrita": "^0.7.6"
   }
 }
