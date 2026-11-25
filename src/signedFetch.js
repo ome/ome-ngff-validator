@@ -15,7 +15,7 @@ function promptForCredentials() {
     const dlg = document.createElement("dialog");
     dlg.innerHTML = `
       <form method="dialog">
-        <p>Access denied. Enter S3 credentials to retry (kept for this browser tab only).</p>
+        <p>Access denied. Enter S3 credentials to retry.</p>
         <p><label>Access key <input name="key" autocomplete="off" required></label></p>
         <p><label>Secret key <input name="secret" type="password" autocomplete="off" required></label></p>
         <p><label>Region <input name="region" value="us-east-1" list="aws-regions"></label></p>
@@ -32,6 +32,7 @@ function promptForCredentials() {
           <option value="ap-southeast-2">
           <option value="ap-northeast-1">
         </datalist>
+        <p><label><input name="remember" type="checkbox"> Remember credentials for this tab</label></p>
         <button value="ok">Sign requests</button>
         <button value="cancel" formnovalidate>Cancel</button>
       </form>`;
@@ -44,7 +45,11 @@ function promptForCredentials() {
           region: f.region.value.trim() || "us-east-1",
           service: "s3",
         };
-        sessionStorage.setItem(KEY, JSON.stringify(creds));
+        if (f.remember.checked) {
+          sessionStorage.setItem(KEY, JSON.stringify(creds));
+        } else {
+          sessionStorage.removeItem(KEY);
+        }
         resolve(new AwsClient(creds));
       } else {
         resolve(null);
