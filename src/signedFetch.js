@@ -39,7 +39,6 @@ export async function signedFetch(input, init) {
       `Your saved keys for ${creds.origin} were rejected, or the store doesn't allow signed requests (CORS).`
     );
   }
-  // ponytail: flag only; callers that want a message (getJson) turn it into a KeysError.
   // zarrita still needs plain 404s for missing chunks.
   signed.signedBy = creds.origin;
   return signed;

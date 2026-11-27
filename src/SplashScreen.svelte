@@ -2,7 +2,7 @@
   export let openCredentials = () => {};
   export let onValidate = () => {};
 
-  // ponytail: read-only test keys, published on purpose; each opens only its own bucket.
+  // read-only test keys, published on purpose; each opens only its own bucket.
   const privateSamples = [
     {
       label: "A single image, OME-NGFF v0.5",
@@ -250,7 +250,6 @@
     filter: brightness(0.9);
   }
 
-  /* ponytail: mirrors .creds in App.svelte (error page) */
   .creds {
     text-align: center;
     color: #8a8a8a;
