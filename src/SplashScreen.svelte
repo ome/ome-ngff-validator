@@ -2,6 +2,22 @@
   export let openCredentials = () => {};
   export let onValidate = () => {};
 
+  // ponytail: read-only test keys, published on purpose; each opens only its own bucket.
+  const privateSamples = [
+    {
+      label: "A single image, OME-NGFF v0.5",
+      source: "https://tiagolubiana.s3.hf.co/sample-private-ngff-dataset/6001240_labels.zarr",
+      accessKey: "HFAK1E60mmwcL84SKWRc68ny1mPcxe3",
+      secretKey: "f9cd5509ce593388e31bd0d88442348cf41b2235ca24e9d4ce278c854e5497ba",
+    },
+    {
+      label: "A v0.6 scene (idr0050, CC BY 4.0)",
+      source: "https://tiagolubiana.s3.hf.co/sample-private-ngff-scene/4995115_scene.zarr",
+      accessKey: "HFAK46NdYjnJblyRsJdtgMXJyciuIrQ",
+      secretKey: "922d1ce1157c19bcac6dbe9ea0027c0dd680e3e1632a721284edadcb63ffd1de",
+    },
+  ];
+
   let sourceInput;
 
   function credentials() {
@@ -79,6 +95,36 @@
         ?source=https://livingobjects.ebi.ac.uk/idr/mobie/clem-scene.ome.zarr
       </a>
     </li>
+  </ul>
+
+  <hr>
+
+  <h3>Private examples</h3>
+  <p>
+    These stores need S3 keys. Click "Use these keys", sign, then open the link.
+  </p>
+  <ul>
+    {#each privateSamples as sample}
+      <li>
+        {sample.label}:
+        <a href="{location}?source={sample.source}">?source={sample.source}</a>
+        <div class="keys">
+          <dl>
+            <dt>Access key</dt><dd>{sample.accessKey}</dd>
+            <dt>Secret key</dt><dd>{sample.secretKey}</dd>
+            <dt>Region</dt><dd>us-east-1</dd>
+          </dl>
+          <button
+            type="button"
+            on:click={() =>
+              openCredentials(new URL(sample.source).origin, {
+                accessKeyId: sample.accessKey,
+                secretAccessKey: sample.secretKey,
+              })}
+          >Use these keys</button>
+        </div>
+      </li>
+    {/each}
   </ul>
 
   <hr>
@@ -220,6 +266,45 @@
   .creds button:hover {
     filter: none;
     text-decoration: underline;
+  }
+
+  .keys {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 8px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: white;
+    text-align: left;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 12px;
+    margin: 0;
+    font-size: 13px;
+  }
+
+  dt {
+    color: #8a8a8a;
+  }
+
+  dd {
+    margin: 0;
+    font-family: monospace;
+    word-break: break-all;
+  }
+
+  .keys button {
+    flex: none;
+    padding: 6px 14px;
+    border-radius: 3px;
+    font-size: 14px;
   }
 
   hr {

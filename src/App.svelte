@@ -41,8 +41,9 @@
   }
 
   const modal = writable(null);
-  const openCredentials = (origin) =>
+  const openCredentials = (origin, prefill = {}) =>
     modal.set(bind(CredentialsDialog, {
+      ...prefill,
       origin,
       onSigned: () => {
         if (source) promise = getZarrGroupAttrs(source);
