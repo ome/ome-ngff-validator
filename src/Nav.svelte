@@ -7,13 +7,13 @@
 </script>
 
 
-<div class="navLeft">
+<a class="navLeft" href="./" aria-label="NGFF Validator home">
 
   <img style="height: 30px" alt="OME Logo" src="{omelogo}"/>
 
   <h1>NGFF Validator</h1>
 
-</div>
+</a>
 
 <ul>
   <li>
@@ -27,6 +27,8 @@
     flex-direction: row;
     align-items: center;
     margin-left: 15px;
+    color: white;
+    text-decoration: none;
   }
 
   h1 {
