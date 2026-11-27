@@ -16,6 +16,16 @@ For example, this will load schemas from a specified branch of the ngff-spec rep
 
 ## FAQ
 
+### HTML error codes
+
+The validator may display standard HTML error codes when it cannot access the requested data. Common codes include:
+- **401 Unauthorized**: The request requires authentication. This typically occurs for private S3 stores without credentials.
+- **403 Forbidden**: The server understood the request but refuses to authorize it. This can happen if the provided credentials do not have sufficient permissions.
+- **404 Not Found**: The requested resource could not be found. Check the URL for correctness.
+- **500 Internal Server Error**: The server encountered an unexpected condition. This usually indicates a problem on the server side rather than with the validator.
+
+For more information see [MDN Web Docs: HTTP response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status).
+
 ### CORS issues
 
 Serving OME-Zarr images (or generally zarr stores) from a remote server requires the server to allow cross-origin reads with [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS).
