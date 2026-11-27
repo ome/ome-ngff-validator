@@ -6,16 +6,20 @@
   import SplashScreen from "./SplashScreen.svelte";
 
   import { getZarrGroupAttrs } from "./utils";
+  import { setCredentialOrigin } from "./signedFetch.js";
   import Modal, { bind } from "svelte-simple-modal";
   import { writable } from "svelte/store";
   import CredentialsDialog from "./Dialogs/CredentialsDialog.svelte";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
-  let source = searchParams.get("source");
+  let source;
   let redirected = false;
+  let promise;
 
-  if (source) {
+  function validate(nextSource) {
+    source = nextSource;
+    redirected = false;
     if (source.endsWith("/")) {
       source = source.slice(0, -1);
     }
@@ -23,14 +27,12 @@
       source = source.replace(/\/(\.zattrs|zarr\.json)$/, "");
       redirected = true;
     }
-  }
-
-  let promise;
-  if (source) {
-    // load JSON to be validated...
-    console.log("Loading JSON... " + source);
+    setCredentialOrigin(new URL(source).origin);
+    window.history.replaceState(null, "", `?source=${encodeURIComponent(source)}`);
     promise = getZarrGroupAttrs(source);
   }
+
+  if (searchParams.has("source")) validate(searchParams.get("source"));
 
   function isBioFormats2Raw(data) {
     let omeAttrs = data?.attributes?.ome || data;
@@ -38,11 +40,14 @@
   }
 
   const modal = writable(null);
-  const useCredentials = () =>
+  const openCredentials = (origin) =>
     modal.set(bind(CredentialsDialog, {
-      origin: new URL(source).origin,
-      onSigned: () => (promise = getZarrGroupAttrs(source)),
+      origin,
+      onSigned: () => {
+        if (source) promise = getZarrGroupAttrs(source);
+      },
     }));
+  const useCredentials = () => openCredentials(new URL(source).origin);
 </script>
 
 <Modal show={$modal}>
@@ -74,7 +79,7 @@
           <p class="creds">Private store? <button on:click={useCredentials}>Use credentials</button></p>
         {/await}
       {:else}
-        <SplashScreen />
+        <SplashScreen {openCredentials} onValidate={validate} />
       {/if}
     </section>
   </main>

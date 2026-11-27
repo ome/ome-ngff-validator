@@ -1,16 +1,30 @@
+<script>
+  export let openCredentials = () => {};
+  export let onValidate = () => {};
+
+  let sourceInput;
+
+  function credentials() {
+    if (sourceInput.value && !sourceInput.reportValidity()) return;
+    openCredentials(sourceInput.value ? new URL(sourceInput.value).origin : null);
+  }
+</script>
+
 <article>
   <h1>OME-NGFF Validator</h1>
 
   <h3>Validate your data</h3>
   <p>Paste the URL of an OME-Zarr file to validate it:</p>
-  <form method="get">
+  <form method="get" on:submit|preventDefault={() => onValidate(sourceInput.value)}>
     <input
+      bind:this={sourceInput}
       type="url"
       name="source"
       placeholder="https://example.com/path/to/image.zarr"
       required
     />
     <button type="submit">Validate</button>
+    <button type="button" class="secondary" on:click={credentials}>S3 Credentials</button>
   </form>
 
   <hr>
@@ -187,6 +201,12 @@
 
   button:hover {
     filter: brightness(0.9);
+  }
+
+  button.secondary {
+    background: white;
+    color: var(--omeLinkBlue);
+    border: 1px solid var(--omeLinkBlue);
   }
 
   hr {

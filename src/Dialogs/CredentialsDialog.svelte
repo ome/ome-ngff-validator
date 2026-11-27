@@ -29,7 +29,13 @@
 </script>
 
 <h1>S3 credentials</h1>
-<p class="origin">Requests to <code>{origin}</code> will be signed.</p>
+<p class="origin">
+  {#if origin}
+    Requests to <code>{origin}</code> will be signed.
+  {:else}
+    These credentials will be used for the next URL you validate.
+  {/if}
+</p>
 
 <form on:submit|preventDefault={submit}>
   <label>Access key <input bind:value={accessKeyId} autocomplete="off" required /></label>

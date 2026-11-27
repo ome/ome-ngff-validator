@@ -17,15 +17,26 @@ export const hasCredentials = () => creds !== null;
 export async function signedFetch(input, init) {
   const request = new Request(input, init);
   const res = await fetch(request.clone());
-  if (!creds || (res.status !== 401 && res.status !== 403)) return res;
+  if (!creds?.origin || (res.status !== 401 && res.status !== 403)) return res;
   if (new URL(request.url).origin !== creds.origin) return res;
   return creds.aws.fetch(request);
 }
 
 export function setCredentials(c, remember) {
-  creds = { aws: new AwsClient(c), origin: c.origin };
+  creds = { aws: new AwsClient(c), origin: c.origin ?? null };
   try {
     if (remember) sessionStorage.setItem(KEY, JSON.stringify(c));
     else sessionStorage.removeItem(KEY);
+  } catch {}
+}
+
+export function setCredentialOrigin(origin) {
+  // If credentials were passed before a URL was known,
+  // set the origin now.
+  if (!creds || creds.origin) return;
+  creds.origin = origin;
+  try {
+    const saved = sessionStorage.getItem(KEY);
+    if (saved) sessionStorage.setItem(KEY, JSON.stringify({ ...JSON.parse(saved), origin }));
   } catch {}
 }
