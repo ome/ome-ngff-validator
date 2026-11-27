@@ -1,4 +1,5 @@
 import { AwsClient } from "aws4fetch";
+import { writable } from "svelte/store";
 
 // Opt-in persistence: sessionStorage is per-tab, but readable by any script on the page.
 const KEY = "ngff-validator-s3-creds";
@@ -11,6 +12,11 @@ try {
 } catch {}
 
 export const hasCredentials = () => creds !== null;
+
+/** What the UI shows: null, or { origin, remembered }. */
+export const credStatus = writable(
+  creds && { origin: creds.origin, remembered: true }
+);
 
 // Plain fetch; a 401/403 from the origin the user entered keys for is retried with SigV4.
 // Never prompts: the UI offers a "Use credentials" button (CredentialsDialog) instead.
@@ -29,6 +35,15 @@ export function setCredentials(c, remember) {
     if (remember) sessionStorage.setItem(KEY, JSON.stringify(c));
     else sessionStorage.removeItem(KEY);
   } catch {}
+  credStatus.set({ origin: creds.origin, remembered: remember });
+}
+
+export function forgetCredentials() {
+  creds = null;
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {}
+  credStatus.set(null);
 }
 
 export function setCredentialOrigin(origin) {
@@ -36,6 +51,7 @@ export function setCredentialOrigin(origin) {
   // set the origin now.
   if (!creds || creds.origin) return;
   creds.origin = origin;
+  credStatus.update((s) => s && { ...s, origin });
   try {
     const saved = sessionStorage.getItem(KEY);
     if (saved) sessionStorage.setItem(KEY, JSON.stringify({ ...JSON.parse(saved), origin }));

@@ -6,10 +6,11 @@
   import SplashScreen from "./SplashScreen.svelte";
 
   import { getZarrGroupAttrs } from "./utils";
-  import { setCredentialOrigin } from "./signedFetch.js";
+  import { setCredentialOrigin, credStatus, forgetCredentials } from "./signedFetch.js";
   import Modal, { bind } from "svelte-simple-modal";
   import { writable } from "svelte/store";
   import CredentialsDialog from "./Dialogs/CredentialsDialog.svelte";
+  import KeysDialog from "./Dialogs/KeysDialog.svelte";
   import CheckMark from "./CheckMark.svelte";
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -56,6 +57,21 @@
       <Nav />
     </nav>
     <section>
+      {#if $credStatus}
+        <div class="private">
+          <span class="chip">
+            <button on:click={() => modal.set(bind(KeysDialog))}>
+              🔑 Keys saved ({$credStatus.remembered ? "this tab" : "until refresh"}) ⓘ
+            </button>
+            <button
+              class="x"
+              title="Forget keys"
+              aria-label="Forget keys"
+              on:click={() => { forgetCredentials(); location.reload(); }}
+            >✕</button>
+          </span>
+        </div>
+      {/if}
       {#if source}
         {#await promise}
           <div>loading...</div>
@@ -147,6 +163,41 @@
 
   .creds button:hover {
     text-decoration: underline;
+  }
+
+  .private {
+    width: clamp(300px, 95%, 1200px);
+    margin: 0 auto 10px;
+    text-align: left;
+  }
+
+  .chip {
+    display: inline-flex;
+    border: 1px solid #f0c36d;
+    border-radius: 3px;
+    background: #fff8e1;
+  }
+
+  .chip:hover {
+    border-color: #d9a23a;
+  }
+
+  .chip button {
+    padding: 4px 10px;
+    border: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 500;
+    color: #7a5a00;
+    cursor: pointer;
+  }
+
+  .chip button:hover {
+    background: #ffefc2;
+  }
+
+  .chip .x {
+    border-left: 1px solid #f0c36d;
   }
 
   .note {
