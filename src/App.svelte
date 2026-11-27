@@ -137,13 +137,16 @@
   }
 
   .creds button {
-    margin-left: 6px;
-    padding: 6px 14px;
+    padding: 0;
     border: none;
-    border-radius: 4px;
-    background: #343a40;
-    color: white;
+    background: none;
+    font: inherit;
+    color: var(--omeLinkBlue);
     cursor: pointer;
+  }
+
+  .creds button:hover {
+    text-decoration: underline;
   }
 
   .note {

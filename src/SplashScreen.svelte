@@ -11,7 +11,6 @@
 </script>
 
 <article>
-  <button type="button" class="credentials" on:click={credentials}>S3 Credentials</button>
   <h1>OME-NGFF Validator</h1>
 
   <h3>Validate your data</h3>
@@ -26,6 +25,7 @@
     />
     <button type="submit">Validate</button>
   </form>
+  <p class="creds">Private store? <button type="button" on:click={credentials}>Use credentials</button></p>
 
   <hr>
 
@@ -204,14 +204,22 @@
     filter: brightness(0.9);
   }
 
-  button.credentials {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 6px 14px;
-    border-radius: 4px;
-    background: #343a40;
-    font-size: 14px;
+  /* ponytail: mirrors .creds in App.svelte (error page) */
+  .creds {
+    text-align: center;
+    color: #8a8a8a;
+  }
+
+  .creds button {
+    padding: 0;
+    background: none;
+    font-size: 1em;
+    color: var(--omeLinkBlue);
+  }
+
+  .creds button:hover {
+    filter: none;
+    text-decoration: underline;
   }
 
   hr {
