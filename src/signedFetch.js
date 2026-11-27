@@ -7,7 +7,7 @@ const KEY = "ngff-validator-s3-creds";
 let creds = null;
 try {
   const saved = JSON.parse(sessionStorage.getItem(KEY));
-  if (saved) creds = { aws: new AwsClient(saved), origin: saved.origin };
+  if (saved) creds = { aws: new AwsClient({ ...saved, retries: 0 }), origin: saved.origin };
 } catch {}
 
 export const hasCredentials = () => creds !== null;
@@ -24,7 +24,7 @@ export async function signedFetch(input, init) {
 }
 
 export function setCredentials(c, remember) {
-  creds = { aws: new AwsClient(c), origin: c.origin ?? null };
+  creds = { aws: new AwsClient({ ...c, retries: 0 }), origin: c.origin ?? null };
   try {
     if (remember) sessionStorage.setItem(KEY, JSON.stringify(c));
     else sessionStorage.removeItem(KEY);

@@ -45,7 +45,7 @@ async function fetchHandleError(url) {
     console.log("check for CORS...");
     console.log(error);
     try {
-      let corsRsp = await fetch(url, { mode: "no-cors" });
+      let corsRsp = await fetch(url, { mode: "no-cors", signal: AbortSignal.timeout(10000) });
       console.log("corsRsp", corsRsp);
       // If the 'no-cors' mode allows this to return, then we
       // likely failed due to CORS in the original request
