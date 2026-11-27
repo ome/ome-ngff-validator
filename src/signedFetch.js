@@ -8,6 +8,8 @@ const KEY = "ngff-validator-s3-creds";
 let creds = null;
 try {
   const saved = JSON.parse(sessionStorage.getItem(KEY));
+// This avoids multiple retries, which caused 500 errors in the HF samples
+// It may be too strict. 
   if (saved) creds = { aws: new AwsClient({ ...saved, retries: 0 }), origin: saved.origin };
 } catch {}
 
