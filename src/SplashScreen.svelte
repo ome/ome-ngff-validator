@@ -11,6 +11,7 @@
 </script>
 
 <article>
+  <button type="button" class="credentials" on:click={credentials}>S3 Credentials</button>
   <h1>OME-NGFF Validator</h1>
 
   <h3>Validate your data</h3>
@@ -24,7 +25,6 @@
       required
     />
     <button type="submit">Validate</button>
-    <button type="button" class="secondary" on:click={credentials}>S3 Credentials</button>
   </form>
 
   <hr>
@@ -149,6 +149,7 @@
 
 <style>
   article {
+    position: relative;
     width: 90%;
     margin: auto;
   }
@@ -203,10 +204,14 @@
     filter: brightness(0.9);
   }
 
-  button.secondary {
-    background: white;
-    color: var(--omeLinkBlue);
-    border: 1px solid var(--omeLinkBlue);
+  button.credentials {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 6px 14px;
+    border-radius: 4px;
+    background: #343a40;
+    font-size: 14px;
   }
 
   hr {
