@@ -19,7 +19,8 @@ export async function signedFetch(input, init) {
   const res = await fetch(request.clone());
   if (!creds?.origin || (res.status !== 401 && res.status !== 403)) return res;
   if (new URL(request.url).origin !== creds.origin) return res;
-  return creds.aws.fetch(request);
+  // Never cache signed responses: otherwise private content outlives the keys.
+  return creds.aws.fetch(request, { cache: "no-store" });
 }
 
 export function setCredentials(c, remember) {
