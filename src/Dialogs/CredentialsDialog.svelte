@@ -7,9 +7,9 @@
 
   const { close } = getContext("simple-modal");
 
-  let accessKeyId = "";
-  let secretAccessKey = "";
-  let region = "us-east-1";
+  export let accessKeyId = "";
+  export let secretAccessKey = "";
+  export let region = "us-east-1";
   let remember = false;
 
   function submit() {
