@@ -1,4 +1,5 @@
 <script>
+  import { signedFetch } from "../../../signedFetch.js";
   import { range, getChunkAndShardShapes } from "../../../utils";
   import { get, writable } from "svelte/store";
   import ChunkViewer from "./ChunkViewer.svelte";
@@ -40,7 +41,7 @@
     chunk = undefined;
 
     let url = source + "/" + zarrPath;
-    const store = new zarr.FetchStore(url);
+    const store = new zarr.FetchStore(url, { fetch: signedFetch });
     const arr = await zarr.open(store, { kind: "array" });
 
     // we want to get exactly 1 chunk

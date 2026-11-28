@@ -1,3 +1,4 @@
+import { signedFetch, hasCredentials, KeysError } from "./signedFetch.js";
 // import { slice, openArray } from "https://cdn.skypack.dev/zarr";
 
 import Ajv from "ajv";
@@ -26,7 +27,14 @@ async function fetchHandleError(url) {
   let msg = `Error Loading ${url}:`;
   let rsp;
   try {
-    rsp = await fetch(url).then(function (response) {
+    rsp = await signedFetch(url).then(function (response) {
+      if (!response.ok && response.signedBy) {
+        throw new KeysError(
+          response.status == 404
+            ? `Not found, or your saved keys for ${response.signedBy} don't have access to this store.`
+            : `Your saved keys for ${response.signedBy} don't open this store (HTTP ${response.status}).`
+        );
+      }
       if (!response.ok) {
         // make the promise be rejected if we didn't get a 2xx response
         // NB. statusText could be "Not Found" or "File not found" depending on server
@@ -41,14 +49,16 @@ async function fetchHandleError(url) {
       }
     });
   } catch (error) {
+    if (error instanceof KeysError) throw error;
     console.log("check for CORS...");
     console.log(error);
     try {
-      let corsRsp = await fetch(url, { mode: "no-cors" });
+      let corsRsp = await fetch(url, { mode: "no-cors", signal: AbortSignal.timeout(10000) });
       console.log("corsRsp", corsRsp);
       // If the 'no-cors' mode allows this to return, then we
       // likely failed due to CORS in the original request
       msg += " Failed due to CORS issues.";
+      if (hasCredentials()) msg += " Signed requests need the bucket CORS policy to allow the authorization, x-amz-date and x-amz-content-sha256 headers.";
     } catch (anotherError) {
       console.log("Even `no-cors` request failed!", anotherError);
       // return the original error (same as anotherError?)
@@ -92,6 +102,7 @@ async function getZarrJson(zarr_dir, alternative=".zattrs") {
     zarrJson = await getJson(zarr_dir + "/zarr.json");
   } catch (error) {
     console.log("getZarrJson", error)
+    if (error instanceof KeysError) throw error;
     // If it's not a CORS or 404 error, then re-throw
     if (!error.message.includes("CORS") && !error.message.includes(FILE_NOT_FOUND)) {
       throw error;

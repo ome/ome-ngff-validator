@@ -1,4 +1,5 @@
 <script>
+  import { signedFetch } from "../../signedFetch.js";
   import * as zarr from "zarrita";
   import * as omezarr from "ome-zarr.js";
 
@@ -7,7 +8,7 @@
   export let targetSize = 0;
   export let maxCssSize = 250;
 
-  const store = new zarr.FetchStore(source);
+  const store = new zarr.FetchStore(source, { fetch: signedFetch });
   // render returns a promise that resolves to a data URL of the thumbnail image
   const promise = omezarr.render(store, targetSize);
 </script>

@@ -19,6 +19,9 @@
   <li>
     <button on:click={showAbout}>About</button>
   </li>
+  <li>
+    <a href="https://github.com/ome/ome-ngff-validator#faq">FAQ</a>
+  </li>
 </ul>
 
 <style>
@@ -38,6 +41,8 @@
   }
 
   ul {
+    display: flex;
+    align-items: center;
     list-style: none;
     color: white;
     position: fixed;
@@ -47,13 +52,20 @@
   }
 
   li {
-    float: right;
     list-style-type: none;
   }
 
-  button {
+  button, a {
+    display: inline-block;
     color: white;
     font-size: 18px;
+    font-family: inherit;
+    line-height: 1;
     margin: 3px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    text-decoration: none;
   }
 </style>
